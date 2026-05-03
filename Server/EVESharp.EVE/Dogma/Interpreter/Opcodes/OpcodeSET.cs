@@ -16,17 +16,17 @@ public class OpcodeSET : OpcodeRunnable
 
     public override Opcode LoadOpcode (BinaryReader reader)
     {
-        this.LeftSide = this.Interpreter.Step (reader);
-        this.Value    = this.Interpreter.Step (reader);
+        LeftSide = Interpreter.Step (reader);
+        Value    = Interpreter.Step (reader);
 
         return this;
     }
 
     public override void Execute ()
     {
-        if (this.LeftSide is OpcodeATT att)
+        if (LeftSide is OpcodeATT att)
         {
-            if (this.Value is OpcodeDEFINT defint)
+            if (Value is OpcodeDEFINT defint)
             {
                 ItemEntity     item      = att.ItemToAffect.GetItem ();
                 AttributeTypes attribute = att.AttributeToAffect.Attribute;
@@ -34,8 +34,8 @@ public class OpcodeSET : OpcodeRunnable
                 item.Attributes [att.AttributeToAffect.Attribute].Integer = defint.Value;
 
                 // notify the character
-                this.Interpreter.Environment.DogmaNotifications.NotifyAttributeChange (
-                    this.Interpreter.Environment.Session.EnsureCharacterIsSelected (),
+                Interpreter.Environment.DogmaNotifications.NotifyAttributeChange (
+                    Interpreter.Environment.Session.EnsureCharacterIsSelected (),
                     attribute,
                     item
                 );

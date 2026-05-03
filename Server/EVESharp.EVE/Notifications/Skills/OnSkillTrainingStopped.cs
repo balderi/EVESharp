@@ -16,14 +16,14 @@ public class OnSkillTrainingStopped : ClientNotification
 
     public OnSkillTrainingStopped (Skill skill) : base (NOTIFICATION_NAME)
     {
-        this.Skill = skill;
+        Skill = skill;
     }
 
     public override List <PyDataType> GetElements ()
     {
         return new List <PyDataType>
         {
-            this.Skill.ID,
+            Skill.ID,
             0
         };
     }

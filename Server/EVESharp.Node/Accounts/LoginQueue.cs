@@ -40,40 +40,40 @@ public class LoginQueue : MessageQueue <LoginQueueEntry>
     public LoginQueue (IDatabase database, Authentication configuration, ILogger logger)
     {
         // login should not be using too many processes
-        this.Database      = database;
-        this.Configuration = configuration;
-        this.Log           = logger;
+        Database      = database;
+        Configuration = configuration;
+        Log           = logger;
     }
 
     public override void HandleMessage (LoginQueueEntry entry)
     {
-        this.Log.Debug ("Processing login for " + entry.Request.user_name);
+        Log.Debug ("Processing login for " + entry.Request.user_name);
         LoginStatus status = LoginStatus.Waiting;
 
         // make some accommodations for the auto-account mechanism
-        if (this.Database.ActExists (entry.Request.user_name) == false && this.Configuration.Autoaccount)
+        if (Database.ActExists (entry.Request.user_name) == false && Configuration.Autoaccount)
         {
-            this.Log.Information ($"Auto account enabled, creating account for user {entry.Request.user_name}");
+            Log.Information ("Auto account enabled, creating account for user {RequestUserName}", entry.Request.user_name);
 
             // create the account
-            this.Database.ActCreate (entry.Request.user_name, entry.Request.user_password, (ulong) this.Configuration.Role);
+            Database.ActCreate (entry.Request.user_name, entry.Request.user_password, (ulong) Configuration.Role);
         }
 
-        if (this.Database.ActLogin (entry.Request.user_name, entry.Request.user_password, out int? accountID, out ulong? role, out bool? banned) == false ||
+        if (Database.ActLogin (entry.Request.user_name, entry.Request.user_password, out int? accountID, out ulong? role, out bool? banned) == false ||
             banned == true)
         {
-            this.Log.Verbose (": Rejected by database");
+            Log.Verbose (": Rejected by database");
 
             status = LoginStatus.Failed;
         }
         else
         {
-            this.Log.Verbose (": success");
+            Log.Verbose (": success");
 
             status = LoginStatus.Success;
 
             // register player to the new address
-            this.Database.CluRegisterClientAddress ((int) accountID, entry.Connection.MachoNet.NodeID);
+            Database.CluRegisterClientAddress ((int) accountID, entry.Connection.MachoNet.NodeID);
         }
 
         entry.Connection.SendLoginNotification (status, accountID ?? 0, role ?? 0);

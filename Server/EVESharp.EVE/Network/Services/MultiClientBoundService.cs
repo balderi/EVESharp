@@ -191,7 +191,7 @@ public abstract class MultiClientBoundService : BoundService
         // TODO: PROPERLY IMPLEMENT AND CLEAN THIS UP LATER
         foreach ((int _, Session session) in Sessions)
         {
-            PyTuple data = new OnMachoObjectDisconnect (this.BoundString, session.UserID, BoundServiceInformation [1] as PyString);
+            PyTuple data = new OnMachoObjectDisconnect (BoundString, session.UserID, BoundServiceInformation [1] as PyString);
         
             PyTuple dataContainer = new PyTuple (2)
             {

@@ -81,7 +81,7 @@ public class invbroker : ClientBoundService
         Notifications      = notificationSender;
         DogmaNotifications = dogmaNotifications;
         SolarSystems       = solarSystems;
-        this.Parent        = parent;
+        Parent        = parent;
         DogmaItems         = dogmaItems;
     }
 
@@ -89,7 +89,7 @@ public class invbroker : ClientBoundService
     {
         // create an instance of the inventory service and bind it to the item data
         return BoundInventory.BindInventory (
-            ItemDB, EffectsManager, inventory, flag, this.Items, Notifications, this.DogmaNotifications,
+            ItemDB, EffectsManager, inventory, flag, Items, Notifications, DogmaNotifications,
             BoundServiceManager, session, this, DogmaItems
         );
     }
@@ -203,7 +203,7 @@ public class invbroker : ClientBoundService
 
     public PyDataType SetLabel (ServiceCall call, PyInteger itemID, PyString newLabel)
     {
-        ItemEntity item = this.Items.GetItem (itemID);
+        ItemEntity item = Items.GetItem (itemID);
 
         // ensure the itemID is owned by the client's character
         if (item.OwnerID != call.Session.CharacterID)
@@ -222,7 +222,7 @@ public class invbroker : ClientBoundService
 
     public PyDataType AssembleCargoContainer (ServiceCall call, PyInteger containerID, PyDataType ignored, PyDecimal ignored2)
     {
-        ItemEntity item = this.Items.GetItem (containerID);
+        ItemEntity item = Items.GetItem (containerID);
 
         if (item.OwnerID != call.Session.CharacterID)
             throw new TheItemIsNotYoursToTake (containerID);
@@ -273,8 +273,8 @@ public class invbroker : ClientBoundService
             throw new CustomError ("Trying to bind an object that does not belong to us!");
 
         return new invbroker (
-            ItemDB, EffectsManager, this.Items, Notifications, this.DogmaNotifications, BoundServiceManager, bindParams.ObjectID,
-            call.Session, this.SolarSystems, this, DogmaItems
+            ItemDB, EffectsManager, Items, Notifications, DogmaNotifications, BoundServiceManager, bindParams.ObjectID,
+            call.Session, SolarSystems, this, DogmaItems
         );
     }
 }

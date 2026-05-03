@@ -55,9 +55,9 @@ public class LogLiteSink : ILogEventSink, IDisposable
         this.mConfiguration = configuration;
         
         // fill in important information
-        this.PID            = Process.GetCurrentProcess ().Id;
-        this.ExecutablePath = Process.GetCurrentProcess ().ProcessName;
-        this.Name           = Process.GetCurrentProcess ().MachineName;
+        PID            = Process.GetCurrentProcess ().Id;
+        ExecutablePath = Process.GetCurrentProcess ().ProcessName;
+        Name           = Process.GetCurrentProcess ().MachineName;
 
         // setup the socket for the loglite server
         this.mSocket = new Socket (AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.Tcp);
@@ -72,10 +72,10 @@ public class LogLiteSink : ILogEventSink, IDisposable
     {
         // prepare the machineName and executablePath
         byte[] machineName = new byte[32];
-        Encoding.ASCII.GetBytes(this.Name, 0, Math.Min(31, this.Name.Length), machineName, 0);
+        Encoding.ASCII.GetBytes(Name, 0, Math.Min(31, Name.Length), machineName, 0);
 
         byte[] executablePath = new byte[260];
-        Encoding.ASCII.GetBytes(this.ExecutablePath, 0, Math.Min(259, this.ExecutablePath.Length), executablePath, 0);
+        Encoding.ASCII.GetBytes(ExecutablePath, 0, Math.Min(259, ExecutablePath.Length), executablePath, 0);
 
         MemoryStream stream = new MemoryStream();
         BinaryWriter writer = new BinaryWriter(stream);
@@ -87,7 +87,7 @@ public class LogLiteSink : ILogEventSink, IDisposable
             writer.Write((int) 0);
             writer.Write((uint) PROTOCOL_VERSION);
             writer.Write((int) 0);
-            writer.Write((long) this.PID);
+            writer.Write((long) PID);
             writer.Write(machineName);
             writer.Write(executablePath);
             // fill the packet with empty data to fill the 344 size in packets

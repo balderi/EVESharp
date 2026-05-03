@@ -81,121 +81,121 @@ public abstract class ItemEntity : IDisposable
     /// </summary>
     public Item Information { get; }
 
-    public int           ID         => this.Information.ID;
-    public AttributeList Attributes => this.Information.Attributes;
-    public Type          Type       => this.Information.Type;
+    public int           ID         => Information.ID;
+    public AttributeList Attributes => Information.Attributes;
+    public Type          Type       => Information.Type;
     public string Name
     {
-        get => this.Information.Name ?? this.Type.Name;
+        get => Information.Name ?? Type.Name;
         set
         {
-            this.Information.Name  = value;
-            this.Information.Dirty = true;
+            Information.Name  = value;
+            Information.Dirty = true;
         }
     }
 
     public virtual int OwnerID
     {
-        get => this.Information.OwnerID;
+        get => Information.OwnerID;
         set
         {
-            this.Information.OwnerID = value;
-            this.Information.Dirty   = true;
+            Information.OwnerID = value;
+            Information.Dirty   = true;
         }
     }
 
     public int LocationID
     {
-        get => this.Information.LocationID;
+        get => Information.LocationID;
         set
         {
-            this.Information.LocationID = value;
-            this.Information.Dirty      = true;
+            Information.LocationID = value;
+            Information.Dirty      = true;
         }
     }
 
     public Flags Flag
     {
-        get => this.Information.Flag;
+        get => Information.Flag;
         set
         {
-            this.Information.Flag  = value;
-            this.Information.Dirty = true;
+            Information.Flag  = value;
+            Information.Dirty = true;
         }
     }
 
     public bool Contraband
     {
-        get => this.Information.Contraband;
+        get => Information.Contraband;
         set
         {
-            this.Information.Contraband = value;
-            this.Information.Dirty      = true;
+            Information.Contraband = value;
+            Information.Dirty      = true;
         }
     }
 
     public bool Singleton
     {
-        get => this.Information.Singleton;
+        get => Information.Singleton;
         set
         {
-            this.Information.Singleton = value;
-            this.Information.Dirty     = true;
+            Information.Singleton = value;
+            Information.Dirty     = true;
         }
     }
 
     public int Quantity
     {
-        get => this.Information.Quantity;
+        get => Information.Quantity;
         set
         {
-            this.Information.Quantity = value;
-            this.Information.Dirty    = true;
+            Information.Quantity = value;
+            Information.Dirty    = true;
         }
     }
 
     public double? X
     {
-        get => this.Information.X;
+        get => Information.X;
         set
         {
-            this.Information.X     = value;
-            this.Information.Dirty = true;
+            Information.X     = value;
+            Information.Dirty = true;
         }
     }
 
     public double? Y
     {
-        get => this.Information.Y;
+        get => Information.Y;
         set
         {
-            this.Information.Y     = value;
-            this.Information.Dirty = true;
+            Information.Y     = value;
+            Information.Dirty = true;
         }
     }
 
     public double? Z
     {
-        get => this.Information.Z;
+        get => Information.Z;
         set
         {
-            this.Information.Z     = value;
-            this.Information.Dirty = true;
+            Information.Z     = value;
+            Information.Dirty = true;
         }
     }
 
     public string CustomInfo
     {
-        get => this.Information.CustomInfo;
+        get => Information.CustomInfo;
         set
         {
-            this.Information.CustomInfo = value;
-            this.Information.Dirty      = true;
+            Information.CustomInfo = value;
+            Information.Dirty      = true;
         }
     }
 
-    public         bool HasName     => this.Information.Name is not null;
-    public virtual bool HasPosition => this.X is not null && this.Y is not null && this.Z is not null;
+    public         bool HasName     => Information.Name is not null;
+    public virtual bool HasPosition => X is not null && Y is not null && Z is not null;
     public         bool HadName     { get; }
     public         bool HadPosition { get; }
     
@@ -206,17 +206,17 @@ public abstract class ItemEntity : IDisposable
 
     public ItemEntity (Item info)
     {
-        this.Information = info;
+        Information = info;
 
-        this.HadName     = this.Information.Name is not null;
-        this.HadPosition = this.Information.X is not null && this.Information.Y is not null && this.Information.Z is not null;
+        HadName     = Information.Name is not null;
+        HadPosition = Information.X is not null && Information.Y is not null && Information.Z is not null;
     }
 
     protected ItemEntity (ItemEntity from) : this (from.Information)
     {
         // keep the status of the original name and position indications
-        this.HadName     = from.HadName;
-        this.HadPosition = from.HadPosition;
+        HadName     = from.HadName;
+        HadPosition = from.HadPosition;
     }
 
     public virtual void Dispose ()
@@ -242,17 +242,17 @@ public abstract class ItemEntity : IDisposable
     {
         Dictionary <string, PyDataType> values = new Dictionary <string, PyDataType>
         {
-            {"itemID", this.ID},
-            {"typeID", this.Type.ID},
-            {"locationID", this.LocationID},
-            {"ownerID", this.OwnerID},
-            {"flag", (int) this.Flag},
-            {"contraband", this.Contraband},
-            {"singleton", this.Singleton},
-            {"quantity", this.Quantity},
-            {"groupID", this.Type.Group.ID},
-            {"categoryID", this.Type.Group.Category.ID},
-            {"customInfo", this.CustomInfo}
+            {"itemID", ID},
+            {"typeID", Type.ID},
+            {"locationID", LocationID},
+            {"ownerID", OwnerID},
+            {"flag", (int) Flag},
+            {"contraband", Contraband},
+            {"singleton", Singleton},
+            {"quantity", Quantity},
+            {"groupID", Type.Group.ID},
+            {"categoryID", Type.Group.Category.ID},
+            {"customInfo", CustomInfo}
         };
 
         return new PyPackedRow (EntityItemDescriptor, values);
@@ -266,12 +266,12 @@ public abstract class ItemEntity : IDisposable
 
     protected void CheckSkillRequirement (AttributeTypes skillTypeIDRequirement, AttributeTypes skillLevelRequirement, Dictionary <int, Skill> skills)
     {
-        if (this.Attributes.AttributeExists (skillLevelRequirement) == false ||
-            this.Attributes.AttributeExists (skillTypeIDRequirement) == false)
+        if (Attributes.AttributeExists (skillLevelRequirement) == false ||
+            Attributes.AttributeExists (skillTypeIDRequirement) == false)
             return;
 
-        int skillTypeID = (int) this.Attributes [skillTypeIDRequirement];
-        int skillLevel  = (int) this.Attributes [skillLevelRequirement];
+        int skillTypeID = (int) Attributes [skillTypeIDRequirement];
+        int skillLevel  = (int) Attributes [skillLevelRequirement];
 
         if (skills.ContainsKey (skillTypeID) == false)
             throw new SkillMissingException (skillTypeID);
@@ -314,53 +314,53 @@ public abstract class ItemEntity : IDisposable
             }
 
         if (missingSkills.Count > 0)
-            throw new ShipHasSkillPrerequisites (this.Type, missingSkills);
+            throw new ShipHasSkillPrerequisites (Type, missingSkills);
     }
 
     public void EnsureOwnership (int characterID, int corporationID, long corporationRole, bool take = false)
     {
-        if (this.OwnerID == characterID)
+        if (OwnerID == characterID)
             return;
 
-        if (this.OwnerID != corporationID)
+        if (OwnerID != corporationID)
             throw new MktNotOwner ();
 
         if (take)
         {
-            if (this.Flag == Flags.CorpMarket && CorporationRole.Trader.Is (corporationRole))
+            if (Flag == Flags.CorpMarket && CorporationRole.Trader.Is (corporationRole))
                 return;
-            if (this.Flag == Flags.Hangar && CorporationRole.HangarCanTake1.Is (corporationRole))
+            if (Flag == Flags.Hangar && CorporationRole.HangarCanTake1.Is (corporationRole))
                 return;
-            if (this.Flag == Flags.CorpSAG2 && CorporationRole.HangarCanTake2.Is (corporationRole))
+            if (Flag == Flags.CorpSAG2 && CorporationRole.HangarCanTake2.Is (corporationRole))
                 return;
-            if (this.Flag == Flags.CorpSAG3 && CorporationRole.HangarCanTake3.Is (corporationRole))
+            if (Flag == Flags.CorpSAG3 && CorporationRole.HangarCanTake3.Is (corporationRole))
                 return;
-            if (this.Flag == Flags.CorpSAG4 && CorporationRole.HangarCanTake4.Is (corporationRole))
+            if (Flag == Flags.CorpSAG4 && CorporationRole.HangarCanTake4.Is (corporationRole))
                 return;
-            if (this.Flag == Flags.CorpSAG5 && CorporationRole.HangarCanTake5.Is (corporationRole))
+            if (Flag == Flags.CorpSAG5 && CorporationRole.HangarCanTake5.Is (corporationRole))
                 return;
-            if (this.Flag == Flags.CorpSAG6 && CorporationRole.HangarCanTake6.Is (corporationRole))
+            if (Flag == Flags.CorpSAG6 && CorporationRole.HangarCanTake6.Is (corporationRole))
                 return;
-            if (this.Flag == Flags.CorpSAG7 && CorporationRole.HangarCanTake7.Is (corporationRole))
+            if (Flag == Flags.CorpSAG7 && CorporationRole.HangarCanTake7.Is (corporationRole))
                 return;
         }
         else
         {
-            if (this.Flag == Flags.CorpMarket && CorporationRole.Trader.Is (corporationRole))
+            if (Flag == Flags.CorpMarket && CorporationRole.Trader.Is (corporationRole))
                 return;
-            if (this.Flag == Flags.Hangar && CorporationRole.HangarCanQuery1.Is (corporationRole))
+            if (Flag == Flags.Hangar && CorporationRole.HangarCanQuery1.Is (corporationRole))
                 return;
-            if (this.Flag == Flags.CorpSAG2 && CorporationRole.HangarCanQuery2.Is (corporationRole))
+            if (Flag == Flags.CorpSAG2 && CorporationRole.HangarCanQuery2.Is (corporationRole))
                 return;
-            if (this.Flag == Flags.CorpSAG3 && CorporationRole.HangarCanQuery3.Is (corporationRole))
+            if (Flag == Flags.CorpSAG3 && CorporationRole.HangarCanQuery3.Is (corporationRole))
                 return;
-            if (this.Flag == Flags.CorpSAG4 && CorporationRole.HangarCanQuery4.Is (corporationRole))
+            if (Flag == Flags.CorpSAG4 && CorporationRole.HangarCanQuery4.Is (corporationRole))
                 return;
-            if (this.Flag == Flags.CorpSAG5 && CorporationRole.HangarCanQuery5.Is (corporationRole))
+            if (Flag == Flags.CorpSAG5 && CorporationRole.HangarCanQuery5.Is (corporationRole))
                 return;
-            if (this.Flag == Flags.CorpSAG6 && CorporationRole.HangarCanQuery6.Is (corporationRole))
+            if (Flag == Flags.CorpSAG6 && CorporationRole.HangarCanQuery6.Is (corporationRole))
                 return;
-            if (this.Flag == Flags.CorpSAG7 && CorporationRole.HangarCanQuery7.Is (corporationRole))
+            if (Flag == Flags.CorpSAG7 && CorporationRole.HangarCanQuery7.Is (corporationRole))
                 return;
         }
 
@@ -369,11 +369,11 @@ public abstract class ItemEntity : IDisposable
 
     public bool IsInModuleSlot ()
     {
-        return this.Flag.IsHighModule () || this.Flag.IsMediumModule () || this.Flag.IsLowModule ();
+        return Flag.IsHighModule () || Flag.IsMediumModule () || Flag.IsLowModule ();
     }
 
     public bool IsInRigSlot ()
     {
-        return this.Flag.IsRigModule ();
+        return Flag.IsRigModule ();
     }
 }

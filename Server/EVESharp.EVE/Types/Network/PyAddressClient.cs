@@ -23,13 +23,13 @@ public class PyAddressClient : PyAddress
 
     public PyAddressClient (PyInteger clientID) : base (TYPE_CLIENT)
     {
-        this.ClientID = clientID;
+        ClientID = clientID;
     }
 
     public PyAddressClient (PyInteger clientID, PyInteger callID = null, PyString service = null) : this (clientID)
     {
-        this.CallID  = callID;
-        this.Service = service;
+        CallID  = callID;
+        Service = service;
     }
 
     public static implicit operator PyDataType (PyAddressClient value)

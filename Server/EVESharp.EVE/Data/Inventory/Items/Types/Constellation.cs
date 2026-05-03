@@ -30,22 +30,22 @@ namespace EVESharp.EVE.Data.Inventory.Items.Types;
 public class Constellation : ItemInventory
 {
     public     Database.Inventory.Types.Information.Constellation ConstellationInformation { get; }
-    public     int                                                RegionId                 => this.ConstellationInformation.RegionId;
-    public new double                                             X                        => this.ConstellationInformation.X;
-    public new double                                             Y                        => this.ConstellationInformation.Y;
-    public new double                                             Z                        => this.ConstellationInformation.Z;
-    public     double                                             XMin                     => this.ConstellationInformation.XMin;
-    public     double                                             YMin                     => this.ConstellationInformation.YMin;
-    public     double                                             ZMin                     => this.ConstellationInformation.ZMin;
-    public     double                                             XMax                     => this.ConstellationInformation.XMax;
-    public     double                                             YMax                     => this.ConstellationInformation.YMax;
-    public     double                                             ZMax                     => this.ConstellationInformation.ZMax;
-    public     int?                                               FactionId                => this.ConstellationInformation.FactionId;
-    public     double                                             Radius                   => this.ConstellationInformation.Radius;
+    public     int                                                RegionId                 => ConstellationInformation.RegionId;
+    public new double                                             X                        => ConstellationInformation.X;
+    public new double                                             Y                        => ConstellationInformation.Y;
+    public new double                                             Z                        => ConstellationInformation.Z;
+    public     double                                             XMin                     => ConstellationInformation.XMin;
+    public     double                                             YMin                     => ConstellationInformation.YMin;
+    public     double                                             ZMin                     => ConstellationInformation.ZMin;
+    public     double                                             XMax                     => ConstellationInformation.XMax;
+    public     double                                             YMax                     => ConstellationInformation.YMax;
+    public     double                                             ZMax                     => ConstellationInformation.ZMax;
+    public     int?                                               FactionId                => ConstellationInformation.FactionId;
+    public     double                                             Radius                   => ConstellationInformation.Radius;
 
     public Constellation (Database.Inventory.Types.Information.Constellation constellation) : base (constellation.Information)
     {
-        this.ConstellationInformation = constellation;
+        ConstellationInformation = constellation;
     }
 
     protected override void LoadContents (Flags ignoreFlags = Flags.None)

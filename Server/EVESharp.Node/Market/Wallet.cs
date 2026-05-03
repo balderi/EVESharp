@@ -26,24 +26,24 @@ public class Wallet : IWallet
     public Wallet (int ownerID, int walletKey, bool isCorporation, IDatabase Database, INotificationSender notificationSender, IWallets wallets)
     {
         // set some data first
-        this.OwnerID        = ownerID;
-        this.WalletKey      = walletKey;
-        this.ForCorporation = isCorporation;
-        this.Notifications  = notificationSender;
-        this.Wallets        = wallets;
+        OwnerID        = ownerID;
+        WalletKey      = walletKey;
+        ForCorporation = isCorporation;
+        Notifications  = notificationSender;
+        Wallets        = wallets;
 
         // obtain exclusive control over the wallet
-        this.Lock = Database.GetLock (this.GenerateLockName ());
+        Lock = Database.GetLock (this.GenerateLockName ());
 
         // fetch the balance, creating the wallet if it doesn't exist yet
         try
         {
-            this.Balance = this.OriginalBalance = Lock.MktWalletGetBalance (WalletKey, OwnerID);
+            Balance = OriginalBalance = Lock.MktWalletGetBalance (WalletKey, OwnerID);
         }
         catch (InvalidDataException)
         {
             Database.MktWalletCreate (0.0, OwnerID, WalletKey);
-            this.Balance = this.OriginalBalance = 0.0;
+            Balance = OriginalBalance = 0.0;
         }
     }
 
@@ -53,7 +53,7 @@ public class Wallet : IWallet
     /// <returns></returns>
     private string GenerateLockName ()
     {
-        return $"wallet_{this.OwnerID}_{this.WalletKey}";
+        return $"wallet_{OwnerID}_{WalletKey}";
     }
 
     public void Dispose ()
@@ -124,7 +124,7 @@ public class Wallet : IWallet
         Balance += amount;
 
         // create journal entry
-        this.Wallets.CreateJournalForOwner (
+        Wallets.CreateJournalForOwner (
             reference, OwnerID, ownerID1, ownerID2, referenceID, amount,
             Balance, reason, WalletKey
         );
@@ -144,7 +144,7 @@ public class Wallet : IWallet
         Balance += amount;
 
         // create journal entry
-        this.Wallets.CreateJournalForOwner (
+        Wallets.CreateJournalForOwner (
             reference, OwnerID, OwnerID, ownerID2, referenceID, amount,
             Balance, reason, WalletKey
         );
@@ -166,7 +166,7 @@ public class Wallet : IWallet
 
         // market transactions do not affect the wallet value because these are paid either when placing the sell/buy order
         // or when fullfiling it
-        this.Wallets.CreateTransactionRecord (
+        Wallets.CreateTransactionRecord (
             OwnerID, type, characterID, otherID, typeID, quantity, amount, stationID,
             WalletKey
         );

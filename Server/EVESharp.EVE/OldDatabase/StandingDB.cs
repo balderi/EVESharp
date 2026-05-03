@@ -12,7 +12,7 @@ public class StandingDB : DatabaseAccessor
 
     public Rowset GetStandings (int characterID)
     {
-        return this.Database.PrepareRowset (
+        return Database.PrepareRowset (
             "SELECT toID, standing FROM chrStandings WHERE characterID = @characterID",
             new Dictionary <string, object> {{"@characterID", characterID}}
         );
@@ -20,7 +20,7 @@ public class StandingDB : DatabaseAccessor
 
     public Rowset GetPrime (int characterID)
     {
-        return this.Database.PrepareRowset (
+        return Database.PrepareRowset (
             "SELECT itemID as ownerID, itemName as ownerName, typeID FROM chrStandings, eveNames WHERE characterID = @characterID AND eveNames.itemID = chrStandings.toID",
             new Dictionary <string, object> {{"@characterID", characterID}}
         );
@@ -28,7 +28,7 @@ public class StandingDB : DatabaseAccessor
 
     public Rowset GetNPCStandings (int characterID)
     {
-        return this.Database.PrepareRowset (
+        return Database.PrepareRowset (
             "SELECT fromID, standing FROM chrNPCStandings WHERE characterID = @characterID",
             new Dictionary <string, object> {{"@characterID", characterID}}
         );
@@ -85,12 +85,12 @@ public class StandingDB : DatabaseAccessor
             parameters ["@eventDateTime"] =  (long) eventDateTime;
         }
 
-        return this.Database.PrepareRowset (query, parameters);
+        return Database.PrepareRowset (query, parameters);
     }
 
     public double? GetSecurityRating (int characterID)
     {
-        DbDataReader reader = this.Database.Select (
+        DbDataReader reader = Database.Select (
             "SELECT securityRating FROM chrInformation WHERE characterID = @characterID",
             new Dictionary <string, object> {{"@characterID", characterID}}
         );
@@ -110,7 +110,7 @@ public class StandingDB : DatabaseAccessor
         int int_3 = 0
     )
     {
-        this.Database.Prepare (
+        Database.Prepare (
             "INSERT INTO chrStandingTransactions (fromID, toID, modification, direction, msg, eventDateTime, eventTypeID, int_1, int_2, int_3)VALUES(@fromID, @toID, @modification, @direction, @msg, @eventDateTime, @eventTypeID, @int_1, @int_2, @int_3)",
             new Dictionary <string, object>
             {
@@ -130,7 +130,7 @@ public class StandingDB : DatabaseAccessor
 
     public void SetPlayerStanding (int fromID, int toID, double value)
     {
-        this.Database.Prepare (
+        Database.Prepare (
             "REPLACE INTO chrStandings(characterID, toID, standing)VALUES(@fromID, @toID, @value)",
             new Dictionary <string, object>
             {
@@ -143,7 +143,7 @@ public class StandingDB : DatabaseAccessor
 
     public double GetStanding (int from, int to)
     {
-        DbDataReader reader = this.Database.Select (
+        DbDataReader reader = Database.Select (
             "SELECT standing FROM chrStandings WHERE characterID = @fromID AND toID = @toID",
             new Dictionary <string, object>
             {
@@ -168,7 +168,7 @@ public class StandingDB : DatabaseAccessor
     /// </summary>
     public double GetNpcStandingToCharacter (int npcFactionID, int characterID)
     {
-        DbDataReader reader = this.Database.Select (
+        DbDataReader reader = Database.Select (
             "SELECT standing FROM chrNPCStandings WHERE characterID = @characterID AND fromID = @fromID",
             new Dictionary <string, object>
             {
@@ -192,7 +192,7 @@ public class StandingDB : DatabaseAccessor
     /// </summary>
     public int GetFactionForCorporation (int corporationID)
     {
-        DbDataReader reader = this.Database.Select (
+        DbDataReader reader = Database.Select (
             "SELECT factionID FROM crpNPCCorporations WHERE corporationID = @corpID",
             new Dictionary <string, object>
             {

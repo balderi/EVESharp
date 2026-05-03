@@ -13,22 +13,22 @@ public class EVEListener : IEVEListener
 
     public EVEListener (int port)
     {
-        this.Port   = port;
-        this.Socket = new Socket (AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.Tcp);
+        Port   = port;
+        Socket = new Socket (AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.Tcp);
         // ensure support for both ipv4 and ipv4
-        this.Socket.SetSocketOption (SocketOptionLevel.IPv6, SocketOptionName.IPv6Only, false);
+        Socket.SetSocketOption (SocketOptionLevel.IPv6, SocketOptionName.IPv6Only, false);
         // setup transfer buffers
-        this.Socket.ReceiveBufferSize = 64 * 1024;
-        this.Socket.SendBufferSize    = 64 * 1024;
+        Socket.ReceiveBufferSize = 64 * 1024;
+        Socket.SendBufferSize    = 64 * 1024;
     }
 
     public virtual void Listen ()
     {
-        this.Socket.Bind (new IPEndPoint (IPAddress.IPv6Any, this.Port));
-        this.Socket.Listen (20);
+        Socket.Bind (new IPEndPoint (IPAddress.IPv6Any, Port));
+        Socket.Listen (20);
         
         // begin accepting connections too
-        this.Socket.BeginAccept (this.AcceptCallback, this);
+        Socket.BeginAccept (this.AcceptCallback, this);
     }
 
     /// <summary>
@@ -44,11 +44,11 @@ public class EVEListener : IEVEListener
     {
         try
         {
-            Socket    socket       = this.Socket.EndAccept (ar);
+            Socket    socket       = Socket.EndAccept (ar);
             EVESocket clientSocket = new EVESocket (socket);
             
             // begin accepting again
-            this.Socket.BeginAccept (this.AcceptCallback, this);
+            Socket.BeginAccept (this.AcceptCallback, this);
 
             this.ConnectionAccepted?.Invoke (clientSocket);
         }
@@ -62,7 +62,7 @@ public class EVEListener : IEVEListener
     {
         try
         {
-            this.Socket.Close ();
+            Socket.Close ();
         }
         catch (SocketException)
         {
@@ -72,6 +72,6 @@ public class EVEListener : IEVEListener
     
     public void Dispose ()
     {
-        this.Socket.Dispose ();
+        Socket.Dispose ();
     }
 }

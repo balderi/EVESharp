@@ -11,6 +11,6 @@ public class Expressions : Dictionary <int, Expression>, IExpressions
 {
     public Expressions (IDatabase Database, ILogger Log) : base (Database.InvDgmLoadExpressions (Log))
     {
-        Log.Debug ($"Loaded {this.Count} expressions for Dogma");
+        Log.Debug ("Loaded {Count} expressions for Dogma", Count);
     }
 }

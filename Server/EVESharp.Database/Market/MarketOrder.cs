@@ -24,20 +24,20 @@ public class MarketOrder
         bool isCorp
     )
     {
-        this.OrderID       = orderID;
-        this.TypeID        = typeID;
-        this.CharacterID   = characterID;
-        this.LocationID    = locationID;
-        this.Price         = price;
-        this.AccountID     = accountID;
-        this.UnitsLeft     = unitsLeft;
-        this.MinimumUnits  = minimumUnits;
-        this.Range         = range;
-        this.Jumps         = jumps;
-        this.Escrow        = escrow;
-        this.Bid           = bid;
-        this.Issued        = issued;
-        this.CorporationID = corporationID;
-        this.IsCorp        = isCorp;
+        OrderID       = orderID;
+        TypeID        = typeID;
+        CharacterID   = characterID;
+        LocationID    = locationID;
+        Price         = price;
+        AccountID     = accountID;
+        UnitsLeft     = unitsLeft;
+        MinimumUnits  = minimumUnits;
+        Range         = range;
+        Jumps         = jumps;
+        Escrow        = escrow;
+        Bid           = bid;
+        Issued        = issued;
+        CorporationID = corporationID;
+        IsCorp        = isCorp;
     }
 }

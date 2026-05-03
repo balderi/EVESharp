@@ -25,8 +25,8 @@ public class ThreadedProcessor<T> : IQueueProcessor<T> where T : IMessage
 
     public ThreadedProcessor (IMessageQueue<T> queue, ILogger logger)
     {
-        this.Queue = queue;
-        this.Log   = logger;
+        Queue = queue;
+        Log   = logger;
     }
 
     /// <summary>
@@ -34,9 +34,9 @@ public class ThreadedProcessor<T> : IQueueProcessor<T> where T : IMessage
     /// </summary>
     private void InitializeThreads ()
     {
-        this.Token = new CancellationTokenSource ();
+        Token = new CancellationTokenSource ();
 
-        for (int i = 0; i < this.NumberOfThreads; i++)
+        for (int i = 0; i < NumberOfThreads; i++)
         {
             Thread thread = new Thread (this.Run);
             thread.Start ();
@@ -51,12 +51,12 @@ public class ThreadedProcessor<T> : IQueueProcessor<T> where T : IMessage
     /// </summary>
     private void Run ()
     {
-        while (this.Token.IsCancellationRequested == false)
+        while (Token.IsCancellationRequested == false)
         {
             try
             {
                 // wait for any data to be present in the queue
-                if (this.Queue.TryTake (out T message, Timeout.Infinite, this.Token.Token) == true)
+                if (Queue.TryTake (out T message, Timeout.Infinite, Token.Token) == true)
                     Queue.HandleMessage (message);
             }
             catch (Exception e)
@@ -74,6 +74,6 @@ public class ThreadedProcessor<T> : IQueueProcessor<T> where T : IMessage
 
     public void Stop ()
     {
-        this.Token.Cancel ();
+        Token.Cancel ();
     }
 }

@@ -54,7 +54,7 @@ public class reprocessingSvc : ClientBoundService
 
     private IItems              Items              { get; }
     private ISolarSystems       SolarSystems       { get; }
-    private ITypes              Types              => this.Items.Types;
+    private ITypes              Types              => Items.Types;
     private StandingDB          StandingDB         { get; }
     private ReprocessingDB      ReprocessingDB     { get; }
     private IDogmaNotifications DogmaNotifications { get; }
@@ -152,7 +152,7 @@ public class reprocessingSvc : ClientBoundService
     [MustBeInStation]
     public PyDataType GetReprocessingInfo (ServiceCall call)
     {
-        Character character = this.Items.GetItem <Character> (call.Session.CharacterID);
+        Character character = Items.GetItem <Character> (call.Session.CharacterID);
 
         double standing = this.GetStanding (character);
 
@@ -226,7 +226,7 @@ public class reprocessingSvc : ClientBoundService
 
     public PyDataType GetQuotes (ServiceCall call, PyList itemIDs)
     {
-        Character character = this.Items.GetItem <Character> (call.Session.CharacterID);
+        Character character = Items.GetItem <Character> (call.Session.CharacterID);
 
         PyDictionary <PyInteger, PyDataType> result = new PyDictionary <PyInteger, PyDataType> ();
 
@@ -268,7 +268,7 @@ public class reprocessingSvc : ClientBoundService
 
     public PyDataType Reprocess (ServiceCall call, PyList itemIDs, PyInteger ownerID, PyInteger flag, PyBool unknown, PyList skipChecks)
     {
-        Character character = this.Items.GetItem <Character> (call.Session.CharacterID);
+        Character character = Items.GetItem <Character> (call.Session.CharacterID);
 
         // TODO: TAKE INTO ACCOUNT OWNERID AND FLAG, THESE MOST LIKELY WILL BE USED BY CORP STUFF
         foreach (PyInteger itemID in itemIDs.GetEnumerable <PyInteger> ())
@@ -296,7 +296,7 @@ public class reprocessingSvc : ClientBoundService
         if (this.MachoResolveObject (call, bindParams) != BoundServiceManager.MachoNet.NodeID)
             throw new CustomError ("Trying to bind an object that does not belong to us!");
 
-        Station station = this.Items.GetStaticStation (bindParams.ObjectID);
+        Station station = Items.GetStaticStation (bindParams.ObjectID);
 
         if (station.HasService (Service.ReprocessingPlant) == false)
             throw new CustomError ("This station does not allow for reprocessing plant services");
@@ -308,8 +308,8 @@ public class reprocessingSvc : ClientBoundService
         ItemInventory inventory = DogmaItems.LoadInventory (station.ID, call.Session.CharacterID);
 
         return new reprocessingSvc (
-            ReprocessingDB, StandingDB, station, inventory, this.Items, BoundServiceManager, this.DogmaNotifications,
-            call.Session, this.SolarSystems, DogmaItems, Database
+            ReprocessingDB, StandingDB, station, inventory, Items, BoundServiceManager, DogmaNotifications,
+            call.Session, SolarSystems, DogmaItems, Database
         );
     }
 }

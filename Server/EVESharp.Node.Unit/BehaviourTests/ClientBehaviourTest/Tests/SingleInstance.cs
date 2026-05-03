@@ -56,26 +56,26 @@ public class SingleInstance
         this.mGeneralMock.SetupGet (x => x.MachoNet).Returns (this.mMachoNetMock.Object);
         this.mGeneralMock.SetupGet (x => x.Cluster).Returns (this.mClusterMock.Object);
 
-        this.LoginProcessor = new SynchronousProcessor <LoginQueueEntry> (
+        LoginProcessor = new SynchronousProcessor <LoginQueueEntry> (
             new LoginQueue (this.mDatabase.Object, this.mAuthenticationMock.Object, Logger.None)
         );
         // transport manager
-        this.TransportManager = new TransportManager (new HttpClient (), Logger.None);
+        TransportManager = new TransportManager (new HttpClient (), Logger.None);
         // macho net
-        this.MachoNet = new MachoNet (
-            this.mDatabase.Object, this.TransportManager, this.LoginProcessor, this.mGeneralMock.Object, Logger.None
+        MachoNet = new MachoNet (
+            this.mDatabase.Object, TransportManager, LoginProcessor, this.mGeneralMock.Object, Logger.None
         );
         // session manager
-        this.mSessionManager = new SessionManager (this.TransportManager, this.MachoNet);
+        this.mSessionManager = new SessionManager (TransportManager, MachoNet);
         // message processor
-        this.MessageProcessor = new SynchronousProcessor <MachoMessage> (
+        MessageProcessor = new SynchronousProcessor <MachoMessage> (
             new MessageQueue (
-                this.MachoNet,
+                MachoNet,
                 Logger.None,
                 null,
                 null,
                 Mock.Of <IRemoteServiceManager> (),
-                new PacketCallHelper (this.MachoNet),
+                new PacketCallHelper (MachoNet),
                 this.mNotificationSender.Object,
                 this.mItems.Object,
                 this.mSolarSystems.Object,
@@ -86,7 +86,7 @@ public class SingleInstance
 
     public void Initialize ()
     {
-        this.MachoNet.Initialize ();
-        this.MachoNet.MessageProcessor = this.MessageProcessor;
+        MachoNet.Initialize ();
+        MachoNet.MessageProcessor = MessageProcessor;
     }
 }

@@ -38,7 +38,7 @@ public class RemoteServiceManager : IRemoteServiceManager
     {
         lock (this.mCallCallbacks)
         {
-            Log.Warning ($"Timeout for call {callID} expired before getting an answer.");
+            Log.Warning ("Timeout for call {Call} expired before getting an answer.", callID);
 
             // get call id and call the timeout callback
             RemoteCall call = this.mCallCallbacks [callID];
@@ -64,7 +64,7 @@ public class RemoteServiceManager : IRemoteServiceManager
         {
             if (this.mCallCallbacks.TryGetValue (callID, out RemoteCall call) == false)
             {
-                Log.Warning ($"Received an answer for call {callID} after the timeout expired, ignoring answer...");
+                Log.Warning ("Received an answer for call {Call} after the timeout expired, ignoring answer...", callID);
 
                 return;
             }

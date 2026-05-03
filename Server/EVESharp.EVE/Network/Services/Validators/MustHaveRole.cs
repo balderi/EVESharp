@@ -11,18 +11,18 @@ public class MustHaveRole : CallValidator
     
     public MustHaveRole(ulong role, Type exception = null)
     {
-        this.Role      = role;
-        this.Exception = exception;
+        Role      = role;
+        Exception = exception;
     }
 
     public MustHaveRole(Roles role, Type exception = null)
     {
-        this.Role      = (ulong) role;
-        this.Exception = exception;
+        Role      = (ulong) role;
+        Exception = exception;
     }
     
     public override bool Validate (Session session)
     {
-        return (session.Role & this.Role) == this.Role;
+        return (session.Role & Role) == Role;
     }
 }

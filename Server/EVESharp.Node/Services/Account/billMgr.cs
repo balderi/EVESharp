@@ -37,7 +37,7 @@ public class billMgr : Service
         CacheStorage  = cacheStorage;
         Database      = database;
         CorporationDB = corporationDb;
-        this.Items    = items;
+        Items    = items;
         Notifications = notificationSender;
 
         clusterManager.ClusterTimerTick += this.PerformTimedEvents;
@@ -81,7 +81,7 @@ public class billMgr : Service
         foreach (CorporationOffice office in offices)
         {
             long dueDate = office.DueDate;
-            int  ownerID = this.Items.Stations [office.StationID].OwnerID;
+            int  ownerID = Items.Stations [office.StationID].OwnerID;
 
             int billID = (int) Database.MktBillsCreate (
                 BillTypes.RentalBill, office.CorporationID, ownerID,

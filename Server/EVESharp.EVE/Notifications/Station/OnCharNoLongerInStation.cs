@@ -17,10 +17,10 @@ public class OnCharNoLongerInStation : ClientNotification
 
     public OnCharNoLongerInStation (Session session) : base (NOTIFICATION_NAME)
     {
-        this.CharacterID   = session.CharacterID;
-        this.CorporationID = session.CorporationID;
-        this.AllianceID    = session.AllianceID;
-        this.WarFactionID  = session.WarFactionID;
+        CharacterID   = session.CharacterID;
+        CorporationID = session.CorporationID;
+        AllianceID    = session.AllianceID;
+        WarFactionID  = session.WarFactionID;
     }
 
     public override List <PyDataType> GetElements ()
@@ -29,10 +29,10 @@ public class OnCharNoLongerInStation : ClientNotification
         {
             new PyTuple (4)
             {
-                [0] = this.CharacterID,
-                [1] = this.CorporationID,
-                [2] = this.AllianceID,
-                [3] = this.WarFactionID
+                [0] = CharacterID,
+                [1] = CorporationID,
+                [2] = AllianceID,
+                [3] = WarFactionID
             }
         };
     }

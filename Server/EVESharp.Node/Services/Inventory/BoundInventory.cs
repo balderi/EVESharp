@@ -448,7 +448,7 @@ public class BoundInventory : ClientBoundService
         if (itemID == call.Session.ShipID)
             throw new CantMoveActiveShip ();
 
-        ItemEntity item = this.Items.GetItem (itemID);
+        ItemEntity item = Items.GetItem (itemID);
 
         this.PreMoveItemCheck (item, this.mFlag, item.Quantity, call.Session);
         this.MoveItemHere (item, this.mFlag, call.Session);
@@ -461,7 +461,7 @@ public class BoundInventory : ClientBoundService
         if (itemID == call.Session.ShipID)
             throw new CantMoveActiveShip ();
 
-        ItemEntity item = this.Items.GetItem (itemID);
+        ItemEntity item = Items.GetItem (itemID);
 
         this.PreMoveItemCheck (item, this.mFlag, item.Quantity, call.Session);
         this.MoveItemHere (item, this.mFlag, call.Session, quantity);
@@ -475,7 +475,7 @@ public class BoundInventory : ClientBoundService
             throw new CantMoveActiveShip ();
 
         // TODO: ADD CONSTRAINTS CHECKS FOR THE FLAG
-        ItemEntity item = this.Items.GetItem (itemID);
+        ItemEntity item = Items.GetItem (itemID);
 
         // ensure there's enough quantity in the stack to split it
         if (quantity > item.Quantity)
@@ -494,7 +494,7 @@ public class BoundInventory : ClientBoundService
             // null quantity means all the items in the list
             foreach (PyInteger itemID in adds.GetEnumerable <PyInteger> ())
             {
-                ItemEntity item = this.Items.GetItem (itemID);
+                ItemEntity item = Items.GetItem (itemID);
 
                 // check and then move the item
                 this.PreMoveItemCheck (item, (Flags) (int) flag, item.Quantity, call.Session);

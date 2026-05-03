@@ -16,47 +16,47 @@ public class PyInteger : PyDataType
 
     public PyInteger (long value)
     {
-        this.Value       = value;
-        this.IntegerType = IntegerTypeEnum.Long;
+        Value       = value;
+        IntegerType = IntegerTypeEnum.Long;
     }
 
     public PyInteger (int value)
     {
-        this.Value       = value;
-        this.IntegerType = IntegerTypeEnum.Int;
+        Value       = value;
+        IntegerType = IntegerTypeEnum.Int;
     }
 
     public PyInteger (short value)
     {
-        this.Value       = value;
-        this.IntegerType = IntegerTypeEnum.Short;
+        Value       = value;
+        IntegerType = IntegerTypeEnum.Short;
     }
 
     public PyInteger (byte value)
     {
-        this.Value = value;
+        Value = value;
         if (value > sbyte.MaxValue)
-            this.IntegerType = IntegerTypeEnum.Short;
+            IntegerType = IntegerTypeEnum.Short;
         else
-            this.IntegerType = IntegerTypeEnum.Byte;
+            IntegerType = IntegerTypeEnum.Byte;
     }
 
     public PyInteger (sbyte value)
     {
-        this.Value       = value;
-        this.IntegerType = IntegerTypeEnum.Byte;
+        Value       = value;
+        IntegerType = IntegerTypeEnum.Byte;
     }
 
     private bool Equals (PyInteger other)
     {
         if (ReferenceEquals (null, other)) return false;
 
-        return this.Value.Equals (other.Value);
+        return Value.Equals (other.Value);
     }
 
     public override int GetHashCode ()
     {
-        return this.Value.GetHashCode ();
+        return Value.GetHashCode ();
     }
 
     public static bool operator == (PyInteger left, PyInteger right)
@@ -239,6 +239,6 @@ public class PyInteger : PyDataType
 
     public override string ToString ()
     {
-        return this.Value.ToString ();
+        return Value.ToString ();
     }
 }

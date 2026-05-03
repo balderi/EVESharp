@@ -14,13 +14,13 @@ public class OnCorporationChanged : ClientNotification
 
     public OnCorporationChanged (int corporationID) : base (NOTIFICATION_NAME)
     {
-        this.CorporationID = corporationID;
-        this.Changes       = new PyDictionary ();
+        CorporationID = corporationID;
+        Changes       = new PyDictionary ();
     }
 
     public OnCorporationChanged AddChange (string changeName, PyDataType oldValue, PyDataType newValue)
     {
-        this.Changes [changeName] = new PyTuple (2)
+        Changes [changeName] = new PyTuple (2)
         {
             [0] = oldValue,
             [1] = newValue
@@ -33,8 +33,8 @@ public class OnCorporationChanged : ClientNotification
     {
         return new List <PyDataType>
         {
-            this.CorporationID,
-            this.Changes
+            CorporationID,
+            Changes
         };
     }
 }

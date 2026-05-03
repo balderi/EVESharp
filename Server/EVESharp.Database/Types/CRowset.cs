@@ -16,22 +16,22 @@ public class CRowset
 
     public virtual PyPackedRow this [int index]
     {
-        get => this.Rows [index];
-        set => this.Rows [index] = value;
+        get => Rows [index];
+        set => Rows [index] = value;
     }
 
     public CRowset (DBRowDescriptor descriptor)
     {
-        this.Header = descriptor;
-        this.Rows   = new PyList <PyPackedRow> ();
+        Header = descriptor;
+        Rows   = new PyList <PyPackedRow> ();
 
         this.PrepareColumnNames ();
     }
 
     public CRowset (DBRowDescriptor descriptor, PyList <PyPackedRow> rows)
     {
-        this.Header = descriptor;
-        this.Rows   = rows;
+        Header = descriptor;
+        Rows   = rows;
 
         this.PrepareColumnNames ();
     }
@@ -41,12 +41,12 @@ public class CRowset
     /// </summary>
     private void PrepareColumnNames ()
     {
-        this.Columns = new PyList <PyString> (this.Header.Columns.Count);
+        Columns = new PyList <PyString> (Header.Columns.Count);
 
         int index = 0;
 
-        foreach (DBRowDescriptor.Column column in this.Header.Columns)
-            this.Columns [index++] = column.Name;
+        foreach (DBRowDescriptor.Column column in Header.Columns)
+            Columns [index++] = column.Name;
     }
 
     /// <summary>
@@ -55,7 +55,7 @@ public class CRowset
     /// <param name="row">The new row to add</param>
     public void Add (PyPackedRow row)
     {
-        this.Rows.Add (row);
+        Rows.Add (row);
     }
 
     public static implicit operator PyDataType (CRowset rowset)

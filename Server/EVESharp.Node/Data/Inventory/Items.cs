@@ -101,29 +101,29 @@ public class Items : IItems
         IStations    stations,    ISolarSystems solarSystems, IFactions factions, IDefaultAttributes defaultAttributes, IDogmaNotifications dogmaNotifications
     )
     {
-        this.Log = logger;
+        Log = logger;
 
-        this.Database                               =  database;
-        this.MachoNet                               =  machoNet;
-        this.Constants                              =  constants;
-        this.Expressions                            =  expressions;
-        this.ItemDB                                 =  itemDB;
-        this.CharacterDB                            =  characterDB;
-        this.InsuranceDB                            =  insuranceDB;
-        this.SkillDB                                =  skillDB;
-        this.CorporationDB                          =  corporationDB;
-        this.DogmaNotifications                     =  dogmaNotifications;
-        this.Factions                               =  factions;
-        this.DefaultAttributes                      =  defaultAttributes;
+        Database                               =  database;
+        MachoNet                               =  machoNet;
+        Constants                              =  constants;
+        Expressions                            =  expressions;
+        ItemDB                                 =  itemDB;
+        CharacterDB                            =  characterDB;
+        InsuranceDB                            =  insuranceDB;
+        SkillDB                                =  skillDB;
+        CorporationDB                          =  corporationDB;
+        DogmaNotifications                     =  dogmaNotifications;
+        Factions                               =  factions;
+        DefaultAttributes                      =  defaultAttributes;
 
-        this.Attributes   = attributes;
-        this.Groups       = groups;
-        this.Categories   = categories;
-        this.Types        = types;
-        this.Ancestries   = ancestries;
-        this.Bloodlines   = bloodlines;
-        this.Stations     = stations;
-        this.SolarSystems = solarSystems;
+        Attributes   = attributes;
+        Groups       = groups;
+        Categories   = categories;
+        Types        = types;
+        Ancestries   = ancestries;
+        Bloodlines   = bloodlines;
+        Stations     = stations;
+        SolarSystems = solarSystems;
     }
 
     /// <summary>
@@ -132,19 +132,19 @@ public class Items : IItems
     public void Init ()
     {
         // load all the items in the database that do not belong to any user (so-called static items)
-        foreach (Item item in Database.InvGetStaticItems (this.Types, this.Attributes))
+        foreach (Item item in Database.InvGetStaticItems (Types, Attributes))
             this.PerformItemLoad (item);
 
-        this.Log.Information ($"Preloaded {this.mItemList.Count} static items");
+        Log.Information ("Preloaded {ItemListCount} static items", this.mItemList.Count);
 
         // store useful items like recycler and system
-        this.LocationRecycler = this.GetItem <EVESystem> (this.Constants.LocationRecycler);
-        this.LocationSystem   = this.GetItem <EVESystem> (this.Constants.LocationSystem);
-        this.LocationUniverse = this.GetItem <EVESystem> (this.Constants.LocationUniverse);
-        this.LocationMarket   = this.GetItem <EVESystem> (this.Constants.LocationMarket);
-        this.LocationTemp     = this.GetItem <EVESystem> (this.Constants.LocationTemp);
-        this.OwnerBank        = this.GetItem <EVESystem> (this.Constants.OwnerBank);
-        this.OwnerSCC         = this.GetItem (this.Constants.OwnerSecureCommerceCommission);
+        LocationRecycler = this.GetItem <EVESystem> (Constants.LocationRecycler);
+        LocationSystem   = this.GetItem <EVESystem> (Constants.LocationSystem);
+        LocationUniverse = this.GetItem <EVESystem> (Constants.LocationUniverse);
+        LocationMarket   = this.GetItem <EVESystem> (Constants.LocationMarket);
+        LocationTemp     = this.GetItem <EVESystem> (Constants.LocationTemp);
+        OwnerBank        = this.GetItem <EVESystem> (Constants.OwnerBank);
+        OwnerSCC         = this.GetItem (Constants.OwnerSecureCommerceCommission);
     }
 
     /// <summary>
@@ -197,7 +197,7 @@ public class Items : IItems
             if (this.TryGetItem (itemID, out ItemEntity item) == false)
                 return this.PerformItemLoad (
                     Database.InvLoadItem (
-                        itemID, this.MachoNet.NodeID, this.Types, this.Attributes
+                        itemID, MachoNet.NodeID, Types, Attributes
                     )
                 );
 
@@ -221,7 +221,7 @@ public class Items : IItems
 
                 return this.PerformItemLoad (
                     Database.InvLoadItem (
-                        itemID, this.MachoNet.NodeID, this.Types, this.Attributes
+                        itemID, MachoNet.NodeID, Types, Attributes
                     )
                 );
             }
@@ -361,7 +361,7 @@ public class Items : IItems
     {
         ConcurrentDictionary <int, ItemEntity> result = new ConcurrentDictionary <int, ItemEntity> ();
 
-        foreach (int itemID in this.ItemDB.LoadItemsLocatedAt (location.ID, ignoreFlag))
+        foreach (int itemID in ItemDB.LoadItemsLocatedAt (location.ID, ignoreFlag))
             result [itemID] = this.LoadItem (itemID);
 
         return result;
@@ -371,7 +371,7 @@ public class Items : IItems
     {
         ConcurrentDictionary <int, ItemEntity> result = new ConcurrentDictionary <int, ItemEntity> ();
 
-        foreach (int itemID in this.ItemDB.LoadAllItemsLocatedAt (location.ID))
+        foreach (int itemID in ItemDB.LoadAllItemsLocatedAt (location.ID))
             result [itemID] = this.LoadItem (itemID);
 
         return result;
@@ -405,7 +405,7 @@ public class Items : IItems
             case (int) GroupID.Tool:
                 return this.LoadContainer (item);
             default:
-                this.Log.Warning ($"Loading celestial {item.ID} from item group {item.Type.Group.ID} as normal item");
+                Log.Warning ("Loading celestial {I} from item group {I1} as normal item", item.ID, item.Type.Group.ID);
 
                 return new EVE.Data.Inventory.Items.Types.Item (item);
         }
@@ -436,12 +436,12 @@ public class Items : IItems
     {
         switch (item.Type.Group.ID)
         {
-            case (int) GroupID.Character:   return new Character (this.ItemDB.LoadCharacter (item));
-            case (int) GroupID.Corporation: return new Corporation (this.ItemDB.LoadCorporation (item));
+            case (int) GroupID.Character:   return new Character (ItemDB.LoadCharacter (item));
+            case (int) GroupID.Corporation: return new Corporation (ItemDB.LoadCorporation (item));
             case (int) GroupID.Faction:     return this.LoadFaction (item);
-            case (int) GroupID.Alliance:    return new Alliance (this.ItemDB.LoadAlliance (item));
+            case (int) GroupID.Alliance:    return new Alliance (ItemDB.LoadAlliance (item));
             default:
-                this.Log.Warning ($"Loading owner {item.ID} from item group {item.Type.Group.ID} as normal item");
+                Log.Warning ("Loading owner {I} from item group {I1} as normal item", item.ID, item.Type.Group.ID);
 
                 return new EVE.Data.Inventory.Items.Types.Item (item);
         }
@@ -449,7 +449,7 @@ public class Items : IItems
 
     private ItemEntity LoadFaction (Item item)
     {
-        return this.Factions [item.ID] = new Faction (this.ItemDB.LoadFaction (item));
+        return Factions [item.ID] = new Faction (ItemDB.LoadFaction (item));
     }
 
     private ItemEntity LoadAccessories (Item item)
@@ -458,7 +458,7 @@ public class Items : IItems
         {
             case (int) GroupID.Clone: return new Clone (item);
             default:
-                this.Log.Warning ($"Loading accessory {item.ID} from item group {item.Type.Group.ID} as normal item");
+                Log.Warning ("Loading accessory {I} from item group {I1} as normal item", item.ID, item.Type.Group.ID);
 
                 return new EVE.Data.Inventory.Items.Types.Item (item);
         }
@@ -466,7 +466,7 @@ public class Items : IItems
 
     private ItemEntity LoadSkill (Item item)
     {
-        return new Skill (item, this.Constants.SkillPointMultiplier);
+        return new Skill (item, Constants.SkillPointMultiplier);
     }
 
     private ItemEntity LoadShip (Item item)
@@ -481,7 +481,7 @@ public class Items : IItems
 
     private ItemEntity LoadSolarSystem (Item item)
     {
-        return this.SolarSystems [item.ID] = new SolarSystem (this.ItemDB.LoadSolarSystem (item));
+        return SolarSystems [item.ID] = new SolarSystem (ItemDB.LoadSolarSystem (item));
     }
 
     private ItemEntity LoadStation (Item item)
@@ -489,9 +489,9 @@ public class Items : IItems
         switch (item.Type.Group.ID)
         {
             case (int) GroupID.StationServices: return this.LoadStationServices (item);
-            case (int) GroupID.Station:         return this.Stations [item.ID] = new Station (this.ItemDB.LoadStation (item));
+            case (int) GroupID.Station:         return Stations [item.ID] = new Station (ItemDB.LoadStation (item));
             default:
-                this.Log.Warning ($"Loading station item {item.ID} from item group {item.Type.Group.ID} as normal item");
+                Log.Warning ("Loading station item {I} from item group {I1} as normal item", item.ID, item.Type.Group.ID);
 
                 return new EVE.Data.Inventory.Items.Types.Item (item);
         }
@@ -503,7 +503,7 @@ public class Items : IItems
         {
             case (int) TypeID.OfficeFolder: return new OfficeFolder (item);
             default:
-                this.Log.Warning ($"Loading station service item {item.ID} as normal item");
+                Log.Warning ("Loading station service item {I} as normal item", item.ID);
 
                 return null;
         }
@@ -511,12 +511,12 @@ public class Items : IItems
 
     private ItemEntity LoadConstellation (Item item)
     {
-        return new Constellation (this.ItemDB.LoadConstellation (item));
+        return new Constellation (ItemDB.LoadConstellation (item));
     }
 
     private ItemEntity LoadRegion (Item item)
     {
-        return new Region (this.ItemDB.LoadRegion (item));
+        return new Region (ItemDB.LoadRegion (item));
     }
 
     private ItemEntity LoadContainer (Item item)
@@ -546,7 +546,7 @@ public class Items : IItems
     )
     {
         int itemID = (int) Database.InvCreateItem (
-            itemName, this.Types [typeID], ownerID, locationID, flag, contraband, singleton,
+            itemName, Types [typeID], ownerID, locationID, flag, contraband, singleton,
             quantity, x, y, z, customInfo
         );
 
@@ -576,7 +576,7 @@ public class Items : IItems
 
     public Skill CreateSkill (Type skillType, Character character, int level = 0, SkillHistoryReason reason = SkillHistoryReason.SkillTrainingComplete)
     {
-        int skillID = this.SkillDB.CreateSkill (skillType, character);
+        int skillID = SkillDB.CreateSkill (skillType, character);
 
         Skill skill = this.LoadItem <Skill> (skillID);
 
@@ -588,7 +588,7 @@ public class Items : IItems
 
         // create a history entry if needed
         if (reason != SkillHistoryReason.None)
-            this.SkillDB.CreateSkillHistoryRecord (skillType, character, reason, skill.GetSkillPointsForLevel (level));
+            SkillDB.CreateSkillHistoryRecord (skillType, character, reason, skill.GetSkillPointsForLevel (level));
 
         // persist the skill to the database
         skill.Persist ();
@@ -598,7 +598,7 @@ public class Items : IItems
 
     public Ship CreateShip (Type shipType, ItemEntity location, Character owner)
     {
-        int shipID = (int) this.ItemDB.CreateShip (shipType, location, owner);
+        int shipID = (int) ItemDB.CreateShip (shipType, location, owner);
 
         Ship ship = this.LoadItem <Ship> (shipID);
 
@@ -673,7 +673,7 @@ public class Items : IItems
 
     private List <Character.SkillQueueEntry> OnSkillQueueLoad (Character character, Dictionary <int, Skill> skillQueue)
     {
-        return this.CharacterDB.LoadSkillQueue (character, skillQueue);
+        return CharacterDB.LoadSkillQueue (character, skillQueue);
     }
 
     private ConcurrentDictionary <int, ItemEntity> OnInventoryLoad (ItemInventory inventory)
@@ -722,15 +722,15 @@ public class Items : IItems
                     break;
 
                 case Ship ship:
-                    this.InsuranceDB.UnInsureShip (ship.ID);
+                    InsuranceDB.UnInsureShip (ship.ID);
                     break;
 
                 case Corporation corporation:
-                    this.CorporationDB.UpdateCorporationInformation (corporation);
+                    CorporationDB.UpdateCorporationInformation (corporation);
                     break;
 
                 case Character character:
-                    this.CharacterDB.UpdateCharacterInformation (character);
+                    CharacterDB.UpdateCharacterInformation (character);
                     break;
             }
         }
@@ -741,7 +741,7 @@ public class Items : IItems
                 inventoryItem.Persist ();
 
         // persist the attributes too
-        this.Database.InvDgmPersistEntityAttributes (item.ID, item.Attributes);
+        Database.InvDgmPersistEntityAttributes (item.ID, item.Attributes);
     }
 
     private void OnItemDisposed (ItemEntity item)
@@ -759,6 +759,6 @@ public class Items : IItems
     private void PersistAlliance (Alliance alliance)
     {
         // update the alliance information
-        this.Database.CrpAlliancesUpdate (alliance.Description, alliance.Url, alliance.ID, alliance.ExecutorCorpID);
+        Database.CrpAlliancesUpdate (alliance.Description, alliance.Url, alliance.ID, alliance.ExecutorCorpID);
     }
 }

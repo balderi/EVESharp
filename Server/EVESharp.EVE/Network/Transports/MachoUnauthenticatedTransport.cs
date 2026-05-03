@@ -29,32 +29,32 @@ public class MachoUnauthenticatedTransport : IMachoTransport
 
     public MachoUnauthenticatedTransport (IMachoNet machoNet, HttpClient httpClient, ILogger channel)
     {
-        this.Session                 =  new Session ();
-        this.Log                     =  channel;
-        this.Socket                  =  new EVESocket ();
-        this.MachoNet                =  machoNet;
-        this.TransportManager        =  machoNet.TransportManager;
-        this.HttpClient              =  httpClient;
+        Session                 =  new Session ();
+        Log                     =  channel;
+        Socket                  =  new EVESocket ();
+        MachoNet                =  machoNet;
+        TransportManager        =  machoNet.TransportManager;
+        HttpClient              =  httpClient;
         
         // setup events
-        this.Socket.DataReceived   += this.ReceiveLowLevelVersionExchange;
-        this.Socket.Exception      += this.HandleException;
-        this.Socket.ConnectionLost += this.HandleConnectionLost;
+        Socket.DataReceived   += this.ReceiveLowLevelVersionExchange;
+        Socket.Exception      += this.HandleException;
+        Socket.ConnectionLost += this.HandleConnectionLost;
     }
 
     public MachoUnauthenticatedTransport (IMachoNet machoNet, HttpClient httpClient, IEVESocket socket, ILogger logger)
     {
-        this.Session                 =  new Session ();
-        this.Log                     =  logger;
-        this.Socket                  =  socket;
-        this.MachoNet                =  machoNet;
-        this.TransportManager        =  machoNet.TransportManager;
-        this.HttpClient              =  httpClient;
+        Session                 =  new Session ();
+        Log                     =  logger;
+        Socket                  =  socket;
+        MachoNet                =  machoNet;
+        TransportManager        =  machoNet.TransportManager;
+        HttpClient              =  httpClient;
         
         // setup events
-        this.Socket.DataReceived   += this.ReceiveLowLevelVersionExchange;
-        this.Socket.Exception      += this.HandleException;
-        this.Socket.ConnectionLost += this.HandleConnectionLost;
+        Socket.DataReceived   += this.ReceiveLowLevelVersionExchange;
+        Socket.Exception      += this.HandleException;
+        Socket.ConnectionLost += this.HandleConnectionLost;
         
         // send low level version exchange to start authorization chain
         this.SendLowLevelVersionExchange ();
@@ -71,7 +71,7 @@ public class MachoUnauthenticatedTransport : IMachoTransport
     public void Connect (string ip, ushort port)
     {
         // connect
-        this.Socket.Connect (ip, port);
+        Socket.Connect (ip, port);
         // send the LowLevelVersionExchange to validate versions
         this.SendLowLevelVersionExchange ();
     }
@@ -79,7 +79,7 @@ public class MachoUnauthenticatedTransport : IMachoTransport
     private void ReceiveLowLevelVersionExchange (PyDataType ar)
     {
         // store the remote address in the session
-        this.Session.Address = this.Socket.RemoteAddress;
+        Session.Address = Socket.RemoteAddress;
 
         // depending on the type of data we're receiving, this has to be treated differently
         this.HandleLowLevelVersionExchange (ar);
@@ -93,7 +93,7 @@ public class MachoUnauthenticatedTransport : IMachoTransport
     private async Task <bool> ValidateIdentificationReq (IdentificationReq req)
     {
         // register ourselves with the orchestrator and get our node id AND address
-        HttpResponseMessage response = await this.HttpClient.GetAsync ($"{this.MachoNet.OrchestratorURL}/Nodes/{req.Address}");
+        HttpResponseMessage response = await HttpClient.GetAsync ($"{MachoNet.OrchestratorURL}/Nodes/{req.Address}");
 
         // make sure we have a proper answer
         response.EnsureSuccessStatusCode ();
@@ -116,14 +116,14 @@ public class MachoUnauthenticatedTransport : IMachoTransport
         // if the connection could not be validated do nothing else
         if (validation.Result == false)
         {
-            this.Log.Fatal ("IdentificationReq and Orchestrator do not say the same thing, aborting connection");
+            Log.Fatal ("IdentificationReq and Orchestrator do not say the same thing, aborting connection");
             this.Close ();
 
             return;
         }
 
         // store the NodeID in the session
-        this.Session.NodeID = req.NodeID;
+        Session.NodeID = req.NodeID;
 
         // send our identification response back and store the connection as whatever it is
         // so we can start receiving data
@@ -131,23 +131,23 @@ public class MachoUnauthenticatedTransport : IMachoTransport
         {
             case "proxy":
                 // resolve the connection to a proxy transport
-                this.MachoNet.TransportManager.ResolveProxyTransport (this);
+                MachoNet.TransportManager.ResolveProxyTransport (this);
                 break;
 
             case "server":
                 // resolve the connection to a node transport
-                this.MachoNet.TransportManager.ResolveNodeTransport (this);
+                MachoNet.TransportManager.ResolveNodeTransport (this);
                 break;
 
         }
 
         // send our identification res so the destination knows what to do
-        this.Socket.Send (
+        Socket.Send (
             new IdentificationRsp
             {
                 Accepted = true,
-                NodeID   = this.MachoNet.NodeID,
-                Mode = this.MachoNet.Mode switch
+                NodeID   = MachoNet.NodeID,
+                Mode = MachoNet.Mode switch
                 {
                     RunMode.Proxy  => "proxy",
                     RunMode.Server => "server",
@@ -160,18 +160,18 @@ public class MachoUnauthenticatedTransport : IMachoTransport
     private void HandleIdentificationRsp (IdentificationRsp rsp)
     {
         // store the NodeID in the session
-        this.Session.NodeID = rsp.NodeID;
+        Session.NodeID = rsp.NodeID;
 
         switch (rsp.Mode)
         {
             case "proxy":
                 // resolve the connection to a proxy transport
-                this.MachoNet.TransportManager.ResolveProxyTransport (this);
+                MachoNet.TransportManager.ResolveProxyTransport (this);
                 break;
 
             case "server":
                 // resolve the connection to a node transport
-                this.MachoNet.TransportManager.ResolveNodeTransport (this);
+                MachoNet.TransportManager.ResolveNodeTransport (this);
                 break;
 
         }
@@ -194,27 +194,27 @@ public class MachoUnauthenticatedTransport : IMachoTransport
 
     private void HandleLowLevelVersionExchange (LowLevelVersionExchange ex)
     {
-        this.Log.Debug ("Handling low level version exchange");
+        Log.Debug ("Handling low level version exchange");
 
         // assign the new packet handler to wait for commands again
-        this.Socket.DataReceived -= this.ReceiveLowLevelVersionExchange;
-        this.Socket.DataReceived += this.ReceiveCommandCallback;
+        Socket.DataReceived -= this.ReceiveLowLevelVersionExchange;
+        Socket.DataReceived += this.ReceiveCommandCallback;
     }
 
     private void HandleException (Exception ex)
     {
-        this.Log.Error ("Exception detected:");
+        Log.Error ("Exception detected:");
 
         do
         {
-            this.Log.Error ("{0}\n{1}", ex.Message, ex.StackTrace);
+            Log.Error ("{0}\n{1}", ex.Message, ex.StackTrace);
         }
         while ((ex = ex.InnerException) != null);
     }
 
     protected void SendLowLevelVersionExchange ()
     {
-        this.Log.Debug ("Sending LowLevelVersionExchange...");
+        Log.Debug ("Sending LowLevelVersionExchange...");
 
         LowLevelVersionExchange data = new LowLevelVersionExchange
         {
@@ -223,11 +223,11 @@ public class MachoUnauthenticatedTransport : IMachoTransport
             Build        = Version.BUILD,
             MachoVersion = Version.MACHO_VERSION,
             Version      = Version.VERSION,
-            UserCount    = this.MachoNet.TransportManager.ClientTransports.Count,
+            UserCount    = MachoNet.TransportManager.ClientTransports.Count,
             Region       = Version.REGION
         };
 
-        this.Socket.Send (data);
+        Socket.Send (data);
     }
 
     private void ReceiveCommandCallback (PyDataType packet)
@@ -243,21 +243,21 @@ public class MachoUnauthenticatedTransport : IMachoTransport
 
         if (command.Command == "QC")
         {
-            this.Log.Debug ("Received QueueCheck command");
+            Log.Debug ("Received QueueCheck command");
             // wait for a new low level version exchange again
-            this.Socket.DataReceived -= this.ReceiveCommandCallback;
-            this.Socket.DataReceived += this.ReceiveLowLevelVersionExchange;
+            Socket.DataReceived -= this.ReceiveCommandCallback;
+            Socket.DataReceived += this.ReceiveLowLevelVersionExchange;
             // send player position on the queue
-            this.Socket.Send (new PyInteger (this.MachoNet.LoginProcessor.Queue.Count));
+            Socket.Send (new PyInteger (MachoNet.LoginProcessor.Queue.Count));
             // send low level version exchange required
             this.SendLowLevelVersionExchange ();
         }
         else if (command.Command == "VK")
         {
-            this.Log.Debug ("Received VipKey command");
+            Log.Debug ("Received VipKey command");
             // next is the placebo challenge
-            this.Socket.DataReceived -= this.ReceiveCommandCallback;
-            this.Socket.DataReceived += this.ReceiveCryptoRequestCallback;
+            Socket.DataReceived -= this.ReceiveCommandCallback;
+            Socket.DataReceived += this.ReceiveCryptoRequestCallback;
         }
         else
         {
@@ -273,14 +273,14 @@ public class MachoUnauthenticatedTransport : IMachoTransport
             throw new InvalidDataException ($"Unknown command {request.Command}, expected 'placebo'");
 
         if (request.Arguments.Length > 0)
-            this.Log.Warning ("Received PlaceboRequest with extra arguments, this is not supported");
+            Log.Warning ("Received PlaceboRequest with extra arguments, this is not supported");
 
-        this.Log.Debug ("Received correct Crypto request");
+        Log.Debug ("Received correct Crypto request");
         // next is the first login attempt
-        this.Socket.DataReceived -= this.ReceiveCryptoRequestCallback;
-        this.Socket.DataReceived += this.ReceiveAuthenticationRequestCallback;
+        Socket.DataReceived -= this.ReceiveCryptoRequestCallback;
+        Socket.DataReceived += this.ReceiveAuthenticationRequestCallback;
         // answer the client with a correct crypto challenge
-        this.Socket.Send (new PyString ("OK CC"));
+        Socket.Send (new PyString ("OK CC"));
     }
 
     private void ReceiveAuthenticationRequestCallback (PyDataType packet)
@@ -289,9 +289,9 @@ public class MachoUnauthenticatedTransport : IMachoTransport
 
         if (request.user_password is null)
         {
-            this.Log.Verbose ("Rejected by server; requesting plain password");
+            Log.Verbose ("Rejected by server; requesting plain password");
             // request the user a plain password
-            this.Socket.Send (new PyInteger (1)); // 1 => plain, 2 => hashed
+            Socket.Send (new PyInteger (1)); // 1 => plain, 2 => hashed
 
             return;
         }
@@ -299,13 +299,13 @@ public class MachoUnauthenticatedTransport : IMachoTransport
         // TODO: DYNAMICALLY FETCH THIS SO WE SUPPORT TRANSLATIONS
         if (request.user_languageid != "EN" && request.user_languageid != "RU" && request.user_languageid != "DE")
             // default to english language
-            this.Session.LanguageID = "EN";
+            Session.LanguageID = "EN";
         else
             // set languageid in the session to the one requested as we have translations for that one
-            this.Session.LanguageID = request.user_languageid;
+            Session.LanguageID = request.user_languageid;
 
         // add the user to the authentication queue
-        this.MachoNet.LoginProcessor?.Queue.Enqueue (
+        MachoNet.LoginProcessor?.Queue.Enqueue (
             new LoginQueueEntry
             {
                 Connection = this,
@@ -324,24 +324,24 @@ public class MachoUnauthenticatedTransport : IMachoTransport
         // Handshake sent when we are mostly in
         HandshakeAck ack = new HandshakeAck
         {
-            LiveUpdates    = this.MachoNet.LiveUpdates,
-            JIT            = this.Session.LanguageID,
-            UserID         = this.Session.UserID,
+            LiveUpdates    = MachoNet.LiveUpdates,
+            JIT            = Session.LanguageID,
+            UserID         = Session.UserID,
             MaxSessionTime = null,
             UserType       = AccountType.USER,
-            Role           = this.Session.Role,
-            Address        = this.Session.Address,
+            Role           = Session.Role,
+            Address        = Session.Address,
             InDetention    = null,
             ClientHashes   = new PyList (),
-            UserClientID   = this.Session.UserID
+            UserClientID   = Session.UserID
         };
 
         // clear the data received event
-        this.Socket.DataReceived -= this.ReceiveLoginResultResponse;
+        Socket.DataReceived -= this.ReceiveLoginResultResponse;
         // send the response first
-        this.Socket.Send (ack);
+        Socket.Send (ack);
         // move the connection to the authenticated user list
-        this.MachoNet.TransportManager.ResolveClientTransport (this);
+        MachoNet.TransportManager.ResolveClientTransport (this);
     }
 
     public void SendLoginNotification (LoginStatus loginStatus, int accountID, ulong role)
@@ -359,8 +359,8 @@ public class MachoUnauthenticatedTransport : IMachoTransport
                 rsp.serverChallenge         = "";
                 rsp.func_marshaled_code     = func_marshaled_code;
                 rsp.verification            = false;
-                rsp.cluster_usercount       = this.MachoNet.TransportManager.ClientTransports.Count;
-                rsp.proxy_nodeid            = this.MachoNet.NodeID;
+                rsp.cluster_usercount       = MachoNet.TransportManager.ClientTransports.Count;
+                rsp.proxy_nodeid            = MachoNet.NodeID;
                 rsp.user_logonqueueposition = 1;
                 rsp.challenge_responsehash  = "55087";
 
@@ -371,29 +371,29 @@ public class MachoUnauthenticatedTransport : IMachoTransport
                 rsp.boot_region   = Version.REGION;
 
                 // setup session
-                this.Session.UserType = AccountType.USER;
-                this.Session.UserID   = accountID;
-                this.Session.Role     = role;
+                Session.UserType = AccountType.USER;
+                Session.UserID   = accountID;
+                Session.Role     = role;
                 // set second to last packet handler
-                this.Socket.DataReceived -= this.ReceiveAuthenticationRequestCallback;
-                this.Socket.DataReceived += this.ReceiveLoginResultResponse;
+                Socket.DataReceived -= this.ReceiveAuthenticationRequestCallback;
+                Socket.DataReceived += this.ReceiveLoginResultResponse;
                 // send the login response
-                this.Socket.Send (rsp);
+                Socket.Send (rsp);
             }
             else
             {
                 // TODO: IMPLEMENT CLUSTER STARTUP
                 // Pretty funny, "AutClusterStarting" maybe they mean "AuthClusterStarting"
-                this.Socket.Send (new GPSTransportClosed ("AutClusterStarting"));
+                Socket.Send (new GPSTransportClosed ("AutClusterStarting"));
 
-                this.Log.Verbose ("Rejected by server; cluster is starting");
+                Log.Verbose ("Rejected by server; cluster is starting");
 
                 this.Close ();
             }
         }
         else if (loginStatus == LoginStatus.Failed)
         {
-            this.Socket.Send (new GPSTransportClosed ("LoginAuthFailed"));
+            Socket.Send (new GPSTransportClosed ("LoginAuthFailed"));
             this.Close ();
         }
     }
@@ -403,7 +403,7 @@ public class MachoUnauthenticatedTransport : IMachoTransport
         // dispose of this
         this.Dispose ();
         // free the underlying socket
-        this.Socket.Close ();
+        Socket.Close ();
     }
     
     /// <summary>
@@ -413,12 +413,12 @@ public class MachoUnauthenticatedTransport : IMachoTransport
     /// </summary>
     public void Dispose ()
     {
-        this.Socket.DataReceived   -= this.ReceiveLowLevelVersionExchange;
-        this.Socket.DataReceived   -= this.ReceiveCommandCallback;
-        this.Socket.DataReceived   -= this.ReceiveLoginResultResponse;
-        this.Socket.DataReceived   -= this.ReceiveAuthenticationRequestCallback;
-        this.Socket.DataReceived   -= this.ReceiveCryptoRequestCallback;
-        this.Socket.Exception      -= this.HandleException;
-        this.Socket.ConnectionLost -= this.HandleConnectionLost;
+        Socket.DataReceived   -= this.ReceiveLowLevelVersionExchange;
+        Socket.DataReceived   -= this.ReceiveCommandCallback;
+        Socket.DataReceived   -= this.ReceiveLoginResultResponse;
+        Socket.DataReceived   -= this.ReceiveAuthenticationRequestCallback;
+        Socket.DataReceived   -= this.ReceiveCryptoRequestCallback;
+        Socket.Exception      -= this.HandleException;
+        Socket.ConnectionLost -= this.HandleConnectionLost;
     }
 }

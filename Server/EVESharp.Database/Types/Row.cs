@@ -20,8 +20,8 @@ public class Row
 
     public Row (PyList <PyString> header, PyList line)
     {
-        this.Header = header;
-        this.Line   = line;
+        Header = header;
+        Line   = line;
     }
 
     public static implicit operator PyDataType (Row row)

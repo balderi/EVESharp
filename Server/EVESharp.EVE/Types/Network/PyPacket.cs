@@ -87,16 +87,16 @@ public class PyPacket
     /// Out of bounds data with extra information for machoNet or other services
     /// </summary>
     public PyDictionary OutOfBounds { get; set; }
-    public string TypeString => PacketTypeString [(int) this.Type];
+    public string TypeString => PacketTypeString [(int) Type];
 
     protected PyPacket ()
     {
-        this.Type        = PacketType.__Fake_Invalid_Type;
-        this.UserID      = 0;
-        this.Payload     = null;
-        this.OutOfBounds = null;
-        this.Source      = null;
-        this.Destination = null;
+        Type        = PacketType.__Fake_Invalid_Type;
+        UserID      = 0;
+        Payload     = null;
+        OutOfBounds = null;
+        Source      = null;
+        Destination = null;
     }
 
     /// <summary>
@@ -105,7 +105,7 @@ public class PyPacket
     /// <param name="type">The type of the packet to create</param>
     public PyPacket (PacketType type) : this ()
     {
-        this.Type = type;
+        Type = type;
     }
 
     public static implicit operator PyDataType (PyPacket packet)

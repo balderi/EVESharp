@@ -25,67 +25,67 @@ public class Character : ItemInventory
 
     public Database.Inventory.Types.Information.Character CharacterInformation { get; }
 
-    public int AccountID => this.CharacterInformation.AccountID;
+    public int AccountID => CharacterInformation.AccountID;
 
     public int? ActiveCloneID
     {
-        get => this.CharacterInformation.ActiveCloneID;
+        get => CharacterInformation.ActiveCloneID;
         set
         {
-            this.Information.Dirty                  = true;
-            this.CharacterInformation.ActiveCloneID = value;
+            Information.Dirty                  = true;
+            CharacterInformation.ActiveCloneID = value;
         }
     }
 
-    public string Title => this.CharacterInformation.Title;
+    public string Title => CharacterInformation.Title;
 
     public string Description
     {
-        get => this.CharacterInformation.Description;
+        get => CharacterInformation.Description;
         set
         {
-            this.Information.Dirty                = true;
-            this.CharacterInformation.Description = value;
+            Information.Dirty                = true;
+            CharacterInformation.Description = value;
         }
     }
 
     public int TitleMask
     {
-        get => this.CharacterInformation.TitleMask;
+        get => CharacterInformation.TitleMask;
         set
         {
-            this.Information.Dirty              = true;
-            this.CharacterInformation.TitleMask = value;
+            Information.Dirty              = true;
+            CharacterInformation.TitleMask = value;
         }
     }
 
     public int CorporationID
     {
-        get => this.CharacterInformation.CorporationID;
+        get => CharacterInformation.CorporationID;
         set
         {
-            this.Information.Dirty                  = true;
-            this.CharacterInformation.CorporationID = value;
+            Information.Dirty                  = true;
+            CharacterInformation.CorporationID = value;
         }
     }
 
     public int? AllianceID
     {
-        get => this.CharacterInformation.AllianceID;
-        set => this.CharacterInformation.AllianceID = value;
+        get => CharacterInformation.AllianceID;
+        set => CharacterInformation.AllianceID = value;
     }
 
-    public double SecurityRating  => this.CharacterInformation.SecurityRating;
-    public string PetitionMessage => this.CharacterInformation.PetitionMessage;
-    public int    LogonMinutes    => this.CharacterInformation.LogonMinutes;
+    public double SecurityRating  => CharacterInformation.SecurityRating;
+    public string PetitionMessage => CharacterInformation.PetitionMessage;
+    public int    LogonMinutes    => CharacterInformation.LogonMinutes;
 
     /// <summary>
     /// WARNING: THIS FIELD IS NOT SAVED
     /// </summary>
     public long Roles
     {
-        get => this.CharacterInformation.Roles;
-        set => this.CharacterInformation.Roles = value;
+        get => CharacterInformation.Roles;
+        set => CharacterInformation.Roles = value;
     }
 
     /// <summary>
@@ -93,8 +93,8 @@ public class Character : ItemInventory
     /// </summary>
     public long RolesAtBase
     {
-        get => this.CharacterInformation.RolesAtBase;
-        set => this.CharacterInformation.RolesAtBase = value;
+        get => CharacterInformation.RolesAtBase;
+        set => CharacterInformation.RolesAtBase = value;
     }
 
     /// <summary>
@@ -102,8 +102,8 @@ public class Character : ItemInventory
     /// </summary>
     public long RolesAtHq
     {
-        get => this.CharacterInformation.RolesAtHq;
-        set => this.CharacterInformation.RolesAtHq = value;
+        get => CharacterInformation.RolesAtHq;
+        set => CharacterInformation.RolesAtHq = value;
     }
 
     /// <summary>
@@ -111,8 +111,8 @@ public class Character : ItemInventory
     /// </summary>
     public long RolesAtOther
     {
-        get => this.CharacterInformation.RolesAtOther;
-        set => this.CharacterInformation.RolesAtOther = value;
+        get => CharacterInformation.RolesAtOther;
+        set => CharacterInformation.RolesAtOther = value;
     }
 
     /// <summary>
@@ -120,116 +120,116 @@ public class Character : ItemInventory
     /// </summary>
     public int? BaseID
     {
-        get => this.CharacterInformation.BaseID;
-        set => this.CharacterInformation.BaseID = value;
+        get => CharacterInformation.BaseID;
+        set => CharacterInformation.BaseID = value;
     }
 
     public long CorporationDateTime
     {
-        get => this.CharacterInformation.CorporationDateTime;
+        get => CharacterInformation.CorporationDateTime;
         set
         {
-            this.Information.Dirty                        = true;
-            this.CharacterInformation.CorporationDateTime = value;
+            Information.Dirty                        = true;
+            CharacterInformation.CorporationDateTime = value;
         }
     }
 
     public int CorpAccountKey
     {
-        get => this.CharacterInformation.CorpAccountKey;
+        get => CharacterInformation.CorpAccountKey;
         set
         {
-            this.Information.Dirty                   = true;
-            this.CharacterInformation.CorpAccountKey = value;
+            Information.Dirty                   = true;
+            CharacterInformation.CorpAccountKey = value;
         }
     }
 
-    public long    StartDateTime      => this.CharacterInformation.StartDateTime;
-    public long    CreateDateTime     => this.CharacterInformation.CreateDateTime;
-    public int     AncestryID         => this.CharacterInformation.AncestryID;
-    public int     CareerID           => this.CharacterInformation.CareerID;
-    public int     SchoolID           => this.CharacterInformation.SchoolID;
-    public int     CareerSpecialityID => this.CharacterInformation.CareerSpecialityID;
-    public int     Gender             => this.CharacterInformation.Gender;
-    public int?    AccessoryID        => this.CharacterInformation.AncestryID;
-    public int?    BeardID            => this.CharacterInformation.BeardID;
-    public int     CostumeID          => this.CharacterInformation.CostumeID;
-    public int?    DecoID             => this.CharacterInformation.DecoID;
-    public int     EyebrowsID         => this.CharacterInformation.EyebrowsID;
-    public int     EyesID             => this.CharacterInformation.EyesID;
-    public int     HairID             => this.CharacterInformation.HairID;
-    public int?    LipstickID         => this.CharacterInformation.LipstickID;
-    public int?    MakeupID           => this.CharacterInformation.MakeupID;
-    public int     SkinID             => this.CharacterInformation.SkinID;
-    public int     BackgroundID       => this.CharacterInformation.BackgroundID;
-    public int     LightID            => this.CharacterInformation.LightID;
-    public double  HeadRotation1      => this.CharacterInformation.HeadRotation1;
-    public double  HeadRotation2      => this.CharacterInformation.HeadRotation2;
-    public double  HeadRotation3      => this.CharacterInformation.HeadRotation3;
-    public double  EyeRotation1       => this.CharacterInformation.EyeRotation1;
-    public double  EyeRotation2       => this.CharacterInformation.EyeRotation2;
-    public double  EyeRotation3       => this.CharacterInformation.EyeRotation3;
-    public double  CamPos1            => this.CharacterInformation.CamPos1;
-    public double  CamPos2            => this.CharacterInformation.CamPos2;
-    public double  CamPos3            => this.CharacterInformation.CamPos3;
-    public double? Morph1E            => this.CharacterInformation.Morph1E;
-    public double? Morph1N            => this.CharacterInformation.Morph1N;
-    public double? Morph1S            => this.CharacterInformation.Morph1S;
-    public double? Morph1W            => this.CharacterInformation.Morph1W;
-    public double? Morph2E            => this.CharacterInformation.Morph2E;
-    public double? Morph2N            => this.CharacterInformation.Morph2N;
-    public double? Morph2S            => this.CharacterInformation.Morph2S;
-    public double? Morph2W            => this.CharacterInformation.Morph2W;
-    public double? Morph3E            => this.CharacterInformation.Morph3E;
-    public double? Morph3N            => this.CharacterInformation.Morph3N;
-    public double? Morph3S            => this.CharacterInformation.Morph3S;
-    public double? Morph3W            => this.CharacterInformation.Morph3W;
-    public double? Morph4E            => this.CharacterInformation.Morph4E;
-    public double? Morph4N            => this.CharacterInformation.Morph4N;
-    public double? Morph4S            => this.CharacterInformation.Morph4S;
-    public double? Morph4W            => this.CharacterInformation.Morph4W;
-    public int     StationID          => this.CharacterInformation.StationID;
-    public int     SolarSystemID      => this.CharacterInformation.SolarSystemID;
-    public int     ConstellationID    => this.CharacterInformation.ConstellationID;
-    public int     RegionID           => this.CharacterInformation.RegionID;
+    public long    StartDateTime      => CharacterInformation.StartDateTime;
+    public long    CreateDateTime     => CharacterInformation.CreateDateTime;
+    public int     AncestryID         => CharacterInformation.AncestryID;
+    public int     CareerID           => CharacterInformation.CareerID;
+    public int     SchoolID           => CharacterInformation.SchoolID;
+    public int     CareerSpecialityID => CharacterInformation.CareerSpecialityID;
+    public int     Gender             => CharacterInformation.Gender;
+    public int?    AccessoryID        => CharacterInformation.AncestryID;
+    public int?    BeardID            => CharacterInformation.BeardID;
+    public int     CostumeID          => CharacterInformation.CostumeID;
+    public int?    DecoID             => CharacterInformation.DecoID;
+    public int     EyebrowsID         => CharacterInformation.EyebrowsID;
+    public int     EyesID             => CharacterInformation.EyesID;
+    public int     HairID             => CharacterInformation.HairID;
+    public int?    LipstickID         => CharacterInformation.LipstickID;
+    public int?    MakeupID           => CharacterInformation.MakeupID;
+    public int     SkinID             => CharacterInformation.SkinID;
+    public int     BackgroundID       => CharacterInformation.BackgroundID;
+    public int     LightID            => CharacterInformation.LightID;
+    public double  HeadRotation1      => CharacterInformation.HeadRotation1;
+    public double  HeadRotation2      => CharacterInformation.HeadRotation2;
+    public double  HeadRotation3      => CharacterInformation.HeadRotation3;
+    public double  EyeRotation1       => CharacterInformation.EyeRotation1;
+    public double  EyeRotation2       => CharacterInformation.EyeRotation2;
+    public double  EyeRotation3       => CharacterInformation.EyeRotation3;
+    public double  CamPos1            => CharacterInformation.CamPos1;
+    public double  CamPos2            => CharacterInformation.CamPos2;
+    public double  CamPos3            => CharacterInformation.CamPos3;
+    public double? Morph1E            => CharacterInformation.Morph1E;
+    public double? Morph1N            => CharacterInformation.Morph1N;
+    public double? Morph1S            => CharacterInformation.Morph1S;
+    public double? Morph1W            => CharacterInformation.Morph1W;
+    public double? Morph2E            => CharacterInformation.Morph2E;
+    public double? Morph2N            => CharacterInformation.Morph2N;
+    public double? Morph2S            => CharacterInformation.Morph2S;
+    public double? Morph2W            => CharacterInformation.Morph2W;
+    public double? Morph3E            => CharacterInformation.Morph3E;
+    public double? Morph3N            => CharacterInformation.Morph3N;
+    public double? Morph3S            => CharacterInformation.Morph3S;
+    public double? Morph3W            => CharacterInformation.Morph3W;
+    public double? Morph4E            => CharacterInformation.Morph4E;
+    public double? Morph4N            => CharacterInformation.Morph4N;
+    public double? Morph4S            => CharacterInformation.Morph4S;
+    public double? Morph4W            => CharacterInformation.Morph4W;
+    public int     StationID          => CharacterInformation.StationID;
+    public int     SolarSystemID      => CharacterInformation.SolarSystemID;
+    public int     ConstellationID    => CharacterInformation.ConstellationID;
+    public int     RegionID           => CharacterInformation.RegionID;
 
     public int FreeReSpecs
     {
-        get => this.CharacterInformation.FreeReSpecs;
+        get => CharacterInformation.FreeReSpecs;
         set
         {
-            this.Information.Dirty                = true;
-            this.CharacterInformation.FreeReSpecs = value;
+            Information.Dirty                = true;
+            CharacterInformation.FreeReSpecs = value;
         }
     }
 
     public long NextReSpecTime
     {
-        get => this.CharacterInformation.NextReSpecTime;
+        get => CharacterInformation.NextReSpecTime;
         set
         {
-            this.Information.Dirty                   = true;
-            this.CharacterInformation.NextReSpecTime = value;
+            Information.Dirty                   = true;
+            CharacterInformation.NextReSpecTime = value;
         }
     }
 
     public long TimeLastJump
     {
-        get => this.CharacterInformation.TimeLastJump;
+        get => CharacterInformation.TimeLastJump;
         set
         {
-            this.Information.Dirty                 = true;
-            this.CharacterInformation.TimeLastJump = value;
+            Information.Dirty                 = true;
+            CharacterInformation.TimeLastJump = value;
         }
     }
 
     public int? WarFactionID
     {
-        get => this.CharacterInformation.WarFactionID;
+        get => CharacterInformation.WarFactionID;
         set
         {
-            this.Information.Dirty                 = true;
-            this.CharacterInformation.WarFactionID = value;
+            Information.Dirty                 = true;
+            CharacterInformation.WarFactionID = value;
         }
     }
 
@@ -238,8 +238,8 @@ public class Character : ItemInventory
     /// </summary>
     public long GrantableRoles
     {
-        get => this.CharacterInformation.GrantableRoles;
-        set => this.CharacterInformation.GrantableRoles = value;
+        get => CharacterInformation.GrantableRoles;
+        set => CharacterInformation.GrantableRoles = value;
     }
 
     /// <summary>
@@ -247,8 +247,8 @@ public class Character : ItemInventory
     /// </summary>
     public long GrantableRolesAtHQ
     {
-        get => this.CharacterInformation.GrantableRolesAtHQ;
-        set => this.CharacterInformation.GrantableRolesAtHQ = value;
+        get => CharacterInformation.GrantableRolesAtHQ;
+        set => CharacterInformation.GrantableRolesAtHQ = value;
     }
 
     /// <summary>
@@ -256,8 +256,8 @@ public class Character : ItemInventory
     /// </summary>
     public long GrantableRolesAtBase
     {
-        get => this.CharacterInformation.GrantableRolesAtBase;
-        set => this.CharacterInformation.GrantableRolesAtBase = value;
+        get => CharacterInformation.GrantableRolesAtBase;
+        set => CharacterInformation.GrantableRolesAtBase = value;
     }
 
     /// <summary>
@@ -265,38 +265,38 @@ public class Character : ItemInventory
     /// </summary>
     public long GrantableRolesAtOther
     {
-        get => this.CharacterInformation.GrantableRolesAtOther;
-        set => this.CharacterInformation.GrantableRolesAtOther = value;
+        get => CharacterInformation.GrantableRolesAtOther;
+        set => CharacterInformation.GrantableRolesAtOther = value;
     }
 
     public long Charisma
     {
-        get => this.Attributes [AttributeTypes.charisma].Integer;
-        set => this.Attributes [AttributeTypes.charisma].Integer = value;
+        get => Attributes [AttributeTypes.charisma].Integer;
+        set => Attributes [AttributeTypes.charisma].Integer = value;
     }
 
     public long Willpower
     {
-        get => this.Attributes [AttributeTypes.willpower].Integer;
-        set => this.Attributes [AttributeTypes.willpower].Integer = value;
+        get => Attributes [AttributeTypes.willpower].Integer;
+        set => Attributes [AttributeTypes.willpower].Integer = value;
     }
 
     public long Intelligence
     {
-        get => this.Attributes [AttributeTypes.intelligence].Integer;
-        set => this.Attributes [AttributeTypes.intelligence].Integer = value;
+        get => Attributes [AttributeTypes.intelligence].Integer;
+        set => Attributes [AttributeTypes.intelligence].Integer = value;
     }
 
     public long Perception
     {
-        get => this.Attributes [AttributeTypes.perception].Integer;
-        set => this.Attributes [AttributeTypes.perception].Integer = value;
+        get => Attributes [AttributeTypes.perception].Integer;
+        set => Attributes [AttributeTypes.perception].Integer = value;
     }
 
     public long Memory
     {
-        get => this.Attributes [AttributeTypes.memory].Integer;
-        set => this.Attributes [AttributeTypes.memory].Integer = value;
+        get => Attributes [AttributeTypes.memory].Integer;
+        set => Attributes [AttributeTypes.memory].Integer = value;
     }
 
     public List <SkillQueueEntry> SkillQueue
@@ -304,45 +304,45 @@ public class Character : ItemInventory
         get
         {
             // if the contents are not loaded then that needs to happen first
-            if (this.ContentsLoaded == false)
+            if (ContentsLoaded == false)
                 this.LoadContents ();
 
             // accessing the skillQueue might be a modification attempt
             // so the character must be marked as dirty
-            this.Information.Dirty = true;
+            Information.Dirty = true;
 
             return this.mSkillQueue;
         }
     }
 
     public Dictionary <int, Skill> InjectedSkills =>
-        this.Items
+        Items
             .Where (x => (x.Value.Flag == Flags.SkillInTraining || x.Value.Flag == Flags.Skill) && x.Value is Skill)
             .ToDictionary (dict => dict.Key, dict => dict.Value as Skill);
 
     public Dictionary <int, ItemEntity> Modifiers =>
-        this.Items
+        Items
             .Where (x => x.Value.Flag == Flags.SkillInTraining || x.Value.Flag == Flags.Skill || x.Value.Flag == Flags.Implant)
             .ToDictionary (dict => dict.Key, dict => dict.Value);
 
     public Dictionary <int, Skill> InjectedSkillsByTypeID =>
-        this.Items
+        Items
             .Where (x => (x.Value.Flag == Flags.Skill || x.Value.Flag == Flags.SkillInTraining) && x.Value is Skill)
             .ToDictionary (dict => dict.Value.Type.ID, dict => dict.Value as Skill);
 
     public Dictionary <int, Implant> PluggedInImplants =>
-        this.Items
+        Items
             .Where (x => x.Value.Flag == Flags.Implant && x.Value is Implant)
             .ToDictionary (dict => dict.Key, dict => dict.Value as Implant);
 
     public Dictionary <int, Implant> PluggedInImplantsByTypeID =>
-        this.Items
+        Items
             .Where (x => x.Value.Flag == Flags.Implant && x.Value is Implant)
             .ToDictionary (dict => dict.Key, dict => dict.Value as Implant);
 
     public Character (Database.Inventory.Types.Information.Character info) : base (info.Information)
     {
-        this.CharacterInformation = info;
+        CharacterInformation = info;
     }
 
     protected override void LoadContents (Flags ignoreFlags = Flags.None)
@@ -352,7 +352,7 @@ public class Character : ItemInventory
         this.CalculateSkillPoints ();
 
         // put things where they belong
-        Dictionary <int, Skill> skillQueue = this.Items
+        Dictionary <int, Skill> skillQueue = Items
                                                  .Where (x => x.Value.Flag == Flags.SkillInTraining && x.Value is Skill)
                                                  .ToDictionary (dict => dict.Key, dict => dict.Value as Skill);
 
@@ -361,7 +361,7 @@ public class Character : ItemInventory
 
     public void CalculateSkillPoints ()
     {
-        foreach ((int itemID, Skill skill) in this.InjectedSkills)
+        foreach ((int itemID, Skill skill) in InjectedSkills)
             // increase our skillpoints count with all the trained skills
             this.mSkillPoints += skill.Points;
     }
@@ -370,12 +370,12 @@ public class Character : ItemInventory
     {
         long skillLearningLevel = 0;
 
-        if (this.InjectedSkillsByTypeID.TryGetValue ((int) TypeID.Learning, out Skill learningSkill))
+        if (InjectedSkillsByTypeID.TryGetValue ((int) TypeID.Learning, out Skill learningSkill))
             skillLearningLevel = learningSkill.Level;
         
         return Database.EVEMath.Skills.GetSkillPointsPerMinute (
-            this.Attributes [skill.PrimaryAttribute.Integer],
-            this.Attributes [skill.SecondaryAttribute.Integer],
+            Attributes [skill.PrimaryAttribute.Integer],
+            Attributes [skill.SecondaryAttribute.Integer],
             (int) skillLearningLevel,
             this.mSkillPoints
         );
@@ -388,7 +388,7 @@ public class Character : ItemInventory
 
     public long GetSkillLevel (int skillTypeID)
     {
-        if (this.InjectedSkillsByTypeID.TryGetValue (skillTypeID, out Skill skill) == false)
+        if (InjectedSkillsByTypeID.TryGetValue (skillTypeID, out Skill skill) == false)
             return 0;
 
         return skill.Level;
@@ -410,7 +410,7 @@ public class Character : ItemInventory
     {
         int implantSlot = (int) newImplant.Attributes [AttributeTypes.implantness].Integer;
 
-        foreach ((int _, Implant implant) in this.PluggedInImplants)
+        foreach ((int _, Implant implant) in PluggedInImplants)
         {
             // the implant does not use any slot, here for sanity checking
             if (implant.Attributes.AttributeExists (AttributeTypes.implantness) == false)

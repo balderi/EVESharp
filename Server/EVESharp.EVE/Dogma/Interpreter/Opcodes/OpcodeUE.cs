@@ -15,18 +15,18 @@ public class OpcodeUE : OpcodeWithBooleanOutput
 
     public override Opcode LoadOpcode (BinaryReader reader)
     {
-        Opcode leftSide = this.Interpreter.Step (reader);
+        Opcode leftSide = Interpreter.Step (reader);
 
         if (leftSide is not OpcodeDEFSTRING defstring)
             throw new DogmaMachineException ("OpcodeUE (user error) must specify a exception name to throw");
 
-        this.LeftSide = defstring;
+        LeftSide = defstring;
 
         return this;
     }
 
     public override bool Execute ()
     {
-        throw new CustomError (this.LeftSide.Definition);
+        throw new CustomError (LeftSide.Definition);
     }
 }

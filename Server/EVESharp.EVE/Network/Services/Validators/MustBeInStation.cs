@@ -10,7 +10,7 @@ public class MustBeInStation : CallValidator
 {
     public MustBeInStation ()
     {
-        this.Exception = typeof (CanOnlyDoInStations);
+        Exception = typeof (CanOnlyDoInStations);
     }
     
     public override bool Validate (Session session)

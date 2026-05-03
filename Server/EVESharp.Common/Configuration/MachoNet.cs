@@ -24,7 +24,7 @@ public class MachoNet
         set
         {
             if (value == MachoNetMode.Server)
-                this.Port = (ushort) new Random ().Next (26001, 27000);
+                Port = (ushort) new Random ().Next (26001, 27000);
             
             this.mMode = value;
         }

@@ -213,7 +213,7 @@ internal class Program
         container.Register<beyonce>(Lifestyle.Singleton);
         container.Register<DestinyBroadcaster>(Lifestyle.Singleton);
         container.Register<SolarSystemDestinyManager>(Lifestyle.Singleton);
-        container.Register<Services.Dogma.TargetManager>(Lifestyle.Singleton);
+        container.Register<TargetManager>(Lifestyle.Singleton);
         container.Register<Services.Combat.PlayerDeathHandler>(Lifestyle.Singleton);
         container.Register<Services.Combat.CombatService>(Lifestyle.Singleton);
         container.Register<Services.Combat.WeaponCycler>(Lifestyle.Singleton);

@@ -14,6 +14,6 @@ public class Shares : IShares
     
     public ISharesAccount AcquireSharesAccount (int ownerID)
     {
-        return new SharesAccount (ownerID, this.Database);
+        return new SharesAccount (ownerID, Database);
     }
 }

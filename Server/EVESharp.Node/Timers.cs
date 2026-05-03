@@ -21,11 +21,11 @@ public class Timers : ITimers
 
     public Timer <T> EnqueueTimer <T> (DateTime dateTime, Action <T> callback, T parameter)
     {
-        return new Timer <T> (dateTime, parameter, callback, this.Log);
+        return new Timer <T> (dateTime, parameter, callback, Log);
     }
 
     public Timer <T> EnqueueTimer <T> (TimeSpan timeSpan, Action <T> callback, T parameter)
     {
-        return new Timer <T> (timeSpan, parameter, callback, this.Log);
+        return new Timer <T> (timeSpan, parameter, callback, Log);
     }
 }

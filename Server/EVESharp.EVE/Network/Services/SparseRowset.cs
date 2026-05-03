@@ -35,9 +35,9 @@ public class SparseRowset
 
     public SparseRowset (int count, PyList <PyString> headers, FieldType [] fieldTypes)
     {
-        this.Count      = count;
-        this.Headers    = headers;
-        this.FieldTypes = fieldTypes;
+        Count      = count;
+        Headers    = headers;
+        FieldTypes = fieldTypes;
     }
 
     public static implicit operator PyDataType (SparseRowset rowsetHeader)
@@ -65,14 +65,14 @@ public class SparseRowset
 
         while (reader.Read ())
         {
-            PyDataType keyValue = reader.GetPyDataType(this.FieldTypes [pkFieldIndex], pkFieldIndex);
+            PyDataType keyValue = reader.GetPyDataType(FieldTypes [pkFieldIndex], pkFieldIndex);
 
             result.Add (
                 new PyTuple (3)
                 {
                     [0] = keyValue,
                     [1] = rowsIndex [keyValue],
-                    [2] = reader.Row (this.Headers, this.FieldTypes)
+                    [2] = reader.Row (Headers, FieldTypes)
                 }
             );
         }
@@ -92,13 +92,13 @@ public class SparseRowset
 
         while (reader.Read ())
         {
-            PyDataType keyValue = reader.GetPyDataType (this.FieldTypes [pkFieldIndex], pkFieldIndex);
+            PyDataType keyValue = reader.GetPyDataType (FieldTypes [pkFieldIndex], pkFieldIndex);
 
             result.Add (
                 new PyTuple (2)
                 {
                     [0] = keyValue,
-                    [1] = reader.Row (this.Headers, this.FieldTypes)
+                    [1] = reader.Row (Headers, FieldTypes)
                 }
             );
         }

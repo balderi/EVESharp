@@ -20,16 +20,16 @@ public class DBRowDescriptor
 
     public DBRowDescriptor ()
     {
-        this.Columns = new List <Column> ();
+        Columns = new List <Column> ();
     }
 
     public override int GetHashCode ()
     {
-        int length      = this.Columns.Count;
+        int length      = Columns.Count;
         int mult        = 100005;
         int currentHash = 0x24157585;
 
-        foreach (Column column in this.Columns)
+        foreach (Column column in Columns)
         {
             currentHash =  (currentHash ^ column.GetHashCode ()) * mult;
             mult        += 52418 + length + length;
@@ -93,19 +93,19 @@ public class DBRowDescriptor
 
         public Column (string name, FieldType type)
         {
-            this.Name = name;
-            this.Type = type;
+            Name = name;
+            Type = type;
         }
 
         public Column (string name, int type)
         {
-            this.Name = name;
-            this.Type = (FieldType) type;
+            Name = name;
+            Type = (FieldType) type;
         }
 
         public override int GetHashCode ()
         {
-            return this.Name.GetHashCode () ^ this.Type.GetHashCode ();
+            return Name.GetHashCode () ^ Type.GetHashCode ();
         }
 
         public static implicit operator PyDataType (Column column)

@@ -13,7 +13,7 @@ public class LogLite
         set
         {
             this.mHostname = value;
-            this.Enabled   = true;
+            Enabled   = true;
         }
     }
     [ConfigValue("port")]

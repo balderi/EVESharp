@@ -64,7 +64,7 @@ public abstract class ItemInventory : ItemEntity
     {
         get
         {
-            if (this.ContentsLoaded == false)
+            if (ContentsLoaded == false)
                 this.LoadContents ();
 
             return this.mItems;
@@ -82,8 +82,8 @@ public abstract class ItemInventory : ItemEntity
         lock (this)
         {
             // ensure the list exists if no handler is there yet
-            this.Items          = this.OnInventoryLoad?.Invoke (this) ?? new ConcurrentDictionary <int, ItemEntity> ();
-            this.ContentsLoaded = true;
+            Items          = this.OnInventoryLoad?.Invoke (this) ?? new ConcurrentDictionary <int, ItemEntity> ();
+            ContentsLoaded = true;
         }
     }
 
@@ -91,7 +91,7 @@ public abstract class ItemInventory : ItemEntity
     {
         lock (this)
         {
-            if (this.ContentsLoaded == false)
+            if (ContentsLoaded == false)
                 return;
 
             this.OnInventoryUnload?.Invoke (this);
@@ -103,24 +103,24 @@ public abstract class ItemInventory : ItemEntity
         // do not add anything if the inventory is not loaded
         // this prevents loading the full inventory for operations
         // that don't really need it
-        if (this.ContentsLoaded == false)
+        if (ContentsLoaded == false)
             return;
 
-        lock (this.Items)
+        lock (Items)
         {
-            this.Items [item.ID] = item;
+            Items [item.ID] = item;
             item.Parent          = this;
         }
     }
 
     public void RemoveItem (ItemEntity item)
     {
-        if (this.ContentsLoaded == false)
+        if (ContentsLoaded == false)
             return;
 
-        lock (this.Items)
+        lock (Items)
         {
-            if (this.Items.TryRemove (item.ID, out _) == true)
+            if (Items.TryRemove (item.ID, out _) == true)
                 item.Parent = null;
         }
     }
@@ -128,7 +128,7 @@ public abstract class ItemInventory : ItemEntity
     public override void Dispose ()
     {
         // trigger the unload of the contents of the inventory
-        if (this.ContentsLoaded)
+        if (ContentsLoaded)
             this.UnloadContents ();
 
         base.Dispose ();

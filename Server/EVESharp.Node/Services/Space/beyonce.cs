@@ -79,15 +79,15 @@ public class beyonce : ClientBoundService
                    TargetManager targetManager, DestinyBroadcaster broadcaster)
         : base(manager)
     {
-        this.Items                 = items;
-        this.DogmaItems            = dogmaItems;
-        this.NotificationSender    = notificationSender;
-        this.SolarSystemDestinyMgr = solarSystemDestinyMgr;
-        this.SessionManager        = sessionManager;
-        this.Database              = database;
-        this.Log                   = logger;
-        this.TargetMgr             = targetManager;
-        this.Broadcaster           = broadcaster;
+        Items                 = items;
+        DogmaItems            = dogmaItems;
+        NotificationSender    = notificationSender;
+        SolarSystemDestinyMgr = solarSystemDestinyMgr;
+        SessionManager        = sessionManager;
+        Database              = database;
+        Log                   = logger;
+        TargetMgr             = targetManager;
+        Broadcaster           = broadcaster;
     }
 
     // =====================================================================
@@ -110,15 +110,15 @@ public class beyonce : ClientBoundService
         DestinyBroadcaster        broadcaster)
         : base(manager, session, objectID)
     {
-        this.Items                 = items;
-        this.DogmaItems            = dogmaItems;
-        this.NotificationSender    = notificationSender;
-        this.SolarSystemDestinyMgr = solarSystemDestinyMgr;
-        this.SessionManager        = sessionManager;
-        this.Database              = database;
-        this.Log                   = logger;
-        this.TargetMgr             = targetManager;
-        this.Broadcaster           = broadcaster;
+        Items                 = items;
+        DogmaItems            = dogmaItems;
+        NotificationSender    = notificationSender;
+        SolarSystemDestinyMgr = solarSystemDestinyMgr;
+        SessionManager        = sessionManager;
+        Database              = database;
+        Log                   = logger;
+        TargetMgr             = targetManager;
+        Broadcaster           = broadcaster;
         this.mSolarSystemID        = objectID;
         this.mOwnerID              = session.CharacterID;
 
@@ -265,8 +265,8 @@ public class beyonce : ClientBoundService
     {
         Log.Information("[beyonce] CreateBoundInstance: objectID={ObjectID}, char={CharID}", bindParams.ObjectID, call.Session.CharacterID);
         return new beyonce(BoundServiceManager, call.Session, bindParams.ObjectID,
-                           this.Items, this.DogmaItems, this.NotificationSender, this.SolarSystemDestinyMgr, this.SessionManager, this.Database, this.Log,
-                           this.TargetMgr, this.Broadcaster);
+                           Items, DogmaItems, NotificationSender, SolarSystemDestinyMgr, SessionManager, Database, Log,
+                           TargetMgr, Broadcaster);
     }
 
     // =====================================================================

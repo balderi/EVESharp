@@ -28,10 +28,10 @@ public class PyException : Exception
 
     public PyException (string type, string reason, PyDataType extra, PyDictionary keywords)
     {
-        this.Type     = type;
-        this.Reason   = reason;
-        this.Extra    = extra;
-        this.Keywords = keywords;
+        Type     = type;
+        Reason   = reason;
+        Extra    = extra;
+        Keywords = keywords;
     }
 
     public static implicit operator PyDataType (PyException ex)

@@ -16,8 +16,8 @@ public class Stations : Dictionary <int, Station>, IStations
 
     public Stations (IDatabase Database)
     {
-        this.Operations   = Database.StaLoadOperations ();
-        this.StationTypes = Database.StaLoadStationTypes ();
-        this.Services     = Database.StaLoadServices ();
+        Operations   = Database.StaLoadOperations ();
+        StationTypes = Database.StaLoadStationTypes ();
+        Services     = Database.StaLoadServices ();
     }
 }

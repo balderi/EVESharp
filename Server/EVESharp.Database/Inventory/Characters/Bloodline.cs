@@ -30,23 +30,23 @@ public class Bloodline
         string shortMaleDescription, string shortFemaleDescription
     )
     {
-        this.ID                     = bloodlineID;
-        this.CharacterType          = characterType;
-        this.Name                   = name;
-        this.RaceID                 = raceID;
-        this.Description            = description;
-        this.MaleDescription        = maleDescription;
-        this.FemaleDescription      = femaleDescription;
-        this.ShipType               = shipType;
-        this.CorporationID          = corporationID;
-        this.Perception             = perception;
-        this.Willpower              = willpower;
-        this.Charisma               = charisma;
-        this.Memory                 = memory;
-        this.Intelligence           = intelligence;
-        this.GraphicID              = graphicID;
-        this.ShortDescription       = shortDescription;
-        this.ShortMaleDescription   = shortMaleDescription;
-        this.ShortFemaleDescription = shortFemaleDescription;
+        ID                     = bloodlineID;
+        CharacterType          = characterType;
+        Name                   = name;
+        RaceID                 = raceID;
+        Description            = description;
+        MaleDescription        = maleDescription;
+        FemaleDescription      = femaleDescription;
+        ShipType               = shipType;
+        CorporationID          = corporationID;
+        Perception             = perception;
+        Willpower              = willpower;
+        Charisma               = charisma;
+        Memory                 = memory;
+        Intelligence           = intelligence;
+        GraphicID              = graphicID;
+        ShortDescription       = shortDescription;
+        ShortMaleDescription   = shortMaleDescription;
+        ShortFemaleDescription = shortFemaleDescription;
     }
 }

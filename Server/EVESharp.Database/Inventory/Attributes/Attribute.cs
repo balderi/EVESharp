@@ -56,10 +56,10 @@ public class Attribute
         set
         {
             // ensure the type is updated to the correct one
-            this.ValueType = ItemAttributeValueType.Integer;
+            ValueType = ItemAttributeValueType.Integer;
 
             this.mInteger = value;
-            this.Dirty    = true;
+            Dirty    = true;
         }
     }
 
@@ -69,26 +69,26 @@ public class Attribute
         set
         {
             // ensure the type is updated to the correct one
-            this.ValueType = ItemAttributeValueType.Double;
+            ValueType = ItemAttributeValueType.Double;
 
             this.mFloat = value;
-            this.Dirty  = true;
+            Dirty  = true;
         }
     }
 
     public Attribute (int id, double value, bool newEntity = false, List <Modifier> modifiers = null)
     {
-        this.ID         = id;
-        this.Float      = value;
-        this.New        = newEntity;
+        ID         = id;
+        Float      = value;
+        New        = newEntity;
         this.mModifiers = modifiers ?? new List <Modifier> ();
     }
 
     public Attribute (int id, long value, bool newEntity = false, List <Modifier> modifiers = null)
     {
-        this.ID         = id;
-        this.Integer    = value;
-        this.New        = newEntity;
+        ID         = id;
+        Integer    = value;
+        New        = newEntity;
         this.mModifiers = modifiers ?? new List <Modifier> ();
     }
 
@@ -114,14 +114,14 @@ public class Attribute
     
     protected bool Equals (Attribute other)
     {
-        if (this.ValueType == ItemAttributeValueType.Integer && other.ValueType == ItemAttributeValueType.Integer)
-            return this.Integer == other.Integer;
-        if (this.ValueType == ItemAttributeValueType.Double && other.ValueType == ItemAttributeValueType.Integer)
-            return Math.Abs (this.Float - other.Integer) < TOLERANCE;
-        if (this.ValueType == ItemAttributeValueType.Integer && other.ValueType == ItemAttributeValueType.Double)
-            return Math.Abs (other.Float - this.Integer) < TOLERANCE;
-        if (this.ValueType == ItemAttributeValueType.Double && other.ValueType == ItemAttributeValueType.Double)
-            return Math.Abs (this.Float - other.Float) < TOLERANCE;
+        if (ValueType == ItemAttributeValueType.Integer && other.ValueType == ItemAttributeValueType.Integer)
+            return Integer == other.Integer;
+        if (ValueType == ItemAttributeValueType.Double && other.ValueType == ItemAttributeValueType.Integer)
+            return Math.Abs (Float - other.Integer) < TOLERANCE;
+        if (ValueType == ItemAttributeValueType.Integer && other.ValueType == ItemAttributeValueType.Double)
+            return Math.Abs (other.Float - Integer) < TOLERANCE;
+        if (ValueType == ItemAttributeValueType.Double && other.ValueType == ItemAttributeValueType.Double)
+            return Math.Abs (Float - other.Float) < TOLERANCE;
 
         return false;
     }
@@ -224,12 +224,12 @@ public class Attribute
     /// <returns></returns>
     public Attribute Clone ()
     {
-        switch (this.ValueType)
+        switch (ValueType)
         {
             case ItemAttributeValueType.Double:
-                return new Attribute (this.ID, this.Float, true, this.mModifiers);
+                return new Attribute (ID, Float, true, this.mModifiers);
             case ItemAttributeValueType.Integer:
-                return new Attribute (this.ID, this.Integer, true, this.mModifiers);
+                return new Attribute (ID, Integer, true, this.mModifiers);
             default:
                 throw new InvalidDataException ();
         }
@@ -619,10 +619,10 @@ public class Attribute
 
     public override string ToString ()
     {
-        if (this.ValueType == ItemAttributeValueType.Double)
-            return this.Float.ToString (CultureInfo.InvariantCulture);
-        if (this.ValueType == ItemAttributeValueType.Integer)
-            return this.Integer.ToString ();
+        if (ValueType == ItemAttributeValueType.Double)
+            return Float.ToString (CultureInfo.InvariantCulture);
+        if (ValueType == ItemAttributeValueType.Integer)
+            return Integer.ToString ();
 
         // this should never happen tho
         return "Unknown";
@@ -630,6 +630,6 @@ public class Attribute
 
     public override int GetHashCode ()
     {
-        return this.ID;
+        return ID;
     }
 }

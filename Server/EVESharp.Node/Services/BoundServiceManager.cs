@@ -53,7 +53,7 @@ public class BoundServiceManager : IBoundServiceManager
         if (service.IsClientAllowedToCall (call.Session) == false)
             throw new UnauthorizedCallException <int> (boundID, method, call.Session.Role);
 
-        Log.Verbose ($"Calling {service.Name}::{method} on bound service {boundID}");
+        Log.Verbose ("Calling {ServiceName}::{Method} on bound service {Bound}", service.Name, method, boundID);
 
         return service.ExecuteCall (method, call);
     }
@@ -82,7 +82,7 @@ public class BoundServiceManager : IBoundServiceManager
     /// <param name="service">The service to unbind</param>
     public void UnbindService (BoundService service)
     {
-        Log.Debug ($"Unbinding service {service.BoundID}");
+        Log.Debug ("Unbinding service {ServiceBound}", service.BoundID);
 
         // remove the service from the bound list
         lock (BoundServices)

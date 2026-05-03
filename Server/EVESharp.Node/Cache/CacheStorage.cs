@@ -226,7 +226,7 @@ public class CacheStorage : DatabaseAccessor, ICacheStorage
     /// <param name="type">How the result will be stored inside the cache</param>
     public void Load (string name, string query, CacheObjectType type)
     {
-        Log.Debug ($"Loading cache data for {name} of type {type}");
+        Log.Debug ("Loading cache data for {Name} of type {CacheObjectType}", name, type);
 
         // if the cache already exists do not generate it again!
         if (this.Exists (name))
@@ -238,7 +238,7 @@ public class CacheStorage : DatabaseAccessor, ICacheStorage
         }
         catch (Exception)
         {
-            Log.Error ($"Cannot generate cache data for {name}");
+            Log.Error ("Cannot generate cache data for {Name}", name);
 
             throw;
         }
@@ -254,7 +254,7 @@ public class CacheStorage : DatabaseAccessor, ICacheStorage
     /// <param name="type">How the result will be stored inside the cache</param>
     public void Load (string service, string method, string query, CacheObjectType type)
     {
-        Log.Debug ($"Loading cache data for {service}::{method} of type {type}");
+        Log.Debug ("Loading cache data for {Service}::{Method} of type {CacheObjectType}", service, method, type);
 
         // if the cache already exists do not generate it again!
         if (this.Exists (service, method))
@@ -266,7 +266,7 @@ public class CacheStorage : DatabaseAccessor, ICacheStorage
         }
         catch (Exception)
         {
-            Log.Error ($"Cannot generate cache data for {service}::{method}");
+            Log.Error ("Cannot generate cache data for {Service}::{Method}", service, method);
 
             throw;
         }

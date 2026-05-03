@@ -120,7 +120,7 @@ public abstract class ClientBoundService : BoundService
     public override void DestroyService()
     {
         PyTuple disconnectData = new OnMachoObjectDisconnect(
-            this.BoundString,
+            BoundString,
             Session.UserID,
             BoundServiceInformation[1] as PyString
         );

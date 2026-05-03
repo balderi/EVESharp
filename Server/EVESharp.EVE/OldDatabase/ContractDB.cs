@@ -48,12 +48,12 @@ public class ContractDB : DatabaseAccessor
 
     public ContractDB (ITypes types, IDatabase db) : base (db)
     {
-        this.Types = types;
+        Types = types;
     }
 
     public int GetOutstandingContractsCountForPlayer (int characterID)
     {
-        DbDataReader reader = this.Database.Select (
+        DbDataReader reader = Database.Select (
             "SELECT COUNT(*) AS contractCount FROM conContracts WHERE issuerID = @characterID and forCorp = @forCorp AND status = @outstandingStatus AND dateExpired > @currentTime",
             new Dictionary <string, object>
             {
@@ -75,7 +75,7 @@ public class ContractDB : DatabaseAccessor
 
     public PyDataType NumRequiringAttention (int characterID, int corporationID)
     {
-        return this.Database.PrepareKeyVal (
+        return Database.PrepareKeyVal (
             "SELECT" +
             " (SELECT COUNT(*) FROM conContracts WHERE forCorp = @notForCorp AND ((issuerID = @characterID AND dateExpired < @currentTime) OR (acceptorID = @characterID AND dateCompleted <= @currentTime))) AS n," +
             " (SELECT COUNT(*) FROM conContracts WHERE forCorp = @forCorp AND ((issuerCorpID = @corporationID AND dateExpired < @currentTime) OR (acceptorID = @corporationID AND dateCompleted <= @currentTime))) AS ncorp",
@@ -92,7 +92,7 @@ public class ContractDB : DatabaseAccessor
 
     public PyDataType NumOutstandingContracts (int characterID, int corporationID)
     {
-        return this.Database.PrepareKeyVal (
+        return Database.PrepareKeyVal (
             "SELECT" +
             " (SELECT COUNT(*) FROM conContracts WHERE issuerID = @corporationID AND forCorp = @forCorp AND status = @outstandingStatus AND dateExpired > @currentTime) AS myCorpTotal," +
             " (SELECT COUNT(*) FROM conContracts WHERE issuerID = @characterID AND forCorp = @notForCorp AND status = @outstandingStatus AND dateExpired > @currentTime) AS myCharTotal," +
@@ -113,7 +113,7 @@ public class ContractDB : DatabaseAccessor
     public PyDataType CollectMyPageInfo (int characterID, int corporationID)
     {
         // TODO: PROPERLY IMPLEMENT THIS
-        return this.Database.PrepareKeyVal (
+        return Database.PrepareKeyVal (
             "SELECT" +
             " (SELECT COUNT(*) FROM conContracts WHERE status = @outstandingStatus AND issuerID = @characterID AND forCorp = @notForCorp AND dateExpired > @currentTime) AS numOutstandingContractsNonCorp," +
             " (SELECT COUNT(*) FROM conContracts WHERE status = @outstandingStatus AND issuerCorpID = @corporationID AND forCorp = @forCorp AND dateExpired > @currentTime) AS numOutstandingContractsForCorp," +
@@ -141,7 +141,7 @@ public class ContractDB : DatabaseAccessor
 
     public Rowset GetItemsInStationForPlayer (int characterID, int stationID)
     {
-        return this.Database.PrepareRowset (
+        return Database.PrepareRowset (
             "SELECT itemID, typeID, categoryID, groupID, singleton, quantity, flag, contraband FROM invItems LEFT JOIN invTypes USING (typeID) LEFT JOIN invGroups USING (groupID) WHERE ownerID = @characterID AND locationID = @stationID AND flag = @flagHangar",
             new Dictionary <string, object>
             {
@@ -159,7 +159,7 @@ public class ContractDB : DatabaseAccessor
         double        reward,     double collateral,  string title,         string description,    int           issuerWalletID
     )
     {
-        return this.Database.Insert (
+        return Database.Insert (
             "INSERT INTO conContracts(issuerID, issuerCorpID, type, availability, assigneeID, expiretime, numDays, startStationID, endStationID, price, reward, collateral, title, description, forCorp, status, isAccepted, acceptorID, dateIssued, dateExpired, dateAccepted, dateCompleted, issuerWalletKey, issuerAllianceID, acceptorWalletKey)VALUES(@issuerID, @issuerCorpID, @type, @availability, @assigneeID, @expiretime, @numDays, @startStationID, @endStationID, @price, @reward, @collateral, @title, @description, @forCorp, @status, @isAccepted, @acceptorID, @dateIssued, @dateExpired, @dateAccepted, @dateCompleted, @issuerWalletKey, @issuerAllianceID, @acceptorWalletKey)",
             new Dictionary <string, object>
             {
@@ -194,7 +194,7 @@ public class ContractDB : DatabaseAccessor
 
     public PyPackedRow GetContractInformation (int contractID, int characterID, int corporationID)
     {
-        return this.Database.PreparePackedRow (
+        return Database.PreparePackedRow (
             "SELECT contractID, issuerID, issuerCorpID, type, availability, assigneeID, expiretime, numDays, startStationID, start.solarSystemID AS startSolarSystemID, start.regionID AS startRegionID, endStationID, end.solarSystemID AS endSolarSystemID, end.regionID AS endRegionID, price, reward, collateral, title, description, forCorp, status, isAccepted, acceptorID, dateIssued, dateExpired, dateAccepted, dateCompleted, volume, crateID, issuerWalletKey, issuerAllianceID, acceptorWalletKey FROM conContracts LEFT JOIN staStations AS start ON start.stationID = startStationID LEFT JOIN staStations AS end ON end.stationID = endStationID WHERE ((availability = 1 AND (issuerID = @characterID OR issuerCorpID = @corporationID OR assigneeID = @characterID OR assigneeID = @corporationID OR acceptorID = @characterID OR acceptorID = @corporationID)) OR availability = 0) AND contractID = @contractID",
             new Dictionary <string, object>
             {
@@ -207,7 +207,7 @@ public class ContractDB : DatabaseAccessor
 
     public Rowset GetContractBids (int contractID, int characterID, int corporationID)
     {
-        return this.Database.PrepareRowset (
+        return Database.PrepareRowset (
             "SELECT bidID, bidderID, amount FROM conBids WHERE contractID = @contractID ORDER BY amount DESC",
             new Dictionary <string, object>
             {
@@ -220,7 +220,7 @@ public class ContractDB : DatabaseAccessor
 
     public Rowset GetContractItems (int contractID, int characterID, int corporationID)
     {
-        return this.Database.PrepareRowset (
+        return Database.PrepareRowset (
             "SELECT itemTypeID AS typeID, quantity, inCrate, itemID, materialLevel, productivityLevel, licensedProductionRunsRemaining AS bpRuns FROM conItems LEFT JOIN invBlueprints USING(itemID) WHERE contractID = @contractID",
             new Dictionary <string, object>
             {
@@ -233,7 +233,7 @@ public class ContractDB : DatabaseAccessor
 
     public PyList <PyPackedRow> GetItemsInContainer (int characterID, int containerID)
     {
-        return this.Database.PreparePackedRowList (
+        return Database.PreparePackedRowList (
             "SELECT itemID, typeID, quantity FROM invItems WHERE locationID = @containerID",
             new Dictionary <string, object> {{"@containerID", containerID}}
         );
@@ -359,7 +359,7 @@ public class ContractDB : DatabaseAccessor
         if (limit > 0)
             contractQuery += $" LIMIT {limit}";
 
-        using (DbDataReader reader = this.Database.Select (contractQuery, values))
+        using (DbDataReader reader = Database.Select (contractQuery, values))
         {
             List <int> result = new List <int> ();
 
@@ -376,7 +376,7 @@ public class ContractDB : DatabaseAccessor
 
     public List <int> GetContractListByOwnerBids (int ownerID)
     {
-        DbDataReader reader = this.Database.Select (
+        DbDataReader reader = Database.Select (
             "SELECT contractID FROM conBids WHERE bidderID = @ownerID",
             new Dictionary <string, object> {{"@ownerID", ownerID}}
         );
@@ -398,7 +398,7 @@ public class ContractDB : DatabaseAccessor
 
     public List <int> GetContractListByAcceptor (int acceptorID)
     {
-        DbDataReader reader = this.Database.Select (
+        DbDataReader reader = Database.Select (
             "SELECT contractID FROM conContracts WHERE acceptorID = @acceptorID AND status = @status",
             new Dictionary <string, object>
             {
@@ -424,14 +424,14 @@ public class ContractDB : DatabaseAccessor
 
     public PyDataType GetInformationForContractList (List <int> contractList)
     {
-        return this.Database.PrepareCRowset (
+        return Database.PrepareCRowset (
             $"SELECT contractID, issuerID, issuerCorpID, type, availability, assigneeID, expiretime, numDays, startStationID, start.solarSystemID AS startSolarSystemID, start.regionID AS startRegionID, endStationID, end.solarSystemID AS endSolarSystemID, end.regionID AS endRegionID, price, reward, collateral, title, description, forCorp, status, isAccepted, acceptorID, dateIssued, dateExpired, dateAccepted, dateCompleted, volume, crateID, issuerWalletKey, issuerAllianceID, acceptorWalletKey FROM conContracts LEFT JOIN staStations AS start ON start.stationID = startStationID LEFT JOIN staStations AS end ON end.stationID = endStationID WHERE contractID IN ({string.Join (',', contractList)})"
         );
     }
 
     public PyDataType GetBidsForContractList (List <int> contractList)
     {
-        return this.Database.PrepareIntPackedRowListDictionary (
+        return Database.PrepareIntPackedRowListDictionary (
             $"SELECT contractID, amount, bidderID FROM conBids WHERE contractID IN ({string.Join (',', contractList)}) ORDER BY contractID, amount DESC",
             0
         );
@@ -439,7 +439,7 @@ public class ContractDB : DatabaseAccessor
 
     public PyDataType GetItemsForContractList (List <int> contractList)
     {
-        return this.Database.PrepareIntPackedRowListDictionary (
+        return Database.PrepareIntPackedRowListDictionary (
             $"SELECT contractID, itemTypeID AS typeID, quantity, inCrate, materialLevel, productivityLevel, licensedProductionRunsRemaining AS bpRuns FROM conItems LEFT JOIN invBlueprints USING(itemID) WHERE contractID IN ({string.Join (',', contractList)}) ORDER BY contractID",
             0
         );
@@ -447,7 +447,7 @@ public class ContractDB : DatabaseAccessor
 
     public List <int> FetchLoginCharacterContractBids (int bidderID)
     {
-        DbDataReader reader = this.Database.Select (
+        DbDataReader reader = Database.Select (
             "SELECT contractID, MAX(amount), (SELECT MAX(amount) FROM conBids b WHERE b.contractID = contractID) AS maximum FROM conBids LEFT JOIN conContracts USING(contractID) WHERE bidderID = @bidderID AND status = @outstandingStatus AND dateExpired < @currentTime GROUP BY contractID",
             new Dictionary <string, object>
             {
@@ -471,7 +471,7 @@ public class ContractDB : DatabaseAccessor
 
     public List <int> FetchLoginCharacterContractAssigned (int assigneeID)
     {
-        DbDataReader reader = this.Database.Select (
+        DbDataReader reader = Database.Select (
             "SELECT contractID FROM conContracts WHERE assigneeID = @assigneeID AND status = @outstandingStatus AND dateExpired < @currentTime",
             new Dictionary <string, object>
             {

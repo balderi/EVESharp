@@ -77,7 +77,7 @@ public class ProxyInstance
         this.mGeneralMock.SetupGet (x => x.MachoNet).Returns (this.mMachoNetMock.Object);
         this.mGeneralMock.SetupGet (x => x.Cluster).Returns (this.mClusterMock.Object);
 
-        this.LoginProcessor = new SynchronousProcessor <LoginQueueEntry> (
+        LoginProcessor = new SynchronousProcessor <LoginQueueEntry> (
             new LoginQueue (this.mDatabase.Object, this.mAuthenticationMock.Object, Logger.None)
         );
         // setup timer mock
@@ -92,16 +92,16 @@ public class ProxyInstance
             .Returns (() => null)
             .Verifiable ();
         // transport manager
-        this.TransportManager = new TransportManager (this.mHttpMessageHandler.ToHttpClient(), Logger.None);
-        this.MachoNet = new MachoNet  (
-            this.TransportManager, this.LoginProcessor, this.mGeneralMock.Object, Logger.None, this.mDatabase.Object
+        TransportManager = new TransportManager (this.mHttpMessageHandler.ToHttpClient(), Logger.None);
+        MachoNet = new MachoNet  (
+            TransportManager, LoginProcessor, this.mGeneralMock.Object, Logger.None, this.mDatabase.Object
         );
         // session manager
-        this.SessionManager = new SessionManager (this.TransportManager, this.MachoNet);
+        SessionManager = new SessionManager (TransportManager, MachoNet);
         // message processor
         this.mMessageProcessor = new SynchronousProcessor <MachoMessage> (
             new MessageQueue (
-                this.MachoNet,
+                MachoNet,
                 Logger.None,
                 this.mNotificationSender.Object,
                 this.mItems.Object,
@@ -109,14 +109,14 @@ public class ProxyInstance
                 null,
                 null,
                 Mock.Of <IRemoteServiceManager> (),
-                new PacketCallHelper (this.MachoNet),
-                this.SessionManager
+                new PacketCallHelper (MachoNet),
+                SessionManager
             )
         );
         // cluster manager
-        this.ClusterManager = new ClusterManager (
-            this.MachoNet,
-            this.TransportManager,
+        ClusterManager = new ClusterManager (
+            MachoNet,
+            TransportManager,
             this.mHttpMessageHandler.ToHttpClient (),
             this.mTimers.Object,
             Logger.None
@@ -125,11 +125,11 @@ public class ProxyInstance
 
     public void Initialize ()
     {
-        this.MachoNet.Initialize ();
-        this.MachoNet.MessageProcessor = this.mMessageProcessor;
+        MachoNet.Initialize ();
+        MachoNet.MessageProcessor = this.mMessageProcessor;
         
         // register the node in the cluster
-        this.ClusterManager.RegisterNode ().Wait ();
+        ClusterManager.RegisterNode ().Wait ();
     }
 
     /// <summary>

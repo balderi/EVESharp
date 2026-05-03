@@ -10,18 +10,18 @@ public class Faction : ItemEntity
 {
     public Database.Inventory.Types.Information.Faction FactionInformation { get; init; }
 
-    public string Description          => this.FactionInformation.Description;
-    public int    RaceIDs              => this.FactionInformation.RaceIDs;
-    public int    SolarSystemId        => this.FactionInformation.SolarSystemID;
-    public int    CorporationId        => this.FactionInformation.CorporationID;
-    public double SizeFactor           => this.FactionInformation.SizeFactor;
-    public int    StationCount         => this.FactionInformation.StationCount;
-    public int    StationSystemCount   => this.FactionInformation.StationSystemCount;
-    public int    MilitiaCorporationId => this.FactionInformation.MilitiaCorporationID;
+    public string Description          => FactionInformation.Description;
+    public int    RaceIDs              => FactionInformation.RaceIDs;
+    public int    SolarSystemId        => FactionInformation.SolarSystemID;
+    public int    CorporationId        => FactionInformation.CorporationID;
+    public double SizeFactor           => FactionInformation.SizeFactor;
+    public int    StationCount         => FactionInformation.StationCount;
+    public int    StationSystemCount   => FactionInformation.StationSystemCount;
+    public int    MilitiaCorporationId => FactionInformation.MilitiaCorporationID;
 
     public Faction (Database.Inventory.Types.Information.Faction info) : base (info.Information)
     {
-        this.FactionInformation = info;
+        FactionInformation = info;
     }
 
     public override void Destroy ()
@@ -34,12 +34,12 @@ public class Faction : ItemEntity
         return KeyVal.FromDictionary (
             new PyDictionary
             {
-                ["factionID"]     = this.ID,
-                ["factionName"]   = this.Name,
-                ["description"]   = this.Description,
-                ["solarSystemID"] = this.SolarSystemId,
-                ["corporationID"] = this.CorporationId,
-                ["militiaID"]     = this.MilitiaCorporationId
+                ["factionID"]     = ID,
+                ["factionName"]   = Name,
+                ["description"]   = Description,
+                ["solarSystemID"] = SolarSystemId,
+                ["corporationID"] = CorporationId,
+                ["militiaID"]     = MilitiaCorporationId
             }
         );
     }

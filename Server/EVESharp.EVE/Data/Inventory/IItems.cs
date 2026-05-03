@@ -122,7 +122,7 @@ public interface IItems
     /// <param name="stationID">The stationID to get</param>
     /// <returns>The item</returns>
     /// <exception cref="ArgumentOutOfRangeException">If the id is not a station</exception>
-    Items.Types.Station GetStaticStation (int stationID);
+    Station GetStaticStation (int stationID);
 
     /// <summary>
     /// Gets the <see cref="ItemEntity"/> of the given solar system

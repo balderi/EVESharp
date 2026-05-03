@@ -14,18 +14,18 @@ public class OnOfficeRentalChanged : ClientNotification
 
     public OnOfficeRentalChanged (int corporationID, int? officeID, int? folderID) : base (NOTIFICATION_NAME)
     {
-        this.CorporationID = corporationID;
-        this.OfficeID      = officeID;
-        this.FolderID      = folderID;
+        CorporationID = corporationID;
+        OfficeID      = officeID;
+        FolderID      = folderID;
     }
 
     public override List <PyDataType> GetElements ()
     {
         return new List <PyDataType>
         {
-            this.CorporationID,
-            this.OfficeID,
-            this.FolderID
+            CorporationID,
+            OfficeID,
+            FolderID
         };
     }
 }

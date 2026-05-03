@@ -57,13 +57,13 @@ public class MachoNet : IMachoNet
         Log.Debug ("Starting MachoNet in proxy mode");
         
         // start the login queue processing
-        this.LoginProcessor.Start ();
+        LoginProcessor.Start ();
         
         // setup events for transport manager
-        this.TransportManager.TransportRemoved += this.OnTransportTerminated;
+        TransportManager.TransportRemoved += this.OnTransportTerminated;
 
         // start the server socket
-        this.TransportManager.OpenServerTransport (this, Configuration.MachoNet).Listen ();
+        TransportManager.OpenServerTransport (this, Configuration.MachoNet).Listen ();
         // nothing else to do for now
     }
 
@@ -110,7 +110,7 @@ public class MachoNet : IMachoNet
     public void QueueInputPacket (IMachoTransport origin, PyPacket packet)
     {
         // add the packet to the processor
-        this.MessageProcessor?.Queue.Enqueue (
+        MessageProcessor?.Queue.Enqueue (
             new MachoMessage
             {
                 Packet    = packet,

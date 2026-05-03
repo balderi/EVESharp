@@ -67,7 +67,7 @@ public class objectCaching : Service
     public PyDataType GetCachableObject (ServiceCall call, PyInteger shared, PyString objectID, PyTuple objectVersion, PyInteger nodeID)
     {
         // TODO: CHECK CACHEOK EXCEPTION ON CLIENT
-        Log.Debug ($"Received cache request for {objectID.Value}");
+        Log.Debug ("Received cache request for {ObjectValue}", objectID.Value);
 
         return CacheStorage.Get (objectID);
     }

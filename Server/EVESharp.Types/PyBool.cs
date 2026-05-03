@@ -6,19 +6,19 @@ public class PyBool : PyDataType
 
     public PyBool (bool value)
     {
-        this.Value = value;
+        Value = value;
     }
 
     private bool Equals (PyBool other)
     {
         if (ReferenceEquals (null, other)) return false;
 
-        return this.Value == other.Value;
+        return Value == other.Value;
     }
 
     public override int GetHashCode ()
     {
-        return this.Value.GetHashCode ();
+        return Value.GetHashCode ();
     }
 
     public static bool operator == (PyBool left, PyBool right)

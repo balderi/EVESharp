@@ -13,11 +13,11 @@ public class OnGodmaMultipleSkillsTrained : ClientNotification
 
     public OnGodmaMultipleSkillsTrained (PyList <PyInteger> skillTypeIDs) : base (NOTIFICATION_NAME)
     {
-        this.SkillTypeIDs = skillTypeIDs;
+        SkillTypeIDs = skillTypeIDs;
     }
 
     public override List <PyDataType> GetElements ()
     {
-        return new List <PyDataType> {this.SkillTypeIDs};
+        return new List <PyDataType> {SkillTypeIDs};
     }
 }

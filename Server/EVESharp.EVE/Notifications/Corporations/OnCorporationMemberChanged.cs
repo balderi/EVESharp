@@ -15,22 +15,22 @@ public class OnCorporationMemberChanged : ClientNotification
 
     public OnCorporationMemberChanged (int memberID, int oldCorporationID, int newCorporationID) : base (NOTIFICATION_NAME)
     {
-        this.MemberID         = memberID;
-        this.OldCorporationID = oldCorporationID;
-        this.NewCorporationID = newCorporationID;
+        MemberID         = memberID;
+        OldCorporationID = oldCorporationID;
+        NewCorporationID = newCorporationID;
     }
 
     public override List <PyDataType> GetElements ()
     {
         return new List <PyDataType>
         {
-            this.MemberID,
+            MemberID,
             new PyDictionary
             {
                 ["corporationID"] = new PyTuple (2)
                 {
-                    [0] = this.OldCorporationID,
-                    [1] = this.NewCorporationID
+                    [0] = OldCorporationID,
+                    [1] = NewCorporationID
                 }
             }
         };

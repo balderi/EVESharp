@@ -68,13 +68,13 @@ public class TransportManager : ITransportManager
 
     public virtual MachoServerTransport OpenServerTransport (IMachoNet machoNet, MachoNet configuration)
     {
-        return this.ServerTransport = new MachoServerTransport (configuration.Port, machoNet, Log.ForContext <MachoServerTransport> ());
+        return ServerTransport = new MachoServerTransport (configuration.Port, machoNet, Log.ForContext <MachoServerTransport> ());
     }
 
     public virtual IMachoTransport NewTransport (IMachoNet machoNet, IEVESocket socket)
     {
         MachoUnauthenticatedTransport transport = new MachoUnauthenticatedTransport (
-            machoNet, this.HttpClient, socket, Log.ForContext <MachoUnauthenticatedTransport> (socket.RemoteAddress)
+            machoNet, HttpClient, socket, Log.ForContext <MachoUnauthenticatedTransport> (socket.RemoteAddress)
         );
 
         this.PrepareTransport (transport);
@@ -154,7 +154,7 @@ public class TransportManager : ITransportManager
 
     public void ResolveNodeTransport (MachoUnauthenticatedTransport transport)
     {
-        Log.Information ($"Connection from server with nodeID {transport.Session.NodeID}");
+        Log.Information ("Connection from server with nodeID {SessionNode}", transport.Session.NodeID);
 
         MachoNodeTransport original = null;
         MachoNodeTransport newTransport;
@@ -194,7 +194,7 @@ public class TransportManager : ITransportManager
 
     public void ResolveProxyTransport (MachoUnauthenticatedTransport transport)
     {
-        Log.Information ($"Connection from proxy with nodeID {transport.Session.NodeID}");
+        Log.Information ("Connection from proxy with nodeID {SessionNode}", transport.Session.NodeID);
 
         MachoProxyTransport original = null;
         MachoProxyTransport newTransport;

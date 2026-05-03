@@ -12,17 +12,17 @@ using Service = EVESharp.EVE.Network.Services.Service;
 
 namespace EVESharp.Node.Services.Navigation;
 
-public class map : EVE.Network.Services.Service
+public class map : Service
 {
     public override AccessLevel AccessLevel => AccessLevel.None;
 
     private IItems        Items          { get; }
-    private IStations     StationManager => this.Items.Stations;
+    private IStations     StationManager => Items.Stations;
     private ICacheStorage CacheStorage   { get; }
 
     public map (IItems items, ICacheStorage cacheStorage)
     {
-        this.Items   = items;
+        Items   = items;
         CacheStorage = cacheStorage;
     }
 
@@ -55,7 +55,7 @@ public class map : EVE.Network.Services.Service
             }
         );
 
-        foreach ((int _, Station station) in this.Items.Stations)
+        foreach ((int _, Station station) in Items.Stations)
             stations.Rows.Add (
                 new PyList (5)
                 {

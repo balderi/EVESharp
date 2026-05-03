@@ -3,23 +3,23 @@ namespace EVESharp.Types;
 public class PyToken : PyDataType
 {
     public string Token  { get; }
-    public int    Length => this.Token.Length;
+    public int    Length => Token.Length;
 
     public PyToken (string token)
     {
-        this.Token = token;
+        Token = token;
     }
 
     private bool Equals (PyToken other)
     {
         if (ReferenceEquals (null, other)) return false;
 
-        return this.Token.Equals (other.Token);
+        return Token.Equals (other.Token);
     }
 
     public override int GetHashCode ()
     {
-        return this.Token is not null ? this.Token.GetHashCode () : PyNone.HASH_VALUE;
+        return Token is not null ? Token.GetHashCode () : PyNone.HASH_VALUE;
     }
 
     public static implicit operator PyToken (string value)

@@ -15,16 +15,16 @@ public class OnCfgDataChanged : ClientNotification
 
     private OnCfgDataChanged (string what, PyDataType data) : base (NOTIFICATION_NAME)
     {
-        this.What = what;
-        this.Data = data;
+        What = what;
+        Data = data;
     }
 
     public override List <PyDataType> GetElements ()
     {
         return new List <PyDataType>
         {
-            this.What,
-            this.Data
+            What,
+            Data
         };
     }
 

@@ -54,10 +54,10 @@ public class MachoNet : IMachoNet
         Log.Debug ("Starting MachoNet in node mode");
         
         // start the login queue processing
-        this.LoginProcessor.Start ();
+        LoginProcessor.Start ();
 
         // start the server socket
-        this.TransportManager.OpenServerTransport (this, Configuration.MachoNet).Listen ();
+        TransportManager.OpenServerTransport (this, Configuration.MachoNet).Listen ();
         // add some callbacks
         // this.TransportManager.ServerTransport.
     }
@@ -99,7 +99,7 @@ public class MachoNet : IMachoNet
     public void QueueInputPacket (IMachoTransport origin, PyPacket packet)
     {
         // add the packet to the processor
-        this.MessageProcessor?.Queue.Enqueue (
+        MessageProcessor?.Queue.Enqueue (
             new MachoMessage
             {
                 Packet    = packet,

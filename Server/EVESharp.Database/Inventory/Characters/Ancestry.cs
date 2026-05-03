@@ -19,16 +19,16 @@ public class Ancestry
         int willpower,  int    charisma, int       memory,    int    intelligence, int graphicId, string shortDescription
     )
     {
-        this.ID               = ancestryId;
-        this.Name             = name;
-        this.Bloodline        = bloodline;
-        this.Description      = description;
-        this.Perception       = perception;
-        this.Willpower        = willpower;
-        this.Charisma         = charisma;
-        this.Memory           = memory;
-        this.Intelligence     = intelligence;
-        this.GraphicID        = graphicId;
-        this.ShortDescription = shortDescription;
+        ID               = ancestryId;
+        Name             = name;
+        Bloodline        = bloodline;
+        Description      = description;
+        Perception       = perception;
+        Willpower        = willpower;
+        Charisma         = charisma;
+        Memory           = memory;
+        Intelligence     = intelligence;
+        GraphicID        = graphicId;
+        ShortDescription = shortDescription;
     }
 }

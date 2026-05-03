@@ -23,13 +23,13 @@ public class PyAddressNode : PyAddress
 
     public PyAddressNode (PyInteger nodeID) : base (TYPE_NODE)
     {
-        this.NodeID = nodeID;
+        NodeID = nodeID;
     }
 
     public PyAddressNode (PyInteger nodeID, PyInteger callID = null, PyString service = null) : this (nodeID)
     {
-        this.CallID  = callID;
-        this.Service = service;
+        CallID  = callID;
+        Service = service;
     }
 
     public static implicit operator PyDataType (PyAddressNode value)

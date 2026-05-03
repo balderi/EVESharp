@@ -32,18 +32,18 @@ public class DbLock : IDisposable
 
         this.mDisposed = true;
         
-        if (this.Connection is null)
+        if (Connection is null)
             return;
 
-        if (this.Connection.State == ConnectionState.Closed)
+        if (Connection.State == ConnectionState.Closed)
         {
-            this.Connection.Dispose ();
+            Connection.Dispose ();
             return;
         }
 
         // release the lock
-        this.Creator.ReleaseLock (this);
+        Creator.ReleaseLock (this);
         // dispose of the connection
-        this.Connection.Dispose ();
+        Connection.Dispose ();
     }
 }

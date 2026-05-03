@@ -63,7 +63,7 @@ public static class DogmaDB
         {
             if (expressionList.ContainsKey ((int) expressionToLoad.FirstArgument) == false)
             {
-                Log.Warning ($"Referenced expression {expressionToLoad.FirstArgument} cannot be found in the list... Ignoring");
+                Log.Warning ("Referenced expression {FirstArgument} cannot be found in the list... Ignoring", expressionToLoad.FirstArgument);
                 expressionToLoad.FirstArgument = null;
             }
             else
@@ -76,7 +76,7 @@ public static class DogmaDB
         {
             if (expressionList.ContainsKey ((int) expressionToLoad.SecondArgument) == false)
             {
-                Log.Warning ($"Referenced expression {expressionToLoad.SecondArgument} cannot be found in the list... Ignoring");
+                Log.Warning ("Referenced expression {SecondArgument} cannot be found in the list... Ignoring", expressionToLoad.SecondArgument);
                 expressionToLoad.SecondArgument = null;
             }
             else

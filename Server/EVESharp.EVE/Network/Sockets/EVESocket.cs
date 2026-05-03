@@ -18,24 +18,24 @@ public class EVESocket : IEVESocket
     public event Action <PyDataType> DataReceived;
     public event Action              ConnectionLost;
     public event Action <Exception>  Exception;
-    public virtual string            RemoteAddress => (this.Socket.RemoteEndPoint as IPEndPoint)?.Address.ToString ();
+    public virtual string            RemoteAddress => (Socket.RemoteEndPoint as IPEndPoint)?.Address.ToString ();
 
     public EVESocket ()
     {
-        this.Socket = new Socket (AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.Tcp);
+        Socket = new Socket (AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.Tcp);
         // ensure support for both ipv4 and ipv4
-        this.Socket.SetSocketOption (SocketOptionLevel.IPv6, SocketOptionName.IPv6Only, false);
+        Socket.SetSocketOption (SocketOptionLevel.IPv6, SocketOptionName.IPv6Only, false);
         // setup transfer buffers
-        this.Socket.ReceiveBufferSize = 64 * 1024;
-        this.Socket.SendBufferSize    = 64 * 1024;
+        Socket.ReceiveBufferSize = 64 * 1024;
+        Socket.SendBufferSize    = 64 * 1024;
     }
     
     public EVESocket (Socket socket)
     {
-        this.Socket = socket;
+        Socket = socket;
         // setup transfer buffers
-        this.Socket.ReceiveBufferSize = 64 * 1024;
-        this.Socket.SendBufferSize    = 64 * 1024;
+        Socket.ReceiveBufferSize = 64 * 1024;
+        Socket.SendBufferSize    = 64 * 1024;
         // setup receive callbacks
         this.SetupReceiveCallback ();
     }
@@ -58,14 +58,14 @@ public class EVESocket : IEVESocket
         }
         
         // connect to the server
-        this.Socket.Connect (new IPEndPoint (ip, port));
+        Socket.Connect (new IPEndPoint (ip, port));
         // setup receive callbacks
         this.SetupReceiveCallback ();
     }
 
     private void SetupReceiveCallback ()
     {
-        this.Socket.BeginReceive (this.ReceiveState.Buffer, 0, this.ReceiveState.Buffer.Length, SocketFlags.None, this.ReceiveCallback, this.ReceiveState);
+        Socket.BeginReceive (ReceiveState.Buffer, 0, ReceiveState.Buffer.Length, SocketFlags.None, this.ReceiveCallback, ReceiveState);
     }
 
     private void ProcessInputData ()
@@ -74,11 +74,11 @@ public class EVESocket : IEVESocket
         if (this.DataReceived is null)
             return;
         
-        while (this.Packetizer.PacketCount > 0)
+        while (Packetizer.PacketCount > 0)
         {
             try
             {
-                PyDataType packet = Unmarshal.ReadFromByteArray (this.Packetizer.PopItem ());
+                PyDataType packet = Unmarshal.ReadFromByteArray (Packetizer.PopItem ());
 
                 this.OnDataReceived (packet);
             }
@@ -101,7 +101,7 @@ public class EVESocket : IEVESocket
         {
             ReceiveCallbackState state = ar.AsyncState as ReceiveCallbackState;
 
-            state.Received = this.Socket.EndReceive (ar);
+            state.Received = Socket.EndReceive (ar);
             
             // receiving 0 bytes means the socket was closed on the other end
             if (state.Received == 0)
@@ -111,8 +111,8 @@ public class EVESocket : IEVESocket
             }
 
             // process the input data
-            this.Packetizer.QueuePackets (state.Buffer, state.Received);
-            this.Packetizer.ProcessPackets ();
+            Packetizer.QueuePackets (state.Buffer, state.Received);
+            Packetizer.ProcessPackets ();
             // notify of any pending packets
             this.ProcessInputData ();
         }
@@ -121,7 +121,7 @@ public class EVESocket : IEVESocket
             this.HandleException (e);
         }
         
-        if (this.Socket.Connected == true)
+        if (Socket.Connected == true)
             // start receiving again
             this.SetupReceiveCallback ();
     }
@@ -130,7 +130,7 @@ public class EVESocket : IEVESocket
     {
         try
         {
-            this.Socket.EndSend (ar);
+            Socket.EndSend (ar);
         }
         catch (Exception e)
         {
@@ -182,7 +182,7 @@ public class EVESocket : IEVESocket
     public virtual void Send (PyDataType data)
     {
         // do not send if the socket is already closed or disposed
-        if (this.IsClosed || this.IsDisposed)
+        if (IsClosed || IsDisposed)
             return;
 
         // convert the data to bytes
@@ -199,19 +199,19 @@ public class EVESocket : IEVESocket
         Buffer.BlockCopy (encodedPacket,                                0, packetBuffer, sizeof (int), encodedPacket.Length);
 
         // finally start actually sending the data
-        this.Socket.BeginSend (packetBuffer, 0, packetBuffer.Length, SocketFlags.None, this.SendCallback, this);
+        Socket.BeginSend (packetBuffer, 0, packetBuffer.Length, SocketFlags.None, this.SendCallback, this);
     }
 
     public void Close ()
     {
-        if (this.IsClosed == true)
+        if (IsClosed == true)
             return;
 
-        this.IsClosed = true;
+        IsClosed = true;
 
-        this.Socket.Shutdown (SocketShutdown.Both);
-        this.Socket.Disconnect (false);
-        this.Socket.Close ();
+        Socket.Shutdown (SocketShutdown.Both);
+        Socket.Disconnect (false);
+        Socket.Close ();
 
         // fire connection lost so transports/sessions can clean up
         this.ConnectionLost?.Invoke ();
@@ -224,10 +224,10 @@ public class EVESocket : IEVESocket
     
     public void Dispose ()
     {
-        if (this.IsDisposed == true)
+        if (IsDisposed == true)
             return;
 
-        this.IsDisposed = true;
-        this.Socket.Dispose ();
+        IsDisposed = true;
+        Socket.Dispose ();
     }
 }

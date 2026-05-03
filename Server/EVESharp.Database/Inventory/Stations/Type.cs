@@ -21,17 +21,17 @@ public class Type
         int?   officeSlots,      double? reprocessingEfficiency, bool   conquerable
     )
     {
-        this.ID                     = id;
-        this.HangarGraphicID        = hangarGraphicId;
-        this.DockEntryX             = dockEntryX;
-        this.DockEntryY             = dockEntryY;
-        this.DockEntryZ             = dockEntryZ;
-        this.DockOrientationX       = dockOrientationX;
-        this.DockOrientationY       = dockOrientationY;
-        this.DockOrientationZ       = dockOrientationZ;
-        this.OperationID            = operationId;
-        this.OfficeSlots            = officeSlots;
-        this.ReprocessingEfficienty = reprocessingEfficiency;
-        this.Conquerable            = conquerable;
+        ID                     = id;
+        HangarGraphicID        = hangarGraphicId;
+        DockEntryX             = dockEntryX;
+        DockEntryY             = dockEntryY;
+        DockEntryZ             = dockEntryZ;
+        DockOrientationX       = dockOrientationX;
+        DockOrientationY       = dockOrientationY;
+        DockOrientationZ       = dockOrientationZ;
+        OperationID            = operationId;
+        OfficeSlots            = officeSlots;
+        ReprocessingEfficienty = reprocessingEfficiency;
+        Conquerable            = conquerable;
     }
 }

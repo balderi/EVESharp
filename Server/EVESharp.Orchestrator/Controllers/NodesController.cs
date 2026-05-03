@@ -23,18 +23,18 @@ public class NodesController : ControllerBase
         IConfiguration       configuration,
         IClusterRepository   clusterRepository)
     {
-        this.DB                  = db;
-        this.Logger              = logger;
-        this.Configuration       = configuration;
-        this.StartupInfoProvider = startupInfoProvider;
-        this.ClusterRepository   = clusterRepository;
+        DB                  = db;
+        Logger              = logger;
+        Configuration       = configuration;
+        StartupInfoProvider = startupInfoProvider;
+        ClusterRepository   = clusterRepository;
     }
 
     [HttpGet (Name = "GetNodeList")]
     [Produces ("application/json")]
     public ActionResult <IEnumerable <Node>> GetNodeList ()
     {
-        return this.ClusterRepository.FindNodes ();
+        return ClusterRepository.FindNodes ();
     }
 
     [HttpGet ("{address}")]
@@ -43,7 +43,7 @@ public class NodesController : ControllerBase
     {
         try
         {
-            return this.ClusterRepository.FindByAddress (address);
+            return ClusterRepository.FindByAddress (address);
         }
         catch (InvalidDataException e)
         {
@@ -57,7 +57,7 @@ public class NodesController : ControllerBase
     {
         try
         {
-            return this.ClusterRepository.FindById (nodeId);
+            return ClusterRepository.FindById (nodeId);
         }
         catch (InvalidDataException e)
         {
@@ -69,14 +69,14 @@ public class NodesController : ControllerBase
     [Produces ("application/json")]
     public ActionResult <List <Node>> GetProxies ()
     {
-        return this.ClusterRepository.FindProxyNodes ();
+        return ClusterRepository.FindProxyNodes ();
     }
 
     [HttpGet ("servers")]
     [Produces ("application/json")]
     public ActionResult <List <Node>> GetServers ()
     {
-        return this.ClusterRepository.FindServerNodes ();
+        return ClusterRepository.FindServerNodes ();
     }
 
     [HttpPost ("register")]
@@ -86,29 +86,29 @@ public class NodesController : ControllerBase
         if (role != "proxy" && role != "server")
             return this.BadRequest ($"Unknown node role... {role}");
 
-        Node newNode = this.ClusterRepository.RegisterNode (
-            this.Request.HttpContext.Connection.RemoteIpAddress?.ToString ()!,
+        Node newNode = ClusterRepository.RegisterNode (
+            Request.HttpContext.Connection.RemoteIpAddress?.ToString ()!,
             port,
             role
         );
         
-        this.Logger.LogInformation ("Registered a new node with address {newNode.Address}, coming from IP {newNode.IP}", newNode.Address, newNode.IP);
+        Logger.LogInformation ("Registered a new node with address {newNode.Address}, coming from IP {newNode.IP}", newNode.Address, newNode.Ip);
 
         return new
         {
-            NodeId       = newNode.NodeID,
+            NodeId       = newNode.NodeId,
             Address      = newNode.Address,
-            TimeInterval = int.Parse (this.Configuration.GetSection ("Cluster") ["TimedEventsInterval"]),
-            StartupTime  = this.StartupInfoProvider.Time.ToFileTimeUtc ()
+            TimeInterval = int.Parse (Configuration.GetSection ("Cluster") ["TimedEventsInterval"]),
+            StartupTime  = StartupInfoProvider.Time.ToFileTimeUtc ()
         };
     }
 
     [HttpPost ("heartbeat")]
     public void DoHeartbeat ([FromForm] string address, [FromForm] float load)
     {
-        this.Logger.LogInformation ("Received heartbeat from {address} with load {load}", address, load);
+        Logger.LogInformation ("Received heartbeat from {address} with load {load}", address, load);
 
-        this.ClusterRepository.Hearbeat (address, load);
+        ClusterRepository.Hearbeat (address, load);
     }
 
     [HttpGet ("next")]
@@ -117,11 +117,11 @@ public class NodesController : ControllerBase
     {
         try
         {
-            Node node = this.ClusterRepository.GetLeastLoadedNode ();
+            Node node = ClusterRepository.GetLeastLoadedNode ();
             
-            this.Logger.LogInformation ("Returned node ({node.NodeID}) with lowest load ({node.Load})", node.NodeID, node.Load);
+            Logger.LogInformation ("Returned node ({node.NodeID}) with lowest load ({node.Load})", node.NodeId, node.Load);
 
-            return node.NodeID;
+            return node.NodeId;
         }
         catch (InvalidDataException e)
         {

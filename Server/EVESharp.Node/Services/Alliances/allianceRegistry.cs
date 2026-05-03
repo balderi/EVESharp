@@ -47,7 +47,7 @@ public class allianceRegistry : MultiClientBoundService
         CorporationDB  = corporationDB;
         ChatDB         = chatDB;
         Notifications  = notificationSender;
-        this.Items     = items;
+        Items     = items;
         SessionManager = sessionManager;
         ClusterManager = clusterManager;
 
@@ -63,7 +63,7 @@ public class allianceRegistry : MultiClientBoundService
         Database       = database;
         CorporationDB  = corporationDB;
         Notifications  = notificationSender;
-        this.Items     = items;
+        Items     = items;
         Alliance       = alliance;
         SessionManager = sessionManager;
     }
@@ -139,9 +139,9 @@ public class allianceRegistry : MultiClientBoundService
         if (this.MachoResolveObject (call, bindParams) != BoundServiceManager.MachoNet.NodeID)
             throw new CustomError ("Trying to bind an object that does not belong to us!");
 
-        Alliance alliance = this.Items.LoadItem <Alliance> (bindParams.ObjectID);
+        Alliance alliance = Items.LoadItem <Alliance> (bindParams.ObjectID);
 
-        return new allianceRegistry (alliance, Database, CorporationDB, this.Items, Notifications, SessionManager, this);
+        return new allianceRegistry (alliance, Database, CorporationDB, Items, Notifications, SessionManager, this);
     }
 
     public PyDataType GetAlliance (ServiceCall call)
@@ -182,7 +182,7 @@ public class allianceRegistry : MultiClientBoundService
 
     public PyDataType GetRelationships (ServiceCall call)
     {
-        return Database.CrpAlliancesGetRelationships (this.ObjectID);
+        return Database.CrpAlliancesGetRelationships (ObjectID);
     }
 
     public PyDataType GetAllianceMembers (ServiceCall call, PyInteger allianceID)
@@ -192,7 +192,7 @@ public class allianceRegistry : MultiClientBoundService
 
     public PyDataType GetMembers (ServiceCall call)
     {
-        return Database.CrpAlliancesGetMembersPrivate (this.ObjectID);
+        return Database.CrpAlliancesGetMembersPrivate (ObjectID);
     }
 
     [MustHaveCorporationRole (MLS.UI_CORP_SET_RELATIONSHIP_DIRECTOR_ONLY, CorporationRole.Director)]
@@ -201,7 +201,7 @@ public class allianceRegistry : MultiClientBoundService
         if (Alliance.ExecutorCorpID != call.Session.CorporationID)
             throw new CrpAccessDenied (MLS.UI_CORP_SET_RELATIONSHIP_EXECUTOR_ONLY);
 
-        Database.CrpAlliancesUpdateRelationship (this.ObjectID, toID, relationship);
+        Database.CrpAlliancesUpdateRelationship (ObjectID, toID, relationship);
 
         OnAllianceRelationshipChanged change =
             new OnAllianceRelationshipChanged (ObjectID, toID)
@@ -224,7 +224,7 @@ public class allianceRegistry : MultiClientBoundService
             throw new CanNotDeclareExecutorInFirstWeek ();
 
         // update corporation's supported executor and get the new alliance's executor id back (if any)
-        int? executorCorpID = Database.CrpAlliancesUpdateSupportedExecutor (call.Session.CorporationID, executorID, this.ObjectID);
+        int? executorCorpID = Database.CrpAlliancesUpdateSupportedExecutor (call.Session.CorporationID, executorID, ObjectID);
 
         OnAllianceMemberChanged change =
             new OnAllianceMemberChanged (ObjectID, call.Session.CorporationID)
@@ -251,12 +251,12 @@ public class allianceRegistry : MultiClientBoundService
 
     public PyDataType GetApplications (ServiceCall call)
     {
-        return Database.CrpAlliancesListApplications (this.ObjectID);
+        return Database.CrpAlliancesListApplications (ObjectID);
     }
 
     public PyDataType GetBills (ServiceCall call)
     {
-        return Database.MktBillsGetPayable (this.ObjectID);
+        return Database.MktBillsGetPayable (ObjectID);
     }
 
     [MustHaveCorporationRole (MLS.UI_CORP_DELETE_RELATIONSHIP_DIRECTOR_ONLY, CorporationRole.Director)]
@@ -265,7 +265,7 @@ public class allianceRegistry : MultiClientBoundService
         if (Alliance.ExecutorCorpID != call.Session.CorporationID)
             throw new CrpAccessDenied (MLS.UI_CORP_DELETE_RELATIONSHIP_EXECUTOR_ONLY);
 
-        Database.CrpAlliancesRemoveRelationship (this.ObjectID, toID);
+        Database.CrpAlliancesRemoveRelationship (ObjectID, toID);
 
         OnAllianceRelationshipChanged change =
             new OnAllianceRelationshipChanged (ObjectID, toID)
@@ -289,7 +289,7 @@ public class allianceRegistry : MultiClientBoundService
         {
             case (int) ApplicationStatus.Accepted:
             case (int) ApplicationStatus.Rejected:
-                Database.CrpAlliancesUpdateApplication (corporationID, this.ObjectID, newStatus);
+                Database.CrpAlliancesUpdateApplication (corporationID, ObjectID, newStatus);
                 break;
 
             default: throw new CustomError ("Unknown status for alliance application");

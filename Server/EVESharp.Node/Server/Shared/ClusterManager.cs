@@ -45,13 +45,13 @@ public class ClusterManager : IClusterManager
         else
         {
             // non-single instances need to perform heartbeats instead
-            this.HeartbeatTimer = this.Timers.EnqueueTimer <object?> (TimeSpan.FromSeconds (45), this.OnClusterHeartbeatTimer, null);
+            HeartbeatTimer = Timers.EnqueueTimer <object?> (TimeSpan.FromSeconds (45), this.OnClusterHeartbeatTimer, null);
         }
     }
 
     private void StartClusterTimer ()
     {
-        this.ClusterTimer = this.Timers.EnqueueTimer <object?> (TimeSpan.FromMinutes (2), this.RunClusterTimerThread, null);
+        ClusterTimer = Timers.EnqueueTimer <object?> (TimeSpan.FromMinutes (2), this.RunClusterTimerThread, null);
     }
 
     /// <summary>
@@ -89,7 +89,7 @@ public class ClusterManager : IClusterManager
         IntervalStart    = DateTime.FromFileTimeUtc ((long) result ["startupTime"]);
         IntervalDuration = (int) result ["timeInterval"];
 
-        MachoNet.Log.Information ($"Orchestrator assigned node id {MachoNet.NodeID} with address {MachoNet.Address}");
+        MachoNet.Log.Information ("Orchestrator assigned node id {MachoNetNode} with address {MachoNetAddress}", MachoNet.NodeID, MachoNet.Address);
 
         // TODO: PROPERLY SELECT THIS AS THIS PREVENTS MULTIPLE PROXIES ACTUALLY WORKING AT ONCE
         if (MachoNet.Mode == RunMode.Proxy)
@@ -154,7 +154,7 @@ public class ClusterManager : IClusterManager
         if (TransportManager.NodeTransports.TryGetValue (nodeID, out MachoNodeTransport nodeTransport))
             return nodeTransport;
 
-        MachoNet.Log.Information ($"Looking up NodeID {nodeID}...");
+        MachoNet.Log.Information ("Looking up NodeID {Node}...", nodeID);
         HttpResponseMessage response = await HttpClient.GetAsync ($"{MachoNet.OrchestratorURL}/Nodes/node/{nodeID}");
 
         // make sure we have a proper answer
@@ -169,10 +169,10 @@ public class ClusterManager : IClusterManager
         ushort port = (ushort) result ["port"];
         string role = result ["role"].ToString ();
 
-        MachoNet.Log.Information ($"Found {role} with NodeID {nodeID} on address {ip}, opening connection...");
+        MachoNet.Log.Information ("Found {Role} with NodeID {Node} on address {Ip}, opening connection...", role, nodeID, ip);
 
         // open the connection and register it in the transports list
-        IMachoTransport transport = this.TransportManager.OpenNewTransport (this.MachoNet, ip, port);
+        IMachoTransport transport = TransportManager.OpenNewTransport (MachoNet, ip, port);
 
         // send an identification req to start the authentication flow
         transport.Socket.Send (

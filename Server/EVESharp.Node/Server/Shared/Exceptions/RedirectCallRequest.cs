@@ -8,6 +8,6 @@ public class RedirectCallRequest : Exception
 
     public RedirectCallRequest (int nodeID)
     {
-        this.NodeID = nodeID;
+        NodeID = nodeID;
     }
 }

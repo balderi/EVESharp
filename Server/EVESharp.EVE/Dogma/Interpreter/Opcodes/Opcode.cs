@@ -8,7 +8,7 @@ public abstract class Opcode
 
     public Opcode (Interpreter interpreter)
     {
-        this.Interpreter = interpreter;
+        Interpreter = interpreter;
     }
 
     public abstract Opcode LoadOpcode (BinaryReader reader);

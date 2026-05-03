@@ -10,7 +10,7 @@ public class OpcodeDEFSTRING : Opcode
 
     public override Opcode LoadOpcode (BinaryReader reader)
     {
-        this.Definition = reader.ReadString ();
+        Definition = reader.ReadString ();
 
         return this;
     }

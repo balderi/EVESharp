@@ -13,49 +13,49 @@ public class Station : ItemInventory
 {
     public Database.Inventory.Types.Information.Station StationInformation { get; }
 
-    public Operation                   Operations               => this.StationInformation.Operations;
-    public Type                        StationType              => this.StationInformation.Type;
+    public Operation                   Operations               => StationInformation.Operations;
+    public Type                        StationType              => StationInformation.Type;
     public Dictionary <int, Character> Guests                   { get; } = new Dictionary <int, Character> ();
-    public int                         Security                 => this.StationInformation.Security;
-    public double                      DockingCostPerVolume     => this.StationInformation.DockingCostPerVolume;
-    public double                      MaxShipVolumeDockable    => this.StationInformation.MaxShipVolumeDockable;
-    public int                         OfficeRentalCost         => this.StationInformation.OfficeRentalCost;
-    public int                         SolarSystemID            => this.LocationID;
-    public int                         ConstellationID          => this.StationInformation.ConstellationID;
-    public int                         RegionID                 => this.StationInformation.RegionID;
-    public double                      ReprocessingEfficiency   => this.StationInformation.ReprocessingEfficiency;
-    public double                      ReprocessingStationsTake => this.StationInformation.ReprocessingStationsTake;
-    public int                         ReprocessingHangarFlag   => this.StationInformation.ReprocessingHangarFlag;
+    public int                         Security                 => StationInformation.Security;
+    public double                      DockingCostPerVolume     => StationInformation.DockingCostPerVolume;
+    public double                      MaxShipVolumeDockable    => StationInformation.MaxShipVolumeDockable;
+    public int                         OfficeRentalCost         => StationInformation.OfficeRentalCost;
+    public int                         SolarSystemID            => LocationID;
+    public int                         ConstellationID          => StationInformation.ConstellationID;
+    public int                         RegionID                 => StationInformation.RegionID;
+    public double                      ReprocessingEfficiency   => StationInformation.ReprocessingEfficiency;
+    public double                      ReprocessingStationsTake => StationInformation.ReprocessingStationsTake;
+    public int                         ReprocessingHangarFlag   => StationInformation.ReprocessingHangarFlag;
 
     public Station (Database.Inventory.Types.Information.Station info) : base (info.Information)
     {
-        this.StationInformation = info;
+        StationInformation = info;
     }
 
     public PyDataType GetStationInfo ()
     {
         PyDictionary data = new PyDictionary
         {
-            ["stationID"]                = this.ID,
-            ["security"]                 = this.Security,
-            ["dockingCostPerVolume"]     = this.DockingCostPerVolume,
-            ["maxShipVolumeDockable"]    = this.MaxShipVolumeDockable,
-            ["officeRentalCost"]         = this.OfficeRentalCost,
-            ["operationID"]              = this.Operations.OperationID,
-            ["stationTypeID"]            = this.Type.ID,
-            ["ownerID"]                  = this.OwnerID,
-            ["solarSystemID"]            = this.SolarSystemID,
-            ["constellationID"]          = this.ConstellationID,
-            ["regionID"]                 = this.RegionID,
-            ["stationName"]              = this.Name,
-            ["x"]                        = this.X,
-            ["y"]                        = this.Y,
-            ["z"]                        = this.Z,
-            ["reprocessingEfficiency"]   = this.ReprocessingEfficiency,
-            ["reprocessingStationsTake"] = this.ReprocessingStationsTake,
-            ["reprocessingHangarFlag"]   = this.ReprocessingHangarFlag,
-            ["description"]              = this.Operations.Description,
-            ["serviceMask"]              = this.Operations.ServiceMask
+            ["stationID"]                = ID,
+            ["security"]                 = Security,
+            ["dockingCostPerVolume"]     = DockingCostPerVolume,
+            ["maxShipVolumeDockable"]    = MaxShipVolumeDockable,
+            ["officeRentalCost"]         = OfficeRentalCost,
+            ["operationID"]              = Operations.OperationID,
+            ["stationTypeID"]            = Type.ID,
+            ["ownerID"]                  = OwnerID,
+            ["solarSystemID"]            = SolarSystemID,
+            ["constellationID"]          = ConstellationID,
+            ["regionID"]                 = RegionID,
+            ["stationName"]              = Name,
+            ["x"]                        = X,
+            ["y"]                        = Y,
+            ["z"]                        = Z,
+            ["reprocessingEfficiency"]   = ReprocessingEfficiency,
+            ["reprocessingStationsTake"] = ReprocessingStationsTake,
+            ["reprocessingHangarFlag"]   = ReprocessingHangarFlag,
+            ["description"]              = Operations.Description,
+            ["serviceMask"]              = Operations.ServiceMask
         };
 
         return KeyVal.FromDictionary (data);
@@ -63,7 +63,7 @@ public class Station : ItemInventory
 
     public bool HasService (Service service)
     {
-        return (this.Operations.ServiceMask & (int) service) == (int) service;
+        return (Operations.ServiceMask & (int) service) == (int) service;
     }
 
     public override void Destroy ()

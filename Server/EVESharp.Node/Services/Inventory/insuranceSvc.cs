@@ -21,7 +21,7 @@ public class insuranceSvc : ClientBoundService
 
     public override AccessLevel AccessLevel => AccessLevel.None;
 
-    private readonly Node.Services.Insurance.OldInsuranceDB DB;
+    private readonly Insurance.OldInsuranceDB DB;
 
     private readonly IItems        Items;
     private readonly MarketDB      MarketDB;
@@ -52,7 +52,7 @@ public class insuranceSvc : ClientBoundService
         Database     = database;
         SolarSystems = solarSystems;
 
-        DB = new Node.Services.Insurance.OldInsuranceDB(Database);
+        DB = new Insurance.OldInsuranceDB(Database);
 
         // Hook cluster event (if available)
         if (clusterManager != null)
@@ -84,7 +84,7 @@ public class insuranceSvc : ClientBoundService
         Database     = database;
         SolarSystems = solarSystems;
 
-        DB = new Node.Services.Insurance.OldInsuranceDB(Database);
+        DB = new Insurance.OldInsuranceDB(Database);
     }
 
     // --------------------------------------------------------------------

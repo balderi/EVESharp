@@ -43,7 +43,7 @@ public class PyTuple : PyDataType, IPyEnumerable<PyDataType>
     public override int GetHashCode ()
     {
         // a somewhat similar implementation based on python's
-        int length      = this.Count;
+        int length      = Count;
         int mult        = 1000003;
         int currentHash = 0x345678;
 
@@ -81,8 +81,8 @@ public class PyTuple : PyDataType, IPyEnumerable<PyDataType>
         // perform some boundaries checks to ensure the data fits
         if (
             count + destinationIndex - sourceIndex > destination.Count ||
-            sourceIndex > this.Count ||
-            sourceIndex + count > this.Count ||
+            sourceIndex > Count ||
+            sourceIndex + count > Count ||
             sourceIndex < 0 ||
             destinationIndex < 0)
             throw new IndexOutOfRangeException ("Trying to copy tuple items that would be out of range");

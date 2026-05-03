@@ -40,8 +40,8 @@ public class dogmaIM : ClientBoundService
     public override AccessLevel AccessLevel => AccessLevel.None;
 
     private IItems                     Items             { get; }
-    private IAttributes                Attributes        => this.Items.Attributes;
-    private IDefaultAttributes         DefaultAttributes => this.Items.DefaultAttributes;
+    private IAttributes                Attributes        => Items.Attributes;
+    private IDefaultAttributes         DefaultAttributes => Items.DefaultAttributes;
     private ISolarSystems              SolarSystems      { get; }
     private INotificationSender        Notifications     { get; }
     private IDogmaNotifications        DogmaNotifications { get; }
@@ -153,7 +153,7 @@ public class dogmaIM : ClientBoundService
         if (shipID is null)
             throw new CustomError ("The character is not aboard any ship");
 
-        Ship ship = this.Items.LoadItem <Ship> ((int) shipID);
+        Ship ship = Items.LoadItem <Ship> ((int) shipID);
 
         if (ship is null)
             throw new CustomError ($"Cannot get information for ship {call.Session.ShipID}");
@@ -182,7 +182,7 @@ public class dogmaIM : ClientBoundService
 
         // pre-load the character's inventory (skills, implants) so that skill checks
         // during module effect initialization don't fail due to lazy-load timing
-        Character character = this.Items.LoadItem <Character> (callerCharacterID);
+        Character character = Items.LoadItem <Character> (callerCharacterID);
         _ = character?.Items;
 
         ItemInfo itemInfo = new ItemInfo ();
@@ -222,7 +222,7 @@ public class dogmaIM : ClientBoundService
     public PyDataType CharGetInfo (ServiceCall call)
     {
         int callerCharacterID = call.Session.CharacterID;
-        Character character = this.Items.LoadItem <Character> (callerCharacterID);
+        Character character = Items.LoadItem <Character> (callerCharacterID);
 
         if (character is null)
             throw new CustomError ($"Cannot get information for character {callerCharacterID}");
@@ -253,7 +253,7 @@ public class dogmaIM : ClientBoundService
     public PyDataType ItemGetInfo (ServiceCall call, PyInteger itemID)
     {
         int callerCharacterID = call.Session.CharacterID;
-        ItemEntity item = this.Items.LoadItem (itemID);
+        ItemEntity item = Items.LoadItem (itemID);
 
         if (item.ID != callerCharacterID && item.OwnerID != callerCharacterID && item.OwnerID != call.Session.CorporationID)
             throw new TheItemIsNotYoursToTake (itemID);
@@ -286,7 +286,7 @@ public class dogmaIM : ClientBoundService
     public PyDataType GetCharacterBaseAttributes (ServiceCall call)
     {
         int callerCharacterID = call.Session.CharacterID;
-        Character character = this.Items.LoadItem <Character> (callerCharacterID);
+        Character character = Items.LoadItem <Character> (callerCharacterID);
 
         if (character is null)
             throw new CustomError ($"Cannot get information for character {callerCharacterID}");
@@ -314,7 +314,7 @@ public class dogmaIM : ClientBoundService
         if ((role & roleMask) == 0)
             throw new CustomError ("Not allowed!");
 
-        ItemEntity item = this.Items.LoadItem (itemID);
+        ItemEntity item = Items.LoadItem (itemID);
 
         if (item.Attributes.AttributeExists (attributeID) == false)
             throw new CustomError ("The given attribute doesn't exists in the item");
@@ -324,14 +324,14 @@ public class dogmaIM : ClientBoundService
             [0] = null,
             [1] = null,
             [2] = $"Server value: {item.Attributes [attributeID]}",
-            [3] = $"Base value: {this.DefaultAttributes [item.Type.ID] [attributeID]}",
+            [3] = $"Base value: {DefaultAttributes [item.Type.ID] [attributeID]}",
             [4] = $"Reason: {reason}"
         };
     }
 
     public PyDataType Activate (ServiceCall call, PyInteger itemID, PyString effectName, PyDataType target, PyDataType repeat)
     {
-        ShipModule module = this.Items.LoadItem <ShipModule> (itemID);
+        ShipModule module = Items.LoadItem <ShipModule> (itemID);
 
         // Extract target ID if provided
         int targetID = 0;
@@ -358,7 +358,7 @@ public class dogmaIM : ClientBoundService
             int shipID = call.Session.ShipID ?? 0;
             if (shipID != 0)
             {
-                Ship ship = this.Items.LoadItem <Ship> (shipID);
+                Ship ship = Items.LoadItem <Ship> (shipID);
                 ItemEntity charge = ship?.Items.Values
                     .FirstOrDefault (i => i.Flag == module.Flag && !(i is ShipModule));
                 if (charge == null)
@@ -368,7 +368,7 @@ public class dogmaIM : ClientBoundService
 
         // Set TargetID on the effect so the notification includes it
         ItemEffects effects = EffectsManager.GetForItem (module, call.Session);
-        EVESharp.Database.Dogma.Effect effectDef = null;
+        Effect effectDef = null;
         if (effects != null && module.Type.EffectsByName.TryGetValue (effectName, out effectDef))
         {
             if (module.Effects.TryGetEffect (effectDef.EffectID, out GodmaShipEffect godmaEffect))
@@ -448,7 +448,7 @@ public class dogmaIM : ClientBoundService
 
     public PyDataType Deactivate (ServiceCall call, PyInteger itemID, PyString effectName)
     {
-        ShipModule module = this.Items.LoadItem <ShipModule> (itemID);
+        ShipModule module = Items.LoadItem <ShipModule> (itemID);
         EffectsManager.GetForItem (module, call.Session).SafeDeactivateEffect (effectName, call.Session);
 
         // Stop weapon cycling
@@ -483,7 +483,7 @@ public class dogmaIM : ClientBoundService
         Ship ship = null;
         if (shipID != 0)
         {
-            ship = this.Items.LoadItem <Ship> (shipID);
+            ship = Items.LoadItem <Ship> (shipID);
             if (ship?.Attributes != null)
             {
                 if (ship.Attributes.AttributeExists (AttributeTypes.maxLockedTargets))
@@ -515,7 +515,7 @@ public class dogmaIM : ClientBoundService
         // Calculate lock time: 40000 / (scanRes * asinh(sigRadius)^2) seconds
         double sigRadius = 100; // fallback
         ItemEntity targetItem = null;
-        try { targetItem = this.Items.LoadItem (tgtID); } catch { }
+        try { targetItem = Items.LoadItem (tgtID); } catch { }
         if (targetItem?.Attributes != null && targetItem.Attributes.AttributeExists (AttributeTypes.signatureRadius))
             sigRadius = (double) targetItem.Attributes [AttributeTypes.signatureRadius];
 
@@ -617,7 +617,7 @@ public class dogmaIM : ClientBoundService
         }
 
         // Find the loaded charge in the same slot as the module
-        Ship ship = this.Items.LoadItem <Ship> (shipID);
+        Ship ship = Items.LoadItem <Ship> (shipID);
         ItemEntity charge = ship?.Items.Values
             .FirstOrDefault (i => i.Flag == module.Flag && !(i is ShipModule));
 
@@ -803,11 +803,11 @@ public class dogmaIM : ClientBoundService
         if (this.MachoResolveObject (call, bindParams) != BoundServiceManager.MachoNet.NodeID)
             throw new CustomError ("Trying to bind an object that does not belong to us!");
 
-        Character character = this.Items.LoadItem <Character> (characterID);
+        Character character = Items.LoadItem <Character> (characterID);
 
         if (bindParams.ExtraValue == (int) GroupID.Station && call.Session.StationID == bindParams.ObjectID)
         {
-            this.Items.GetStaticStation (bindParams.ObjectID).Guests [characterID] = character;
+            Items.GetStaticStation (bindParams.ObjectID).Guests [characterID] = character;
             Notifications.NotifyStation (bindParams.ObjectID, new OnCharNowInStation (call.Session));
         }
 
@@ -828,11 +828,11 @@ public class dogmaIM : ClientBoundService
 
         if (mIsStationBound)
         {
-            this.Items.GetStaticStation (ObjectID).Guests.Remove (characterID);
+            Items.GetStaticStation (ObjectID).Guests.Remove (characterID);
             Notifications.NotifyStation (ObjectID, new OnCharNoLongerInStation (Session));
-            this.Items.UnloadItem (characterID);
+            Items.UnloadItem (characterID);
             if (Session.ShipID is not null)
-                this.Items.UnloadItem ((int) Session.ShipID);
+                Items.UnloadItem ((int) Session.ShipID);
         }
     }
 

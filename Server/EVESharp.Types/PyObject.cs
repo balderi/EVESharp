@@ -11,14 +11,14 @@ public class PyObject : PyDataType
 
     public PyObject (bool isType2, PyTuple header, PyList list = null, PyDictionary dict = null)
     {
-        this.IsType2    = isType2;
-        this.Header     = header;
-        this.List       = list ?? new PyList ();
-        this.Dictionary = dict ?? new PyDictionary ();
+        IsType2    = isType2;
+        Header     = header;
+        List       = list ?? new PyList ();
+        Dictionary = dict ?? new PyDictionary ();
     }
 
     public override int GetHashCode ()
     {
-        return (this.IsType2 ? 1 : 0) ^ this.Header.GetHashCode () ^ this.List.GetHashCode () ^ this.Dictionary.GetHashCode () ^ 0x36120485;
+        return (IsType2 ? 1 : 0) ^ Header.GetHashCode () ^ List.GetHashCode () ^ Dictionary.GetHashCode () ^ 0x36120485;
     }
 }

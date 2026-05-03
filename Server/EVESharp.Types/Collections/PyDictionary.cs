@@ -37,7 +37,7 @@ public class PyDictionary : PyDataType, IPyDictionaryEnumerable <PyDataType, PyD
     }
 
     public int Length => this.mDictionary.Count;
-    public int Count  => this.Length;
+    public int Count  => Length;
 
     public PyDictionary ()
     {
@@ -62,7 +62,7 @@ public class PyDictionary : PyDataType, IPyDictionaryEnumerable <PyDataType, PyD
     public override int GetHashCode ()
     {
         // a similar implementation to PyTuple to make my life easy
-        int length      = this.Count;
+        int length      = Count;
         int mult        = 1000003;
         int mul2        = 1000005;
         int currentHash = 0x63521485;

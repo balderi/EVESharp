@@ -13,9 +13,9 @@ public class Timer<T> : IDisposable
     
     public Timer (DateTime time, T state, Action<T> callback, ILogger logger)
     {
-        this.Callback         =  callback;
-        this.State            =  state;
-        this.Log              =  logger;
+        Callback         =  callback;
+        State            =  state;
+        Log              =  logger;
         this.mTimer           =  new Timer ((time - DateTime.UtcNow).TotalMilliseconds);
         this.mTimer.Elapsed   += this.OnTimerFired;
         this.mTimer.AutoReset =  false;
@@ -24,9 +24,9 @@ public class Timer<T> : IDisposable
 
     public Timer (TimeSpan interval, T state, Action <T> callback, ILogger logger)
     {
-        this.Callback         =  callback;
-        this.State            =  state;
-        this.Log              =  logger;
+        Callback         =  callback;
+        State            =  state;
+        Log              =  logger;
         this.mTimer           =  new Timer (interval.TotalMilliseconds);
         this.mTimer.Elapsed   += this.OnTimerFired;
         this.mTimer.AutoReset =  true;
@@ -38,12 +38,12 @@ public class Timer<T> : IDisposable
         try
         {
             // run the callback
-            this.Callback (this.State);
+            Callback (State);
         }
         catch (Exception e)
         {
-            this.Log.Error ("Callback for timer threw an exception {e}", e);
-            this.Log.Error (e.StackTrace);
+            Log.Error ("Callback for timer threw an exception {e}", e);
+            Log.Error (e.StackTrace);
         }
     }
     

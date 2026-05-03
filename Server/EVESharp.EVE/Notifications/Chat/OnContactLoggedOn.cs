@@ -12,11 +12,11 @@ public class OnContactLoggedOn : ClientNotification
 
     public OnContactLoggedOn (int characterID) : base (NOTIFICATION_NAME)
     {
-        this.CharacterID = characterID;
+        CharacterID = characterID;
     }
 
     public override List <PyDataType> GetElements ()
     {
-        return new List <PyDataType> {this.CharacterID};
+        return new List <PyDataType> {CharacterID};
     }
 }

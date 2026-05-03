@@ -16,11 +16,11 @@ public class OnAccountChange : ClientNotification
 
     public OnAccountChange (int accountKey, int ownerID, double newBalance) : base (NOTIFICATION_NAME)
     {
-        this.AccountKey = accountKey;
-        this.OwnerID    = ownerID;
-        this.NewBalance = newBalance;
+        AccountKey = accountKey;
+        OwnerID    = ownerID;
+        NewBalance = newBalance;
 
-        this.Wallet = this.AccountKey switch
+        Wallet = AccountKey switch
         {
             WalletKeys.MAIN    => "cash",
             WalletKeys.SECOND  => "cash2",
@@ -37,9 +37,9 @@ public class OnAccountChange : ClientNotification
     {
         return new List <PyDataType>
         {
-            this.Wallet,
-            this.OwnerID,
-            this.NewBalance
+            Wallet,
+            OwnerID,
+            NewBalance
         };
     }
 }

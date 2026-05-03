@@ -15,12 +15,12 @@ public class OnOfficeFolderDestroyed : InterNodeNotification
 
     public OnOfficeFolderDestroyed (PyInteger officeFolderID) : base (NOTIFICATION_NAME)
     {
-        this.OfficeFolderID = officeFolderID;
+        OfficeFolderID = officeFolderID;
     }
 
     protected override PyDataType GetNotification ()
     {
-        return this.OfficeFolderID;
+        return OfficeFolderID;
     }
 
     public static implicit operator OnOfficeFolderDestroyed (PyTuple notification)

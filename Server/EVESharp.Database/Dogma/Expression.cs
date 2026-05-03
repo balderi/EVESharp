@@ -22,6 +22,6 @@ public class Expression
 
     public void Compile ()
     {
-        this.VMCode = new Compiler ().CompileExpression (this);
+        VMCode = new Compiler ().CompileExpression (this);
     }
 }

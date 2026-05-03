@@ -15,14 +15,14 @@ public class OnAllianceApplicationChanged : ClientNotification
 
     public OnAllianceApplicationChanged (int allianceID, int corpID) : base (NOTIFICATION_NAME)
     {
-        this.AllianceID = allianceID;
-        this.CorpID     = corpID;
-        this.Changes    = new PyDictionary ();
+        AllianceID = allianceID;
+        CorpID     = corpID;
+        Changes    = new PyDictionary ();
     }
 
     public OnAllianceApplicationChanged AddChange (string changeName, PyDataType oldValue, PyDataType newValue)
     {
-        this.Changes [changeName] = new PyTuple (2)
+        Changes [changeName] = new PyTuple (2)
         {
             [0] = oldValue,
             [1] = newValue
@@ -35,9 +35,9 @@ public class OnAllianceApplicationChanged : ClientNotification
     {
         return new List <PyDataType>
         {
-            this.AllianceID,
-            this.CorpID,
-            this.Changes
+            AllianceID,
+            CorpID,
+            Changes
         };
     }
 }

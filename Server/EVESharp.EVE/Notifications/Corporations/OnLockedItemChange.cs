@@ -16,15 +16,15 @@ public class OnLockedItemChange : ClientNotification
 
     public OnLockedItemChange (int itemID, int ownerID, int locationID) : base (NOTIFICATION_NAME)
     {
-        this.ItemID     = itemID;
-        this.OwnerID    = ownerID;
-        this.LocationID = locationID;
-        this.Changes    = new PyDictionary ();
+        ItemID     = itemID;
+        OwnerID    = ownerID;
+        LocationID = locationID;
+        Changes    = new PyDictionary ();
     }
 
     public OnLockedItemChange AddChange (string changeName, PyDataType oldValue, PyDataType newValue)
     {
-        this.Changes [changeName] = new PyTuple (2)
+        Changes [changeName] = new PyTuple (2)
         {
             [0] = oldValue,
             [1] = newValue
@@ -37,10 +37,10 @@ public class OnLockedItemChange : ClientNotification
     {
         return new List <PyDataType>
         {
-            this.ItemID,
-            this.OwnerID,
-            this.LocationID,
-            this.Changes
+            ItemID,
+            OwnerID,
+            LocationID,
+            Changes
         };
     }
 }

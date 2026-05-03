@@ -12,8 +12,8 @@ public class OpcodeCOMBINE : OpcodeRunnable
 
     public override Opcode LoadOpcode (BinaryReader reader)
     {
-        Opcode leftSide  = this.Interpreter.Step (reader);
-        Opcode rightSide = this.Interpreter.Step (reader);
+        Opcode leftSide  = Interpreter.Step (reader);
+        Opcode rightSide = Interpreter.Step (reader);
 
         // ensure that both sides can return a value
         if (leftSide is not OpcodeRunnable && leftSide is not OpcodeWithBooleanOutput && leftSide is not OpcodeWithDoubleOutput)
@@ -21,8 +21,8 @@ public class OpcodeCOMBINE : OpcodeRunnable
         if (rightSide is not OpcodeRunnable && rightSide is not OpcodeWithBooleanOutput && rightSide is not OpcodeWithDoubleOutput)
             throw new DogmaMachineException ("The right side of a COMBINE operand must be some kind of runnable");
 
-        this.LeftSide  = leftSide;
-        this.RightSide = rightSide;
+        LeftSide  = leftSide;
+        RightSide = rightSide;
 
         return this;
     }
@@ -39,7 +39,7 @@ public class OpcodeCOMBINE : OpcodeRunnable
 
     public override void Execute ()
     {
-        this.ExecuteSide (this.LeftSide);
-        this.ExecuteSide (this.RightSide);
+        this.ExecuteSide (LeftSide);
+        this.ExecuteSide (RightSide);
     }
 }

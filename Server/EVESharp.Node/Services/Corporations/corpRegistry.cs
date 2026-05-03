@@ -88,7 +88,7 @@ public class corpRegistry : MultiClientBoundService
         Notifications  = notificationSender;
         Constants      = constants;
         MailManager    = mailManager;
-        this.Wallets   = wallets;
+        Wallets   = wallets;
         Items          = items;
         Ancestries     = ancestries;
         SessionManager = sessionManager;
@@ -114,7 +114,7 @@ public class corpRegistry : MultiClientBoundService
         Notifications                     = notificationSender;
         Constants                         = constants;
         MailManager                       = mailManager;
-        this.Wallets                      = wallets;
+        Wallets                      = wallets;
         Items                             = items;
         SessionManager                    = sessionManager;
         Corporation                       = corp;
@@ -224,7 +224,7 @@ public class corpRegistry : MultiClientBoundService
         int entityID = call.Session.CharacterID;
 
         if (corpShares != true)
-            return this.DB.GetSharesByShareholder (entityID);
+            return DB.GetSharesByShareholder (entityID);
 
         entityID = call.Session.CorporationID;
             
@@ -246,8 +246,8 @@ public class corpRegistry : MultiClientBoundService
     [MustHaveCorporationRole (MLS.UI_CORP_DO_NOT_HAVE_ROLE_DIRECTOR, CorporationRole.Director)]
     public PyDataType MoveCompanyShares (ServiceCall call, PyInteger corporationID, PyInteger to, PyInteger quantity)
     {
-        using (ISharesAccount corporationShares = this.Shares.AcquireSharesAccount (call.Session.CorporationID))
-        using (ISharesAccount characterShares = this.Shares.AcquireSharesAccount (to))
+        using (ISharesAccount corporationShares = Shares.AcquireSharesAccount (call.Session.CorporationID))
+        using (ISharesAccount characterShares = Shares.AcquireSharesAccount (to))
         {
             // first make sure there's enough shares available
             uint availableShares = corporationShares.GetSharesForCorporation (call.Session.CorporationID);
@@ -285,8 +285,8 @@ public class corpRegistry : MultiClientBoundService
     {
         int callerCharacterID = call.Session.CharacterID;
 
-        using (ISharesAccount originSharesAccount = this.Shares.AcquireSharesAccount (callerCharacterID))
-        using (ISharesAccount destinationSharesAccount = this.Shares.AcquireSharesAccount (toShareholderID))
+        using (ISharesAccount originSharesAccount = Shares.AcquireSharesAccount (callerCharacterID))
+        using (ISharesAccount destinationSharesAccount = Shares.AcquireSharesAccount (toShareholderID))
         {
             // first make sure there's enough shares available
             uint availableShares = originSharesAccount.GetSharesForCorporation (corporationID);
@@ -535,13 +535,13 @@ public class corpRegistry : MultiClientBoundService
         // TODO: PROPERLY IMPLEMENT THIS CHECK, RIGHT NOW THE CHARACTER AND THE CORPREGISTRY INSTANCES DO NOT HAVE TO BE LOADED ON THE SAME NODE
         // TODO: SWITCH UP THE CORPORATION CHANGE MECHANISM TO NOT RELY ON THE CHARACTER OBJECT SO THIS CAN BE DONE THROUGH THE DATABASE
         // TODO: DIRECTLY
-        Character character = this.Items.GetItem <Character> (callerCharacterID);
+        Character character = Items.GetItem <Character> (callerCharacterID);
 
         // ensure empire control is trained and at least level 5
         character.EnsureSkillLevel (TypeID.EmpireControl, 5);
 
         // the alliance costs 1b ISK to establish, and that's taken from the corporation's wallet
-        using (IWallet wallet = this.Wallets.AcquireWallet (Corporation.ID, call.Session.CorpAccountKey, true))
+        using (IWallet wallet = Wallets.AcquireWallet (Corporation.ID, call.Session.CorpAccountKey, true))
         {
             // ensure there's enough balance
             wallet.EnsureEnoughBalance (Constants.AllianceCreationCost);
@@ -550,16 +550,16 @@ public class corpRegistry : MultiClientBoundService
             wallet.CreateJournalRecord (MarketReference.AllianceRegistrationFee, null, null, -Constants.AllianceCreationCost);
 
             // now create the alliance
-            ItemEntity allianceItem = this.Items.CreateSimpleItem (
+            ItemEntity allianceItem = Items.CreateSimpleItem (
                 name, (int) TypeID.Alliance, call.Session.CorporationID,
-                this.Items.LocationSystem.ID, Flags.None, 1, false, true, 0, 0, 0,
+                Items.LocationSystem.ID, Flags.None, 1, false, true, 0, 0, 0,
                 ""
             );
 
             int allianceID = allianceItem.ID;
 
             // unload the item as alliances shouldn't really be loaded anywhere
-            this.Items.UnloadItem (allianceItem);
+            Items.UnloadItem (allianceItem);
 
             // now record the alliance into the database
             Database.CrpAlliancesCreate (allianceID, shortName, description, url, call.Session.CorporationID, callerCharacterID);
@@ -639,7 +639,7 @@ public class corpRegistry : MultiClientBoundService
         // TODO: PROPERLY IMPLEMENT THIS CHECK, RIGHT NOW THE CHARACTER AND THE CORPREGISTRY INSTANCES DO NOT HAVE TO BE LOADED ON THE SAME NODE
         // TODO: SWITCH UP THE CORPORATION CHANGE MECHANISM TO NOT RELY ON THE CHARACTER OBJECT SO THIS CAN BE DONE THROUGH THE DATABASE
         // TODO: DIRECTLY
-        Character character = this.Items.GetItem <Character> (callerCharacterID);
+        Character character = Items.GetItem <Character> (callerCharacterID);
 
         this.CalculateCorporationLimits (character, out int maximumMembers, out int allowedMemberRaceIDs);
 
@@ -652,7 +652,7 @@ public class corpRegistry : MultiClientBoundService
         try
         {
             // acquire the wallet for this character too
-            using (IWallet wallet = this.Wallets.AcquireWallet (character.ID, WalletKeys.MAIN))
+            using (IWallet wallet = Wallets.AcquireWallet (character.ID, WalletKeys.MAIN))
             {
                 // ensure there's enough balance
                 wallet.EnsureEnoughBalance (-corporationStartupCost);
@@ -717,13 +717,13 @@ public class corpRegistry : MultiClientBoundService
                 Notifications.NotifyCorporation (change.OldCorporationID, change);
                 Notifications.NotifyCorporation (change.NewCorporationID, change);
                 // create default wallets
-                this.Wallets.CreateWallet (corporationID, WalletKeys.MAIN,    0.0);
-                this.Wallets.CreateWallet (corporationID, WalletKeys.SECOND,  0.0);
-                this.Wallets.CreateWallet (corporationID, WalletKeys.THIRD,   0.0);
-                this.Wallets.CreateWallet (corporationID, WalletKeys.FOURTH,  0.0);
-                this.Wallets.CreateWallet (corporationID, WalletKeys.FIFTH,   0.0);
-                this.Wallets.CreateWallet (corporationID, WalletKeys.SIXTH,   0.0);
-                this.Wallets.CreateWallet (corporationID, WalletKeys.SEVENTH, 0.0);
+                Wallets.CreateWallet (corporationID, WalletKeys.MAIN,    0.0);
+                Wallets.CreateWallet (corporationID, WalletKeys.SECOND,  0.0);
+                Wallets.CreateWallet (corporationID, WalletKeys.THIRD,   0.0);
+                Wallets.CreateWallet (corporationID, WalletKeys.FOURTH,  0.0);
+                Wallets.CreateWallet (corporationID, WalletKeys.FIFTH,   0.0);
+                Wallets.CreateWallet (corporationID, WalletKeys.SIXTH,   0.0);
+                Wallets.CreateWallet (corporationID, WalletKeys.SEVENTH, 0.0);
                 // create the employment record for the character
                 CharacterDB.CreateEmploymentRecord (character.ID, corporationID, DateTime.UtcNow.ToFileTimeUtc ());
                 // create company shares too!
@@ -738,7 +738,7 @@ public class corpRegistry : MultiClientBoundService
                 character.Persist ();
 
                 // load the corporation item
-                this.Items.LoadItem <Corporation> (corporationID);
+                Items.LoadItem <Corporation> (corporationID);
                 
                 // register audit stuff
                 Audit.RecordAudit (corporationID, callerCharacterID, CorporationLogEvent.CreatedCorporation);
@@ -893,7 +893,7 @@ public class corpRegistry : MultiClientBoundService
 
     public PyDataType SetAccountKey (ServiceCall call, PyInteger accountKey)
     {
-        if (this.Wallets.IsTakeAllowed (call.Session, accountKey, call.Session.CorporationID))
+        if (Wallets.IsTakeAllowed (call.Session, accountKey, call.Session.CorporationID))
             SessionManager.PerformSessionUpdate (Session.CHAR_ID, call.Session.CharacterID, new Session {[Session.CORP_ACCOUNT_KEY] = accountKey});
 
         return null;
@@ -916,7 +916,7 @@ public class corpRegistry : MultiClientBoundService
 
             // TODO: INCLUDE WETHER THE SHAREHOLDER IS A CORPORATION OR NOT, MAYBE CREATE A CUSTOM OBJECT FOR THIS
             // calculate amount to give and acquire it's wallet
-            using (IWallet dest = this.Wallets.AcquireWallet (ownerID, WalletKeys.MAIN))
+            using (IWallet dest = Wallets.AcquireWallet (ownerID, WalletKeys.MAIN))
             {
                 dest.CreateJournalRecord (MarketReference.CorporationDividendPayment, ownerID, Corporation.ID, pricePerShare * sharesCount);
             }
@@ -928,7 +928,7 @@ public class corpRegistry : MultiClientBoundService
         double pricePerMember = totalAmount / Corporation.MemberCount;
 
         foreach (int characterID in DB.GetMembersForCorp (Corporation.ID))
-            using (IWallet dest = this.Wallets.AcquireWallet (characterID, WalletKeys.MAIN))
+            using (IWallet dest = Wallets.AcquireWallet (characterID, WalletKeys.MAIN))
             {
                 dest.CreateJournalRecord (MarketReference.CorporationDividendPayment, characterID, Corporation.ID, pricePerMember);
             }
@@ -948,12 +948,12 @@ public class corpRegistry : MultiClientBoundService
         if (Corporation.CeoID != call.Session.CharacterID)
             throw new OnlyCEOCanPayoutDividends ();
 
-        using (IWallet wallet = this.Wallets.AcquireWallet (call.Session.CorporationID, call.Session.CorpAccountKey, true))
+        using (IWallet wallet = Wallets.AcquireWallet (call.Session.CorporationID, call.Session.CorpAccountKey, true))
         {
             // check if there's enough cash left
             wallet.EnsureEnoughBalance (amount);
             // make transaction
-            wallet.CreateJournalRecord (MarketReference.CorporationDividendPayment, this.Items.OwnerBank.ID, null, amount);
+            wallet.CreateJournalRecord (MarketReference.CorporationDividendPayment, Items.OwnerBank.ID, null, amount);
         }
 
         if (payShareholders == 1)
@@ -989,7 +989,7 @@ public class corpRegistry : MultiClientBoundService
             throw new CrpAccessDenied (MLS.UI_CORP_ACCESSDENIED12);
 
         // TODO: CHANGE THIS UP SO IT DOESN'T REQUIRE THE OBJECT IN MEMORY AS CORPREGISTRY MIGHT NOT BE ON THE SAME NODE AS OUR CHARACTER
-        Character character = this.Items.GetItem <Character> (call.Session.CharacterID);
+        Character character = Items.GetItem <Character> (call.Session.CharacterID);
 
         this.CalculateCorporationLimits (character, out int maximumMembers, out int allowedMemberRaceIDs);
 
@@ -1078,7 +1078,7 @@ public class corpRegistry : MultiClientBoundService
     {
         // TODO: HANDLE DIVISION AND SQUADRON CHANGES
         int       callerCharacterID = call.Session.CharacterID;
-        Character character         = this.Items.GetItem <Character> (callerCharacterID);
+        Character character         = Items.GetItem <Character> (callerCharacterID);
         Session   update            = new Session ();
 
         // get current roles for that character
@@ -1442,13 +1442,13 @@ public class corpRegistry : MultiClientBoundService
         PyString        description
     )
     {
-        Station station           = this.Items.GetStaticStation (stationID);
+        Station station           = Items.GetStaticStation (stationID);
         int     callerCharacterID = call.Session.CharacterID;
         long    price             = CorporationAdvertisementFlatFee + (CorporationAdvertisementDailyRate * days);
 
         // TODO: ENSURE stationID MATCHES ONE OF OUR OFFICES FOR THE ADVERT TO BE CREATED
         // get the current wallet and check if there's enough money on it
-        using (IWallet wallet = this.Wallets.AcquireWallet (call.Session.CorporationID, call.Session.CorpAccountKey, true))
+        using (IWallet wallet = Wallets.AcquireWallet (call.Session.CorporationID, call.Session.CorpAccountKey, true))
         {
             wallet.EnsureEnoughBalance (price);
             wallet.CreateJournalRecord (MarketReference.CorporationAdvertisementFee, callerCharacterID, null, null, price);
@@ -1579,11 +1579,11 @@ public class corpRegistry : MultiClientBoundService
         if (this.MachoResolveObject (call, bindParams) != BoundServiceManager.MachoNet.NodeID)
             throw new CustomError ("Trying to bind an object that does not belong to us!");
 
-        Corporation corp = this.Items.LoadItem <Corporation> (bindParams.ObjectID);
+        Corporation corp = Items.LoadItem <Corporation> (bindParams.ObjectID);
 
         return new corpRegistry (
-            DB, Database, ChatDB, CharacterDB, Notifications, MailManager, this.Wallets, Constants,
-            this.Items, Ancestries, SessionManager, corp, bindParams.ExtraValue, this, this.Audit, this.Shares
+            DB, Database, ChatDB, CharacterDB, Notifications, MailManager, Wallets, Constants,
+            Items, Ancestries, SessionManager, corp, bindParams.ExtraValue, this, Audit, Shares
         );
     }
 
@@ -1814,14 +1814,14 @@ public class corpRegistry : MultiClientBoundService
     private void LockdownItem (int voteCaseID, int itemID, int stationID)
     {
         // lock the item
-        Database.InvItemsLockedAdd (itemID, this.ObjectID, stationID, voteCaseID);
+        Database.InvItemsLockedAdd (itemID, ObjectID, stationID, voteCaseID);
         // get the item type
         uint typeID = Database.InvItemsGetType (itemID);
         // TODO: DETERMINE WHO REALLY HAS TO GET THIS NOTIFICATION
-        OnLockedItemChange change = new OnLockedItemChange (itemID, this.ObjectID, stationID)
+        OnLockedItemChange change = new OnLockedItemChange (itemID, ObjectID, stationID)
             .AddChange ("typeID", null, typeID);
         
-        Notifications.NotifyCorporation (this.ObjectID, change);
+        Notifications.NotifyCorporation (ObjectID, change);
     }
 
     private void NotifyUnlockedItem (int itemID, int corporationID, int stationID)
@@ -1926,21 +1926,21 @@ public class corpRegistry : MultiClientBoundService
             return;
         
         // open the shares account and create the new shares
-        using (ISharesAccount corporationAccount = this.Shares.AcquireSharesAccount (this.ObjectID))
+        using (ISharesAccount corporationAccount = Shares.AcquireSharesAccount (ObjectID))
         {
-            uint currentShares = corporationAccount.GetSharesForCorporation (this.ObjectID);
+            uint currentShares = corporationAccount.GetSharesForCorporation (ObjectID);
             
             corporationAccount.UpdateSharesForCorporation (
-                this.ObjectID,
+                ObjectID,
                 currentShares + (uint) parameter
             );
             
             OnShareChange changeForNewHolder = new OnShareChange (
-                this.ObjectID, this.ObjectID,
+                ObjectID, ObjectID,
                 currentShares == 0 ? null : currentShares, currentShares + (uint) parameter
             );
             
-            Notifications.NotifyCorporationByRole (this.ObjectID, changeForNewHolder, CorporationRole.JuniorAccountant, CorporationRole.Accountant);
+            Notifications.NotifyCorporationByRole (ObjectID, changeForNewHolder, CorporationRole.JuniorAccountant, CorporationRole.Accountant);
         }
     }
 
@@ -1989,14 +1989,14 @@ public class corpRegistry : MultiClientBoundService
         Database.CrpVotesApply (voteCaseID);
         
         // send the notification to everyone that can see the sanctioned actions
-        OnSanctionedActionChanged changes = new OnSanctionedActionChanged (this.ObjectID, voteCaseID)
+        OnSanctionedActionChanged changes = new OnSanctionedActionChanged (ObjectID, voteCaseID)
             .AddValue ("inEffect", 0, 1)
             .AddValue ("actedUpon", 0, 1)
             .AddValue ("timeActedUpon", null, DateTime.Now.ToFileTimeUtc ())
             .AddValue ("status", 2, 1);
         
         // notify directors of the corporation
-        Notifications.NotifyCorporationByRole (this.ObjectID, CorporationRole.Director, changes);
+        Notifications.NotifyCorporationByRole (ObjectID, CorporationRole.Director, changes);
         
         return null;
     }

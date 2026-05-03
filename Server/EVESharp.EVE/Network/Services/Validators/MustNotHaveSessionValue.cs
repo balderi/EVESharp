@@ -11,12 +11,12 @@ public class MustNotHaveSessionValue : CallValidator
 
     public MustNotHaveSessionValue (string key, Type exception = null)
     {
-        this.Key       = key;
-        this.Exception = exception;
+        Key       = key;
+        Exception = exception;
     }
 
     public override bool Validate (Session session)
     {
-        return session.TryGetValue (this.Key, out PyDataType value) == false || value is null;
+        return session.TryGetValue (Key, out PyDataType value) == false || value is null;
     }
 }

@@ -12,8 +12,8 @@ public class OpcodeATT : Opcode
 
     public override Opcode LoadOpcode (BinaryReader reader)
     {
-        Opcode leftSide  = this.Interpreter.Step (reader);
-        Opcode rightSide = this.Interpreter.Step (reader);
+        Opcode leftSide  = Interpreter.Step (reader);
+        Opcode rightSide = Interpreter.Step (reader);
 
         // ensure that both sides can return a value
         if (leftSide is not OpcodeDEFENVIDX left)
@@ -21,8 +21,8 @@ public class OpcodeATT : Opcode
         if (rightSide is not OpcodeDEFATTRIBUTE right)
             throw new DogmaMachineException ("The right side of a ATT operand must be a DEFATTRIBUTE");
 
-        this.ItemToAffect      = left;
-        this.AttributeToAffect = right;
+        ItemToAffect      = left;
+        AttributeToAffect = right;
 
         return this;
     }

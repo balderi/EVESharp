@@ -12,7 +12,7 @@ public class OpcodeDEFATTRIBUTE : Opcode
 
     public override Opcode LoadOpcode (BinaryReader reader)
     {
-        this.Attribute = (AttributeTypes) reader.ReadInt32 ();
+        Attribute = (AttributeTypes) reader.ReadInt32 ();
 
         return this;
     }

@@ -8,6 +8,6 @@ public abstract class TransformConfigValue : ConfigValue
 
     protected TransformConfigValue (string name, bool optional, Func<string, object> transform) : base (name, optional)
     {
-        this.Transform = transform;
+        Transform = transform;
     }
 }

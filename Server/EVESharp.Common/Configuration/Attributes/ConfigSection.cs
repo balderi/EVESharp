@@ -10,7 +10,7 @@ public class ConfigSection : Attribute
     
     public ConfigSection (string sectionName, bool optional = false)
     {
-        this.Section  = sectionName;
-        this.Optional = optional;
+        Section  = sectionName;
+        Optional = optional;
     }
 }

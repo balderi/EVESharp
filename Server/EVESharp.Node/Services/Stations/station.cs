@@ -13,7 +13,7 @@ public class station : Service
 
     public station (IItems items)
     {
-        this.Items = items;
+        Items = items;
     }
 
     [MustBeInStation]
@@ -21,7 +21,7 @@ public class station : Service
     {
         int stationID = call.Session.StationID;
 
-        Station station = this.Items.GetStaticStation (stationID);
+        Station station = Items.GetStaticStation (stationID);
 
         return new PyTuple (5)
         {
@@ -38,7 +38,7 @@ public class station : Service
     {
         int stationID = call.Session.StationID;
 
-        Station          station = this.Items.GetStaticStation (stationID);
+        Station          station = Items.GetStaticStation (stationID);
         PyList <PyTuple> result  = new PyList <PyTuple> ();
 
         foreach ((int _, Character character) in station.Guests)

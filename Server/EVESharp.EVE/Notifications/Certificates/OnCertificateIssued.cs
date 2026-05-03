@@ -12,14 +12,14 @@ public class OnCertificateIssued : ClientNotification
 
     public OnCertificateIssued (PyInteger certificateID = null) : base (NOTIFICATION_NAME)
     {
-        this.CertificateID = certificateID;
+        CertificateID = certificateID;
     }
 
     public override List <PyDataType> GetElements ()
     {
-        if (this.CertificateID == null)
+        if (CertificateID == null)
             return new List <PyDataType> ();
 
-        return new List <PyDataType> {this.CertificateID};
+        return new List <PyDataType> {CertificateID};
     }
 }

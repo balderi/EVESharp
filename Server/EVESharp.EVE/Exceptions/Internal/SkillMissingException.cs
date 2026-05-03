@@ -9,11 +9,11 @@ public class SkillMissingException : Exception
 
     public SkillMissingException (Type skill)
     {
-        this.SkillTypeID = skill.ID;
+        SkillTypeID = skill.ID;
     }
 
     public SkillMissingException (int skillTypeID)
     {
-        this.SkillTypeID = skillTypeID;
+        SkillTypeID = skillTypeID;
     }
 }

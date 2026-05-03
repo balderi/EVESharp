@@ -15,14 +15,14 @@ public class OnSanctionedActionChanged : ClientNotification
 
     public OnSanctionedActionChanged (int corporationID, int voteCaseID, PyDictionary<PyString, PyTuple> changes = null) : base (NOTIFICATION_NAME)
     {
-        this.CorporationID = corporationID;
-        this.VoteCaseID    = voteCaseID;
-        this.Changes       = changes ?? new PyDictionary <PyString, PyTuple> ();
+        CorporationID = corporationID;
+        VoteCaseID    = voteCaseID;
+        Changes       = changes ?? new PyDictionary <PyString, PyTuple> ();
     }
     
     public OnSanctionedActionChanged AddValue (string columnName, PyDataType oldValue, PyDataType newValue)
     {
-        this.Changes [columnName] = new PyTuple (2)
+        Changes [columnName] = new PyTuple (2)
         {
             [0] = oldValue,
             [1] = newValue
@@ -35,9 +35,9 @@ public class OnSanctionedActionChanged : ClientNotification
     {
         return new List <PyDataType>
         {
-            this.CorporationID,
-            this.VoteCaseID,
-            this.Changes
+            CorporationID,
+            VoteCaseID,
+            Changes
         };
     }
 }

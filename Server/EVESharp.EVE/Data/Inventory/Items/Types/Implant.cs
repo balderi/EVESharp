@@ -13,10 +13,10 @@ public class Implant : ItemEntity
         base.CheckPrerequisites (character);
 
         // check if the implant requires other implant used
-        if (this.Attributes.AttributeExists (AttributeTypes.prereqimplant) == false)
+        if (Attributes.AttributeExists (AttributeTypes.prereqimplant) == false)
             return;
 
-        int typeID = (int) this.Attributes [AttributeTypes.prereqimplant].Integer;
+        int typeID = (int) Attributes [AttributeTypes.prereqimplant].Integer;
 
         if (character.PluggedInImplantsByTypeID.ContainsKey (typeID) == false)
             throw new PrereqImplantMissing (typeID);

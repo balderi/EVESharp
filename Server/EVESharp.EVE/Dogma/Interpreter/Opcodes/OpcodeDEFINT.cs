@@ -10,13 +10,13 @@ public class OpcodeDEFINT : OpcodeWithIntegerOutput
 
     public override Opcode LoadOpcode (BinaryReader reader)
     {
-        this.Value = int.Parse (reader.ReadString ());
+        Value = int.Parse (reader.ReadString ());
 
         return this;
     }
 
     public override int Execute ()
     {
-        return this.Value;
+        return Value;
     }
 }

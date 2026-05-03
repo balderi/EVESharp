@@ -28,13 +28,13 @@ public class Blueprint : ItemEntity
 {
     public Database.Inventory.Types.Information.Blueprint BlueprintInformation { get; }
 
-    public bool Copy                            => this.BlueprintInformation.IsCopy;
-    public int  MaterialLevel                   => this.BlueprintInformation.MaterialLevel;
-    public int  ProductivityLevel               => this.BlueprintInformation.ProductivityLevel;
-    public int  LicensedProductionRunsRemaining => this.BlueprintInformation.LicensedProductionRunsRemaining;
+    public bool Copy                            => BlueprintInformation.IsCopy;
+    public int  MaterialLevel                   => BlueprintInformation.MaterialLevel;
+    public int  ProductivityLevel               => BlueprintInformation.ProductivityLevel;
+    public int  LicensedProductionRunsRemaining => BlueprintInformation.LicensedProductionRunsRemaining;
 
     public Blueprint (Database.Inventory.Types.Information.Blueprint information) : base (information.Information)
     {
-        this.BlueprintInformation = information;
+        BlueprintInformation = information;
     }
 }

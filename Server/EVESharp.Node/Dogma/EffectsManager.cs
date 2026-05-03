@@ -13,8 +13,8 @@ public class EffectsManager
 
     public EffectsManager (IItems items, IDogmaNotifications dogmaNotifications)
     {
-        this.Items              = items;
-        this.DogmaNotifications = dogmaNotifications;
+        Items              = items;
+        DogmaNotifications = dogmaNotifications;
     }
 
     /// <summary>
@@ -28,6 +28,6 @@ public class EffectsManager
         if (module is null)
             return null;
 
-        return module.ItemEffects ??= new ItemEffects (module, this.Items, this.DogmaNotifications, session);
+        return module.ItemEffects ??= new ItemEffects (module, Items, DogmaNotifications, session);
     }
 }

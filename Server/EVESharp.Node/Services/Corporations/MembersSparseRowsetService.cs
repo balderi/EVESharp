@@ -67,7 +67,7 @@ public class MembersSparseRowsetService : SparseRowsetDatabaseService
         // fetch the new ids list
         this.RowsIndex = DB.GetMembers (Corporation.ID);
         // update the header count
-        this.RowsetHeader.Count++;
+        RowsetHeader.Count++;
 
         // notify the clients
         this.SendOnObjectChanged (primaryKey, changes);
@@ -83,7 +83,7 @@ public class MembersSparseRowsetService : SparseRowsetDatabaseService
         // fetch the new ids list
         this.RowsIndex = DB.GetMembers (Corporation.ID);
         // update the header count
-        this.RowsetHeader.Count--;
+        RowsetHeader.Count--;
 
         PyDictionary <PyString, PyTuple> changes = new PyDictionary <PyString, PyTuple>
         {

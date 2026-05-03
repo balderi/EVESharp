@@ -46,17 +46,17 @@ public class Group
         bool allowRecycler, bool     anchored, bool   anchorable, bool   fittableNonSingleton, bool published
     )
     {
-        this.ID                   = id;
-        this.Category             = category;
-        this.Name                 = name;
-        this.Description          = description;
-        this.GraphicID            = graphicId;
-        this.UseBasePrice         = useBasePrice;
-        this.AllowManufacture     = allowManufacture;
-        this.AllowRecycler        = allowRecycler;
-        this.Anchored             = anchored;
-        this.Anchorable           = anchorable;
-        this.FittableNonSingleton = fittableNonSingleton;
-        this.Published            = published;
+        ID                   = id;
+        Category             = category;
+        Name                 = name;
+        Description          = description;
+        GraphicID            = graphicId;
+        UseBasePrice         = useBasePrice;
+        AllowManufacture     = allowManufacture;
+        AllowRecycler        = allowRecycler;
+        Anchored             = anchored;
+        Anchorable           = anchorable;
+        FittableNonSingleton = fittableNonSingleton;
+        Published            = published;
     }
 }

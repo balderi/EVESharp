@@ -31,18 +31,18 @@ public class Region : ItemInventory
 {
     public Database.Inventory.Types.Information.Region RegionInformation { get; }
 
-    public double XMin      => this.RegionInformation.XMin;
-    public double YMin      => this.RegionInformation.YMin;
-    public double ZMin      => this.RegionInformation.ZMin;
-    public double XMax      => this.RegionInformation.XMax;
-    public double YMax      => this.RegionInformation.YMax;
-    public double ZMax      => this.RegionInformation.ZMax;
-    public int?   FactionID => this.RegionInformation.FactionID;
-    public double Radius    => this.RegionInformation.Radius;
+    public double XMin      => RegionInformation.XMin;
+    public double YMin      => RegionInformation.YMin;
+    public double ZMin      => RegionInformation.ZMin;
+    public double XMax      => RegionInformation.XMax;
+    public double YMax      => RegionInformation.YMax;
+    public double ZMax      => RegionInformation.ZMax;
+    public int?   FactionID => RegionInformation.FactionID;
+    public double Radius    => RegionInformation.Radius;
 
     public Region (Database.Inventory.Types.Information.Region region) : base (region.Information)
     {
-        this.RegionInformation = region;
+        RegionInformation = region;
     }
 
     protected override void LoadContents (Flags ignoreFlags = Flags.None)

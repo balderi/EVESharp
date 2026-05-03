@@ -12,31 +12,31 @@ public class ShipModule : ItemEntity
 
     public ShipModule (Database.Inventory.Types.Information.Item info) : base (info)
     {
-        this.Effects = new GodmaShipEffectsList ();
+        Effects = new GodmaShipEffectsList ();
     }
 
     public override PyDictionary GetEffects ()
     {
-        return this.Effects;
+        return Effects;
     }
 
     public bool IsHighSlot ()
     {
-        return this.Effects.ContainsKey ((int) EffectsEnum.HighPower);
+        return Effects.ContainsKey ((int) EffectsEnum.HighPower);
     }
 
     public bool IsMediumSlot ()
     {
-        return this.Effects.ContainsKey ((int) EffectsEnum.MedPower);
+        return Effects.ContainsKey ((int) EffectsEnum.MedPower);
     }
 
     public bool IsLowSlot ()
     {
-        return this.Effects.ContainsKey ((int) EffectsEnum.LowPower);
+        return Effects.ContainsKey ((int) EffectsEnum.LowPower);
     }
 
     public bool IsRigSlot ()
     {
-        return this.Effects.ContainsKey ((int) EffectsEnum.RigSlot);
+        return Effects.ContainsKey ((int) EffectsEnum.RigSlot);
     }
 }

@@ -20,7 +20,7 @@ public class OnItemChange : ClientNotification
 
     public OnItemChange (ItemEntity item) : base (NOTIFICATION_NAME)
     {
-        this.Item = item;
+        Item = item;
     }
 
     /// <summary>
@@ -31,7 +31,7 @@ public class OnItemChange : ClientNotification
     /// <returns>Itself so methods can be chained</returns>
     public OnItemChange AddChange (ItemChange change, PyDataType oldValue)
     {
-        this.Changes [change] = oldValue;
+        Changes [change] = oldValue;
 
         return this;
     }
@@ -44,7 +44,7 @@ public class OnItemChange : ClientNotification
     {
         PyDictionary <PyInteger, PyDataType> result = new PyDictionary <PyInteger, PyDataType> ();
 
-        foreach ((ItemChange changeType, PyDataType oldValue) in this.Changes)
+        foreach ((ItemChange changeType, PyDataType oldValue) in Changes)
             result [(int) changeType] = oldValue;
 
         return result;
@@ -54,7 +54,7 @@ public class OnItemChange : ClientNotification
     {
         return new List <PyDataType>
         {
-            this.Item.GetEntityRow (),
+            Item.GetEntityRow (),
             this.BuildChangeDictionary ()
         };
     }

@@ -8,7 +8,7 @@ public class SynchronousProcessor<T> : IQueueProcessor <T> where T : IMessage
 
     public SynchronousProcessor (IMessageQueue <T> queue)
     {
-        this.Queue = queue;
+        Queue = queue;
     }
     
     public void Start ()
@@ -26,7 +26,7 @@ public class SynchronousProcessor<T> : IQueueProcessor <T> where T : IMessage
     /// </summary>
     public void ProcessNextMessage ()
     {
-        if (this.Queue.TryTake (out T message) == true)
+        if (Queue.TryTake (out T message) == true)
             Queue.HandleMessage (message);
     }
 }

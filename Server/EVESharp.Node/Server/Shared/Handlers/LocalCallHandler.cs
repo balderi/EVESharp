@@ -45,7 +45,7 @@ public class LocalCallHandler
 
     private PyDataType HandleNormalCallReq (ServiceCall call, PyTuple information, string service, string method)
     {
-        MachoNet.Log.Verbose ($"Calling {service}::{method}");
+        MachoNet.Log.Verbose ("Calling {Service}::{Method}", service, method);
 
         return ServiceManager.ServiceCall (service, method, call);
     }

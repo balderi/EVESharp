@@ -10,7 +10,7 @@ public class ConfigValue : Attribute
 
     public ConfigValue (string name, bool optional = false)
     {
-        this.Name     = name;
-        this.Optional = optional;
+        Name     = name;
+        Optional = optional;
     }
 }

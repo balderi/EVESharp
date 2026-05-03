@@ -16,7 +16,7 @@ public class OpcodeDEFASSOCIATION : Opcode
         if (Enum.TryParse (reader.ReadString (), out Association association) == false)
             throw new DogmaMachineException ("Unknown value for DEFASSOCIATION");
 
-        this.Association = association;
+        Association = association;
 
         return this;
     }

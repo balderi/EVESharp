@@ -21,12 +21,12 @@ public class ramProxy : Service
     public ramProxy (RAMDB ramDb, IItems items)
     {
         DB         = ramDb;
-        this.Items = items;
+        Items = items;
     }
 
     public PyDataType GetRelevantCharSkills (ServiceCall call)
     {
-        Character character = this.Items.GetItem <Character> (call.Session.CharacterID);
+        Character character = Items.GetItem <Character> (call.Session.CharacterID);
 
         // i guess this call fetches skills that affect maximumManufacturingJobCount and maximumResearchJobCount
         return new PyTuple (2)

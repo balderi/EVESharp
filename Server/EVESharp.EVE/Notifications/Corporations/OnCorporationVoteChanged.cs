@@ -16,15 +16,15 @@ public class OnCorporationVoteChanged : ClientNotification
 
     public OnCorporationVoteChanged (int corporationID, int voteCaseID, int characterID) : base (NOTIFICATION_NAME)
     {
-        this.CorporationID = corporationID;
-        this.VoteCaseID    = voteCaseID;
-        this.CharacterID   = characterID;
-        this.Changes       = new PyDictionary <PyString, PyTuple> ();
+        CorporationID = corporationID;
+        VoteCaseID    = voteCaseID;
+        CharacterID   = characterID;
+        Changes       = new PyDictionary <PyString, PyTuple> ();
     }
 
     public OnCorporationVoteChanged AddValue (string columnName, PyDataType oldValue, PyDataType newValue)
     {
-        this.Changes [columnName] = new PyTuple (2)
+        Changes [columnName] = new PyTuple (2)
         {
             [0] = oldValue,
             [1] = newValue
@@ -37,10 +37,10 @@ public class OnCorporationVoteChanged : ClientNotification
     {
         return new List <PyDataType>
         {
-            this.CorporationID,
-            this.VoteCaseID,
-            this.CharacterID,
-            this.Changes
+            CorporationID,
+            VoteCaseID,
+            CharacterID,
+            Changes
         };
     }
 }

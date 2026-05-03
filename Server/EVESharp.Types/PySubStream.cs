@@ -53,6 +53,6 @@ public class PySubStream : PyDataType
 
     public override int GetHashCode ()
     {
-        return (int) CRC32.Checksum (this.ByteStream) ^ 0x35415879;
+        return (int) CRC32.Checksum (ByteStream) ^ 0x35415879;
     }
 }

@@ -7,7 +7,7 @@ public class ReceiveCallbackState
 
     public ReceiveCallbackState (byte [] buffer)
     {
-        this.Buffer   = buffer;
-        this.Received = 0;
+        Buffer   = buffer;
+        Received = 0;
     }
 }

@@ -17,25 +17,25 @@ public class MachoProxyTransport : IMachoTransport
     
     public MachoProxyTransport (IMachoTransport source)
     {
-        this.Socket                =  source.Socket;
-        this.Log                   =  source.Log;
-        this.Session               =  source.Session;
-        this.MachoNet              =  source.MachoNet;
-        this.TransportManager      =  source.TransportManager;
+        Socket                =  source.Socket;
+        Log                   =  source.Log;
+        Session               =  source.Session;
+        MachoNet              =  source.MachoNet;
+        TransportManager      =  source.TransportManager;
         
-        this.Socket.DataReceived   += this.HandlePacket;
-        this.Socket.Exception      += this.HandleException;
-        this.Socket.ConnectionLost += this.HandleConnectionLost;
+        Socket.DataReceived   += this.HandlePacket;
+        Socket.Exception      += this.HandleException;
+        Socket.ConnectionLost += this.HandleConnectionLost;
     }
 
     private void HandlePacket (PyDataType data)
     {
-        this.MachoNet.QueueInputPacket (this, data);
+        MachoNet.QueueInputPacket (this, data);
     }
 
     private void HandleConnectionLost ()
     {
-        Log.Fatal ("Lost connection to proxy {0}, is it down?", this.Session.NodeID);
+        Log.Fatal ("Lost connection to proxy {0}, is it down?", Session.NodeID);
 
         // clean up ourselves
         this.Terminated?.Invoke (this);
@@ -43,11 +43,11 @@ public class MachoProxyTransport : IMachoTransport
 
     private void HandleException (Exception ex)
     {
-        this.Log.Error ("Exception detected: ");
+        Log.Error ("Exception detected: ");
 
         do
         {
-            this.Log.Error ("{0}\n{1}", ex.Message, ex.StackTrace);
+            Log.Error ("{0}\n{1}", ex.Message, ex.StackTrace);
         }
         while ((ex = ex.InnerException) != null);
     }
@@ -59,10 +59,10 @@ public class MachoProxyTransport : IMachoTransport
 
     public void Dispose ()
     {
-        this.Socket.Close ();
+        Socket.Close ();
         
-        this.Socket.DataReceived   -= this.HandlePacket;
-        this.Socket.Exception      -= this.HandleException;
-        this.Socket.ConnectionLost -= this.HandleConnectionLost;
+        Socket.DataReceived   -= this.HandlePacket;
+        Socket.Exception      -= this.HandleException;
+        Socket.ConnectionLost -= this.HandleConnectionLost;
     }
 }

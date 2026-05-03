@@ -65,7 +65,7 @@ public class OfficesSparseRowsetService : SparseRowsetDatabaseService
     {
         this.RowsIndex = DB.GetOffices (Corporation.ID);
         // update the header count
-        this.RowsetHeader.Count++;
+        RowsetHeader.Count++;
 
         this.SendOnObjectChanged (primaryKey, changes);
     }
@@ -79,7 +79,7 @@ public class OfficesSparseRowsetService : SparseRowsetDatabaseService
     {
         this.RowsIndex = DB.GetOffices (Corporation.ID);
         // update the header count
-        this.RowsetHeader.Count--;
+        RowsetHeader.Count--;
 
         PyDictionary <PyString, PyTuple> changes = new PyDictionary <PyString, PyTuple>
         {

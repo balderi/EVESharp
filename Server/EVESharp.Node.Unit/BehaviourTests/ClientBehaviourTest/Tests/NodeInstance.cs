@@ -88,9 +88,9 @@ public class NodeInstance
         );
         
         // transport manager
-        this.TransportManager = new TransportManager (this.mHttpMessageHandler.ToHttpClient(), Logger.None);
+        TransportManager = new TransportManager (this.mHttpMessageHandler.ToHttpClient(), Logger.None);
         // setup the listener so we can keep track of the socket
-        this.TransportManager.OnNewTransportOpen += (socket) =>
+        TransportManager.OnNewTransportOpen += (socket) =>
         {
             // transport open, link it into the machoNet input
             TestEveClientSocket proxySocket = (this.mProxyInstance.TransportManager.ServerTransport as TestMachoServerTransport).SimulateNewConnection ();
@@ -105,15 +105,15 @@ public class NodeInstance
             };
         };
         
-        this.MachoNet = new MachoNet  (
-            this.mDatabase.Object, this.TransportManager, this.mLoginProcessor, this.mGeneralMock.Object, Logger.None
+        MachoNet = new MachoNet  (
+            this.mDatabase.Object, TransportManager, this.mLoginProcessor, this.mGeneralMock.Object, Logger.None
         );
         // session manager
-        this.SessionManager = new SessionManager (this.TransportManager, this.MachoNet);
+        SessionManager = new SessionManager (TransportManager, MachoNet);
         // message processor
         this.mMessageProcessor = new SynchronousProcessor <MachoMessage> (
             new MessageQueue (
-                this.MachoNet,
+                MachoNet,
                 Logger.None,
                 this.mNotificationSender.Object,
                 this.mItems.Object,
@@ -121,14 +121,14 @@ public class NodeInstance
                 null,
                 null,
                 Mock.Of <IRemoteServiceManager> (),
-                new PacketCallHelper (this.MachoNet),
-                this.SessionManager
+                new PacketCallHelper (MachoNet),
+                SessionManager
             )
         );
         // cluster manager
-        this.ClusterManager = new ClusterManager (
-            this.MachoNet,
-            this.TransportManager,
+        ClusterManager = new ClusterManager (
+            MachoNet,
+            TransportManager,
             this.mHttpMessageHandler.ToHttpClient (),
             Mock.Of <ITimers> (),
             Logger.None
@@ -137,13 +137,13 @@ public class NodeInstance
 
     public void Initialize ()
     {
-        this.MachoNet.Initialize ();
-        this.MachoNet.MessageProcessor = this.mMessageProcessor;
+        MachoNet.Initialize ();
+        MachoNet.MessageProcessor = this.mMessageProcessor;
         
         // register the node in the cluster
-        this.ClusterManager.RegisterNode ().Wait ();
+        ClusterManager.RegisterNode ().Wait ();
         // connect to the proxy
-        this.ClusterManager.EstablishConnectionWithProxies ().Wait ();
+        ClusterManager.EstablishConnectionWithProxies ().Wait ();
     }
 
     /// <summary>

@@ -39,7 +39,7 @@ public class contractMgr : Service
 
     private ContractDB          DB                 { get; }
     private IItems              Items              { get; }
-    private ITypes              Types              => this.Items.Types;
+    private ITypes              Types              => Items.Types;
     private ISolarSystems       SolarSystems       { get; }
     private INotificationSender Notifications      { get; }
     private IWallets            Wallets            { get; }
@@ -60,7 +60,7 @@ public class contractMgr : Service
         DB                    = db;
         Items                 = items;
         Notifications         = notificationSender;
-        this.Wallets          = wallets;
+        Wallets          = wallets;
         DogmaNotifications    = dogmaNotifications;
         SolarSystems          = solarSystems;
         Contracts             = contracts;
@@ -79,10 +79,10 @@ public class contractMgr : Service
         List <int> assignedContracts = DB.FetchLoginCharacterContractAssigned (callerCharacterID);
 
         foreach (int contractID in outbidContracts)
-            this.DogmaNotifications.QueueMultiEvent (callerCharacterID, new OnContractOutbid (contractID));
+            DogmaNotifications.QueueMultiEvent (callerCharacterID, new OnContractOutbid (contractID));
 
         foreach (int contractID in assignedContracts)
-            this.DogmaNotifications.QueueMultiEvent (callerCharacterID, new OnContractAssigned (contractID));
+            DogmaNotifications.QueueMultiEvent (callerCharacterID, new OnContractAssigned (contractID));
 
         return DB.NumRequiringAttention (callerCharacterID, call.Session.CorporationID);
     }
@@ -167,12 +167,12 @@ public class contractMgr : Service
             PyList <PyInteger> itemEntry = itemEntryList.GetEnumerable <PyInteger> ();
             PyInteger          itemID    = itemEntry [0];
 
-            ItemEntity entity = this.Items.LoadItem (itemID);
+            ItemEntity entity = Items.LoadItem (itemID);
 
             DogmaItems.MoveItem (entity, contract.CrateID);
             
             if (entity.Parent is null)
-                this.Items.UnloadItem (entity);
+                Items.UnloadItem (entity);
         }
     }
 
@@ -213,7 +213,7 @@ public class contractMgr : Service
         if (contractType == (int) ContractTypes.Auction && priceOrStartingBid < this.MinimumBid)
             throw new ConMinMaxPriceError ();
 
-        Character character = this.Items.GetItem <Character> (callerCharacterID);
+        Character character = Items.GetItem <Character> (callerCharacterID);
 
         if (forCorp == false)
         {
@@ -230,12 +230,12 @@ public class contractMgr : Service
 
         // TODO: CHECK FOR MAXIMUM AMOUNT OF ITEMS IN CONTRACT ConTooManyItems
         
-        Station station = this.Items.GetStaticStation (startStationID);
+        Station station = Items.GetStaticStation (startStationID);
         
         // take reward from the character
         if (reward > 0)
         {
-            using (IWallet wallet = this.Wallets.AcquireWallet (callerCharacterID, WalletKeys.MAIN))
+            using (IWallet wallet = Wallets.AcquireWallet (callerCharacterID, WalletKeys.MAIN))
             {
                 wallet.EnsureEnoughBalance (reward);
                 wallet.CreateJournalRecord (MarketReference.ContractRewardAdded, null, null, -reward);

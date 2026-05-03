@@ -15,8 +15,8 @@ public class OpcodeEFF : Opcode
 
     public override Opcode LoadOpcode (BinaryReader reader)
     {
-        Opcode leftSide  = this.Interpreter.Step (reader);
-        Opcode rightSide = this.Interpreter.Step (reader);
+        Opcode leftSide  = Interpreter.Step (reader);
+        Opcode rightSide = Interpreter.Step (reader);
 
         // ensure that both sides can return a value
         if (leftSide is not OpcodeDEFASSOCIATION left)
@@ -24,8 +24,8 @@ public class OpcodeEFF : Opcode
         if (rightSide is not OpcodeATT right)
             throw new DogmaMachineException ("The right side of an EFF operand must be an ATT");
 
-        this.LeftSide  = left;
-        this.RightSide = right;
+        LeftSide  = left;
+        RightSide = right;
 
         return this;
     }

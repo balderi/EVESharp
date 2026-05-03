@@ -13,15 +13,15 @@ public class MachoServerTransport : EVEListener
 
     public MachoServerTransport (int port, IMachoNet machoNet, ILogger log) : base (port)
     {
-        this.Log           =  log;
-        this.MachoNet      =  machoNet;
+        Log           =  log;
+        MachoNet      =  machoNet;
         ConnectionAccepted += this.ConnectionAcceptedHandler;
-        base.Exception   += this.ExceptionHandler;
+        this.Exception   += this.ExceptionHandler;
     }
 
     private void ConnectionAcceptedHandler (IEVESocket socket)
     {
-        this.MachoNet.TransportManager.NewTransport (this.MachoNet, socket);
+        MachoNet.TransportManager.NewTransport (MachoNet, socket);
     }
 
     private void ExceptionHandler (Exception ex)

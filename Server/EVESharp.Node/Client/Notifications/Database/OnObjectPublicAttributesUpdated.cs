@@ -22,25 +22,25 @@ public class OnObjectPublicAttributesUpdated : ClientNotification
         PyDataType primaryKey, SparseRowsetDatabaseService rowset, PyDictionary <PyString, PyTuple> changes, PyDictionary notificationParams = null
     ) : base (NOTIFICATION_NAME)
     {
-        this.PrimaryKey         = primaryKey;
-        this.SparseRowset       = rowset;
-        this.Changes            = changes;
-        this.NotificationParams = notificationParams;
+        PrimaryKey         = primaryKey;
+        SparseRowset       = rowset;
+        Changes            = changes;
+        NotificationParams = notificationParams;
     }
 
     public override List <PyDataType> GetElements ()
     {
         return new List <PyDataType>
         {
-            this.SparseRowset.BoundString,
-            new PyDictionary {["realRowCount"] = this.SparseRowset.RowsetHeader.Count},
+            SparseRowset.BoundString,
+            new PyDictionary {["realRowCount"] = SparseRowset.RowsetHeader.Count},
             new PyTuple (0),
             new PyDictionary
             {
-                ["change"]             = this.Changes,
-                ["changePKIndexValue"] = this.PrimaryKey,
+                ["change"]             = Changes,
+                ["changePKIndexValue"] = PrimaryKey,
                 ["partials"]           = new PyList {"realRowCount"},
-                ["notificationParams"] = this.NotificationParams ?? new PyDictionary ()
+                ["notificationParams"] = NotificationParams ?? new PyDictionary ()
             }
         };
     }

@@ -30,7 +30,7 @@ public class ballparkSvc : ClientBoundService
         : base(manager)
     {
         Console.WriteLine("[ballparkSvc] Global service constructed");
-        this.Items = items;
+        Items = items;
     }
 
     // --------------------------------------------------------------------
@@ -45,7 +45,7 @@ public class ballparkSvc : ClientBoundService
         Console.WriteLine(
             $"[ballparkSvc] ctor: solarSystemID={solarSystemID}, charID={ownerID}, shipID={session.ShipID}");
 
-        this.Items = items;
+        Items = items;
         mBallpark  = new Ballpark(solarSystemID, ownerID);
         Console.WriteLine("[ballparkSvc] Ballpark created (no station autoload — stationSvc provides entities)");
     }
@@ -68,7 +68,7 @@ public class ballparkSvc : ClientBoundService
             $"[ballparkSvc] CreateBoundInstance: objectID={bindParams.ObjectID}, charID={call.Session.CharacterID}, shipID={call.Session.ShipID}");
 
         // objectID here should be the solarSystemID
-        return new ballparkSvc(BoundServiceManager, call.Session, bindParams.ObjectID, this.Items);
+        return new ballparkSvc(BoundServiceManager, call.Session, bindParams.ObjectID, Items);
     }
 
     // --------------------------------------------------------------------
@@ -231,7 +231,7 @@ public class ballparkSvc : ClientBoundService
     // --------------------------------------------------------------------
     public void AddEntity(ItemEntity entity)
     {
-        EnsureBallpark(this.Session);
+        EnsureBallpark(Session);
 
         Console.WriteLine(
             $"[ballparkSvc] AddEntity: entityID={entity.ID}, typeID={entity.Type?.ID}, pos=({entity.X},{entity.Y},{entity.Z})");

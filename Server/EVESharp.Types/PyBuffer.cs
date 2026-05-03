@@ -5,16 +5,16 @@ namespace EVESharp.Types;
 public class PyBuffer : PyDataType
 {
     public byte [] Value  { get; }
-    public int     Length => this.Value.Length;
+    public int     Length => Value.Length;
 
     public PyBuffer (byte [] value)
     {
-        this.Value = value;
+        Value = value;
     }
 
     public override int GetHashCode ()
     {
-        return (int) CRC32.Checksum (this.Value);
+        return (int) CRC32.Checksum (Value);
     }
 
     public static implicit operator byte [] (PyBuffer obj)

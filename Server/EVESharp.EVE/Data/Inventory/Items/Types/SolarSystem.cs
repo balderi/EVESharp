@@ -35,36 +35,36 @@ public class SolarSystem : ItemInventory
 {
     public Database.Inventory.Types.Information.SolarSystem SolarSystemInformation { get; }
 
-    public int    RegionId        => this.SolarSystemInformation.RegionId;
-    public int    ConstellationId => this.SolarSystemInformation.ConstellationId;
-    public double MapX            => this.SolarSystemInformation.MapX;
-    public double MapY            => this.SolarSystemInformation.MapY;
-    public double MapZ            => this.SolarSystemInformation.MapZ;
-    public double MapXMin         => this.SolarSystemInformation.MapXMin;
-    public double MapYMin         => this.SolarSystemInformation.MapYMin;
-    public double MapZMin         => this.SolarSystemInformation.MapZMin;
-    public double MapXMax         => this.SolarSystemInformation.MapXMax;
-    public double MapYMax         => this.SolarSystemInformation.MapYMax;
-    public double MapZMax         => this.SolarSystemInformation.MapZMax;
-    public double Luminosity      => this.SolarSystemInformation.Luminosity;
-    public bool   Border          => this.SolarSystemInformation.Border;
-    public bool   Fringe          => this.SolarSystemInformation.Fringe;
-    public bool   Corridor        => this.SolarSystemInformation.Corridor;
-    public bool   Hub             => this.SolarSystemInformation.Hub;
-    public bool   International   => this.SolarSystemInformation.International;
-    public bool   Regional        => this.SolarSystemInformation.Regional;
-    public bool   Constellation   => this.SolarSystemInformation.Constellation;
-    public double Security        => this.SolarSystemInformation.Security;
-    public int?   FactionId       => this.SolarSystemInformation.FactionId;
-    public double Radius          => this.SolarSystemInformation.Radius;
-    public int    SunTypeId       => this.SolarSystemInformation.SunTypeId;
-    public string SecurityClass   => this.SolarSystemInformation.SecurityClass;
+    public int    RegionId        => SolarSystemInformation.RegionId;
+    public int    ConstellationId => SolarSystemInformation.ConstellationId;
+    public double MapX            => SolarSystemInformation.MapX;
+    public double MapY            => SolarSystemInformation.MapY;
+    public double MapZ            => SolarSystemInformation.MapZ;
+    public double MapXMin         => SolarSystemInformation.MapXMin;
+    public double MapYMin         => SolarSystemInformation.MapYMin;
+    public double MapZMin         => SolarSystemInformation.MapZMin;
+    public double MapXMax         => SolarSystemInformation.MapXMax;
+    public double MapYMax         => SolarSystemInformation.MapYMax;
+    public double MapZMax         => SolarSystemInformation.MapZMax;
+    public double Luminosity      => SolarSystemInformation.Luminosity;
+    public bool   Border          => SolarSystemInformation.Border;
+    public bool   Fringe          => SolarSystemInformation.Fringe;
+    public bool   Corridor        => SolarSystemInformation.Corridor;
+    public bool   Hub             => SolarSystemInformation.Hub;
+    public bool   International   => SolarSystemInformation.International;
+    public bool   Regional        => SolarSystemInformation.Regional;
+    public bool   Constellation   => SolarSystemInformation.Constellation;
+    public double Security        => SolarSystemInformation.Security;
+    public int?   FactionId       => SolarSystemInformation.FactionId;
+    public double Radius          => SolarSystemInformation.Radius;
+    public int    SunTypeId       => SolarSystemInformation.SunTypeId;
+    public string SecurityClass   => SolarSystemInformation.SecurityClass;
     public bool   BelongsToUs     { get; set; }
 
     public SolarSystem (Database.Inventory.Types.Information.SolarSystem info) : base (info.Information)
     {
-        this.SolarSystemInformation = info;
-        this.BelongsToUs            = false;
+        SolarSystemInformation = info;
+        BelongsToUs            = false;
     }
     
     protected override void LoadContents (Flags ignoreFlags = Flags.None)
@@ -107,17 +107,17 @@ public class SolarSystem : ItemInventory
             },
             new PyList (14)
             {
-                [0]  = this.ID,
-                [1]  = this.Name,
-                [2]  = this.X,
-                [3]  = this.Y,
-                [4]  = this.Z,
-                [5]  = this.Radius,
-                [6]  = this.Security,
-                [7]  = this.ConstellationId,
-                [8]  = this.FactionId,
-                [9]  = this.SunTypeId,
-                [10] = this.RegionId,
+                [0]  = ID,
+                [1]  = Name,
+                [2]  = X,
+                [3]  = Y,
+                [4]  = Z,
+                [5]  = Radius,
+                [6]  = Security,
+                [7]  = ConstellationId,
+                [8]  = FactionId,
+                [9]  = SunTypeId,
+                [10] = RegionId,
                 [11] = null,
                 [12] = 0,
                 [13] = 0

@@ -31,7 +31,7 @@ public class jumpCloneSvc : ClientBoundService
     private ItemDB              ItemDB        { get; }
     private MarketDB            MarketDB      { get; }
     private IItems              Items         { get; }
-    private ITypes              Types         => this.Items.Types;
+    private ITypes              Types         => Items.Types;
     private ISolarSystems       SolarSystems  { get; }
     private INotificationSender Notifications { get; }
     private IWallets            Wallets       { get; }
@@ -45,9 +45,9 @@ public class jumpCloneSvc : ClientBoundService
     {
         ItemDB            = itemDB;
         MarketDB          = marketDB;
-        this.Items        = items;
-        this.SolarSystems = solarSystems;
-        this.Wallets      = wallets;
+        Items        = items;
+        SolarSystems = solarSystems;
+        Wallets      = wallets;
         Notifications     = notificationSender;
         Database          = database;
     }
@@ -60,9 +60,9 @@ public class jumpCloneSvc : ClientBoundService
     {
         ItemDB            = itemDB;
         MarketDB          = marketDB;
-        this.Items        = items;
-        this.SolarSystems = solarSystems;
-        this.Wallets      = wallets;
+        Items        = items;
+        SolarSystems = solarSystems;
+        Wallets      = wallets;
         Notifications     = notificationSender;
     }
 
@@ -80,7 +80,7 @@ public class jumpCloneSvc : ClientBoundService
     {
         int callerCharacterID = call.Session.CharacterID;
 
-        Character character = this.Items.GetItem <Character> (callerCharacterID);
+        Character character = Items.GetItem <Character> (callerCharacterID);
 
         return KeyVal.FromDictionary (
             new PyDictionary
@@ -97,7 +97,7 @@ public class jumpCloneSvc : ClientBoundService
         // if the clone is not loaded the clone cannot be removed, players can only remove clones from where they're at
         int callerCharacterID = call.Session.CharacterID;
 
-        if (this.Items.TryGetItem (jumpCloneID, out ItemEntity clone) == false)
+        if (Items.TryGetItem (jumpCloneID, out ItemEntity clone) == false)
             throw new JumpCantDestroyNonLocalClone ();
 
         if (clone.LocationID != call.Session.LocationID)
@@ -107,7 +107,7 @@ public class jumpCloneSvc : ClientBoundService
             throw new MktNotOwner ();
 
         // finally destroy the clone, this also destroys all the implants in it
-        this.Items.DestroyItem (clone);
+        Items.DestroyItem (clone);
 
         // let the client know that the clones were updated
         this.OnCloneUpdate (callerCharacterID);
@@ -141,7 +141,7 @@ public class jumpCloneSvc : ClientBoundService
         int callerCharacterID = call.Session.CharacterID;
         int stationID         = call.Session.StationID;
 
-        Character character = this.Items.GetItem <Character> (callerCharacterID);
+        Character character = Items.GetItem <Character> (callerCharacterID);
 
         // check the maximum number of clones the character has assigned
         long maximumClonesAvailable = character.GetSkillLevel (TypeID.InfomorphPsychology);
@@ -161,9 +161,9 @@ public class jumpCloneSvc : ClientBoundService
         int cost = this.GetPriceForClone (call);
 
         // get character's station
-        Station station = this.Items.GetStaticStation (stationID);
+        Station station = Items.GetStaticStation (stationID);
 
-        using IWallet wallet = this.Wallets.AcquireWallet (character.ID, WalletKeys.MAIN);
+        using IWallet wallet = Wallets.AcquireWallet (character.ID, WalletKeys.MAIN);
 
         {
             wallet.EnsureEnoughBalance (cost);
@@ -171,10 +171,10 @@ public class jumpCloneSvc : ClientBoundService
         }
 
         // create an alpha clone
-        Type cloneType = this.Types [TypeID.CloneGradeAlpha];
+        Type cloneType = Types [TypeID.CloneGradeAlpha];
 
         // create a new clone on the itemDB
-        Clone clone = this.Items.CreateClone (cloneType, station, character);
+        Clone clone = Items.CreateClone (cloneType, station, character);
 
         // finally create the jump clone and invalidate caches
         this.OnCloneUpdate (callerCharacterID);
@@ -201,7 +201,7 @@ public class jumpCloneSvc : ClientBoundService
             throw new CustomError ("Trying to bind an object that does not belong to us!");
 
         return new jumpCloneSvc (
-            bindParams.ObjectID, ItemDB, MarketDB, this.Items, this.SolarSystems, BoundServiceManager, this.Wallets, Notifications,
+            bindParams.ObjectID, ItemDB, MarketDB, Items, SolarSystems, BoundServiceManager, Wallets, Notifications,
             call.Session
         );
     }

@@ -44,7 +44,7 @@ public class marketProxy : Service
     private OldCharacterDB      CharacterDB        { get; }
     private ICacheStorage       CacheStorage       { get; }
     private IItems              Items              { get; }
-    private ITypes              Types              => this.Items.Types;
+    private ITypes              Types              => Items.Types;
     private IDatabase           Database           { get; }
     private IConstants          Constants          { get; }
     private ISolarSystems       SolarSystems       { get; }
@@ -67,7 +67,7 @@ public class marketProxy : Service
         Items              = items;
         Constants          = constants;
         Notifications      = notificationSender;
-        this.Wallets       = wallets;
+        Wallets       = wallets;
         DogmaNotifications = dogmaNotifications;
         SolarSystems       = solarSystems;
         DogmaItems         = dogmaItems;
@@ -222,7 +222,7 @@ public class marketProxy : Service
 
     private void CheckSellOrderDistancePermissions (Character character, int stationID)
     {
-        Station station = this.Items.GetStaticStation (stationID);
+        Station station = Items.GetStaticStation (stationID);
 
         if (character.RegionID != station.RegionID)
             throw new MktInvalidRegion ();
@@ -244,7 +244,7 @@ public class marketProxy : Service
         if (duration == 0)
             return;
 
-        Station station = this.Items.GetStaticStation (stationID);
+        Station station = Items.GetStaticStation (stationID);
 
         if (character.RegionID != station.RegionID)
             throw new MktInvalidRegion ();
@@ -291,7 +291,7 @@ private void PlaceImmediateSellOrderChar(
     DbLock dbLock, IWallet wallet, Character character, int itemID, int typeID, int stationID, int quantity,
     double price, Session session)
 {
-    int solarSystemID = this.Items.GetStaticStation(stationID).SolarSystemID;
+    int solarSystemID = Items.GetStaticStation(stationID).SolarSystemID;
 
     List <(int ownerID, int accountID, bool isCorp, double amount)> pendingRefunds = new List<(int ownerID, int accountID, bool isCorp, double amount)>();
 
@@ -343,7 +343,7 @@ private void PlaceImmediateSellOrderChar(
         // credit seller and tax SCC
         wallet.CreateJournalRecord(MarketReference.MarketTransaction, character.ID, null,  profit);
         if (tax > 0)
-            wallet.CreateJournalRecord(MarketReference.TransactionTax, this.Items.OwnerSCC.ID, null, -tax);
+            wallet.CreateJournalRecord(MarketReference.TransactionTax, Items.OwnerSCC.ID, null, -tax);
 
         // Transaction log (seller)
         wallet.CreateTransactionRecord(
@@ -351,7 +351,7 @@ private void PlaceImmediateSellOrderChar(
         );
 
         // Transaction log (buyer) — **no wallet lock needed**
-        this.Wallets.CreateTransactionRecord(
+        Wallets.CreateTransactionRecord(
             orderOwnerID, TransactionType.Buy, order.CharacterID, wallet.OwnerID,
             typeID, quantityToSell, price, stationID, order.AccountID
         ); // writes mktTransactions only (no balance change). :contentReference[oaicite:3]{index=3}
@@ -360,7 +360,7 @@ private void PlaceImmediateSellOrderChar(
         ItemEntity item = DogmaItems.CreateItem<ItemEntity>(
             Types[typeID], orderOwnerID, stationID, order.IsCorp ? Flags.CorpMarket : Flags.Hangar, quantityToSell
         );
-        if (item.Parent is null) this.Items.UnloadItem(item);
+        if (item.Parent is null) Items.UnloadItem(item);
 
         quantity -= quantityToSell;
     }
@@ -368,7 +368,7 @@ private void PlaceImmediateSellOrderChar(
     // 4) Refund leftover escrow to buyers (if any) — this DOES touch balances, so use wallet locks here only
     foreach ((int ownerID, int accountID, bool isCorp, double amount) in pendingRefunds)
     {
-        using IWallet w = this.Wallets.AcquireWallet(ownerID, accountID, isCorp);
+        using IWallet w = Wallets.AcquireWallet(ownerID, accountID, isCorp);
         w.CreateJournalRecord(MarketReference.MarketEscrow, null, null, amount);
     }
 }
@@ -389,14 +389,14 @@ private void PlaceImmediateSellOrderChar(
             items = DB.PrepareItemForOrder (dbLock, typeID, stationID, -1, quantity, session.CharacterID, session.CorporationID, session.CorporationRole);
 
         if (items is null)
-            throw new NotEnoughQuantity (this.Types [typeID]);
+            throw new NotEnoughQuantity (Types [typeID]);
 
         // load the items here and send proper notifications
         foreach ((int _, MarketDB.ItemQuantityEntry entry) in items)
         {
-           ItemEntity item = this.Items.LoadItem(entry.ItemID);
+           ItemEntity item = Items.LoadItem(entry.ItemID);
 if (item is null)
-    throw new NotEnoughQuantity(this.Types[typeID]);  // item disappeared or wrong station
+    throw new NotEnoughQuantity(Types[typeID]);  // item disappeared or wrong station
 
 int splitQty = entry.OriginalQuantity - entry.Quantity;
 if (splitQty > 0)
@@ -435,7 +435,7 @@ if (splitQty > 0)
             DB.CheckRepackagedItem (dbLock, itemID, out singleton);
 
             if (singleton)
-                throw new RepackageBeforeSelling (this.Types [typeID]);
+                throw new RepackageBeforeSelling (Types [typeID]);
         }
 
         if (duration == 0)
@@ -466,7 +466,7 @@ if (splitQty > 0)
         }
 
         // send a OnOwnOrderChange notification
-        this.DogmaNotifications.QueueMultiEvent (callerCharacterID, new OnOwnOrderChanged (typeID, "Add"));
+        DogmaNotifications.QueueMultiEvent (callerCharacterID, new OnOwnOrderChanged (typeID, "Add"));
     }
 
     private void CheckMatchingSellOrders (MarketOrder [] orders, int quantity, int stationID)
@@ -495,7 +495,7 @@ if (splitQty > 0)
     double price, int range
 )
 {
-    int solarSystemID = this.Items.GetStaticStation(stationID).SolarSystemID;
+    int solarSystemID = Items.GetStaticStation(stationID).SolarSystemID;
 
     // look for matching sell orders
     MarketOrder[] orders = DB.FindMatchingOrders(dbLock, price, typeID, character.ID, solarSystemID, TransactionType.Sell);
@@ -551,21 +551,21 @@ if (splitQty > 0)
                 // credit same wallet
                 wallet.CreateJournalRecord(MarketReference.MarketTransaction, orderOwnerID, null, cost);
                 if (tax > 0)
-                    wallet.CreateJournalRecord(MarketReference.TransactionTax, this.Items.OwnerSCC.ID, null, -tax);
+                    wallet.CreateJournalRecord(MarketReference.TransactionTax, Items.OwnerSCC.ID, null, -tax);
             }
             else
             {
-                using IWallet sellerWallet = this.Wallets.AcquireWallet(orderOwnerID, order.AccountID, order.IsCorp);
+                using IWallet sellerWallet = Wallets.AcquireWallet(orderOwnerID, order.AccountID, order.IsCorp);
                 sellerWallet.CreateJournalRecord(MarketReference.MarketTransaction, orderOwnerID, null, cost);
                 if (tax > 0)
-                    sellerWallet.CreateJournalRecord(MarketReference.TransactionTax, this.Items.OwnerSCC.ID, null, -tax);
+                    sellerWallet.CreateJournalRecord(MarketReference.TransactionTax, Items.OwnerSCC.ID, null, -tax);
             }
 
             // 3) Transactions
             wallet.CreateTransactionRecord(TransactionType.Buy, character.ID, orderOwnerID, typeID, quantityToBuy, price, stationID);
 
             // Seller’s side transaction record
-            this.Wallets.CreateTransactionRecord(
+            Wallets.CreateTransactionRecord(
                 orderOwnerID, TransactionType.Sell, order.CharacterID, wallet.OwnerID, typeID, quantityToBuy, price, stationID,
                 order.AccountID
             );
@@ -580,10 +580,10 @@ if (splitQty > 0)
 );
 
 if (item.Parent is null)
-    this.Items.UnloadItem(item);
+    Items.UnloadItem(item);
 
 
-            Notifications.NotifyCharacter(character.ID, OnItemChange.BuildLocationChange(item, this.Items.LocationMarket.ID));
+            Notifications.NotifyCharacter(character.ID, OnItemChange.BuildLocationChange(item, Items.LocationMarket.ID));
         }
 
         if (quantity == 0)
@@ -602,7 +602,7 @@ private void PlaceBuyOrder
     // ensure the character can place the order where he's trying to
     this.CheckBuyOrderDistancePermissions (character, stationID, duration);
 
-    using IWallet wallet = this.Wallets.AcquireWallet(ownerID, accountKey, ownerID == call.Session.CorporationID);
+    using IWallet wallet = Wallets.AcquireWallet(ownerID, accountKey, ownerID == call.Session.CorporationID);
     using DbLock  dbLock = DB.AcquireMarketLock();
 
     if (duration == 0)
@@ -633,7 +633,7 @@ private void PlaceBuyOrder
     }
 
     // send a OnOwnOrderChange notification
-    this.DogmaNotifications.QueueMultiEvent(character.ID, new OnOwnOrderChanged(typeID, "Add"));
+    DogmaNotifications.QueueMultiEvent(character.ID, new OnOwnOrderChanged(typeID, "Add"));
 }
 
     public PyDataType PlaceCharOrder
@@ -656,13 +656,13 @@ private void PlaceBuyOrder
         PyDataType      located
     )
     {
-        int nodeID = (int) this.SolarSystems.GetNodeStationBelongsTo (stationID);
+        int nodeID = (int) SolarSystems.GetNodeStationBelongsTo (stationID);
 
         if (nodeID != call.MachoNet.NodeID && nodeID != 0)
             throw new RedirectCallRequest (nodeID);
         
         // get solarSystem for the station
-        Character character  = this.Items.GetItem <Character> (call.Session.CharacterID);
+        Character character  = Items.GetItem <Character> (call.Session.CharacterID);
         double    brokerCost = 0.0;
 
         // if the order is not immediate check the amount of orders the character has
@@ -685,7 +685,7 @@ private void PlaceBuyOrder
         // for sell orders just look into if the user can query that wallet
         if (useCorp == true)
         {
-            if (this.Wallets.IsTakeAllowed (call.Session, call.Session.CorpAccountKey, call.Session.CorporationID) == false)
+            if (Wallets.IsTakeAllowed (call.Session, call.Session.CorpAccountKey, call.Session.CorporationID) == false)
                 throw new CrpAccessDenied (MLS.UI_CORP_ACCESSTOWALLETDIVISIONDENIED);
 
             if (CorporationRole.Trader.Is (call.Session.CorporationRole) == false)
@@ -723,7 +723,7 @@ private void PlaceBuyOrder
     {
         int callerCharacterID = call.Session.CharacterID;
 
-        Character character = this.Items.GetItem <Character> (callerCharacterID);
+        Character character = Items.GetItem <Character> (callerCharacterID);
 
         using DbLock dbLock = DB.AcquireMarketLock ();
 
@@ -743,7 +743,7 @@ private void PlaceBuyOrder
         // check for escrow
         if (order.Escrow > 0.0 && order.Bid == TransactionType.Buy)
         {
-            using (IWallet wallet = this.Wallets.AcquireWallet (orderOwnerID, order.AccountID, order.IsCorp))
+            using (IWallet wallet = Wallets.AcquireWallet (orderOwnerID, order.AccountID, order.IsCorp))
             {
                 wallet.CreateJournalRecord (MarketReference.MarketEscrow, null, null, order.Escrow);
             }
@@ -752,14 +752,14 @@ private void PlaceBuyOrder
         if (order.Bid == TransactionType.Sell)
         {
             // create the new item that will be used by the player
-            ItemEntity item = this.Items.CreateSimpleItem (
-                this.Types [order.TypeID], orderOwnerID, order.LocationID, order.IsCorp ? Flags.CorpMarket : Flags.Hangar, order.UnitsLeft
+            ItemEntity item = Items.CreateSimpleItem (
+                Types [order.TypeID], orderOwnerID, order.LocationID, order.IsCorp ? Flags.CorpMarket : Flags.Hangar, order.UnitsLeft
             );
 
             if (item.Parent is null)
-                this.Items.UnloadItem (item);
+                Items.UnloadItem (item);
             
-            Notifications.NotifyCharacter (character.ID, OnItemChange.BuildLocationChange (item, this.Items.LocationMarket.ID));
+            Notifications.NotifyCharacter (character.ID, OnItemChange.BuildLocationChange (item, Items.LocationMarket.ID));
         }
 
         // finally remove the order
@@ -772,7 +772,7 @@ private void PlaceBuyOrder
             Notifications.NotifyCorporationByRole (call.Session.CorporationID, CorporationRole.Trader, notification);
         else
             // send a OnOwnOrderChange notification
-            this.DogmaNotifications.QueueMultiEvent (callerCharacterID, notification);
+            DogmaNotifications.QueueMultiEvent (callerCharacterID, notification);
 
         return null;
     }
@@ -786,7 +786,7 @@ private void PlaceBuyOrder
     {
         int callerCharacterID = call.Session.CharacterID;
 
-        Character character = this.Items.GetItem <Character> (callerCharacterID);
+        Character character = Items.GetItem <Character> (callerCharacterID);
 
         using DbLock dbLock = DB.AcquireMarketLock ();
 
@@ -814,7 +814,7 @@ private void PlaceBuyOrder
 
         int orderOwnerID = order.IsCorp ? order.CorporationID : order.CharacterID;
 
-        using IWallet wallet = this.Wallets.AcquireWallet (orderOwnerID, order.AccountID, order.IsCorp);
+        using IWallet wallet = Wallets.AcquireWallet (orderOwnerID, order.AccountID, order.IsCorp);
 
         {
             if (order.Bid == TransactionType.Buy)
@@ -847,7 +847,7 @@ private void PlaceBuyOrder
             Notifications.NotifyCorporationByRole (call.Session.CorporationID, CorporationRole.Trader, notification);
         else
             // send a OnOwnOrderChange notification
-            this.DogmaNotifications.QueueMultiEvent (callerCharacterID, notification);
+            DogmaNotifications.QueueMultiEvent (callerCharacterID, notification);
 
         return null;
     }
@@ -885,7 +885,7 @@ private void PlaceBuyOrder
         DB.RemoveOrder (dbLock, order.OrderID);
 
         // give back the escrow paid by the player
-        using IWallet wallet = this.Wallets.AcquireWallet (order.IsCorp ? order.CorporationID : order.CharacterID, order.AccountID, order.IsCorp);
+        using IWallet wallet = Wallets.AcquireWallet (order.IsCorp ? order.CorporationID : order.CharacterID, order.AccountID, order.IsCorp);
 
         {
             wallet.CreateJournalRecord (MarketReference.MarketEscrow, null, null, order.Escrow);
@@ -907,14 +907,14 @@ private void PlaceBuyOrder
         // create the item back into the player's hanger
 
         // create the new item that will be used by the player
-        ItemEntity item = this.Items.CreateSimpleItem (
-            this.Types [order.TypeID], order.CharacterID, order.LocationID, order.IsCorp ? Flags.CorpMarket : Flags.Hangar, order.UnitsLeft
+        ItemEntity item = Items.CreateSimpleItem (
+            Types [order.TypeID], order.CharacterID, order.LocationID, order.IsCorp ? Flags.CorpMarket : Flags.Hangar, order.UnitsLeft
         );
 
         if (item.Parent is null)
-            this.Items.UnloadItem (item);
+            Items.UnloadItem (item);
         
-        Notifications.NotifyCharacter (order.CharacterID, OnItemChange.BuildLocationChange (item, this.Items.LocationMarket.ID));
+        Notifications.NotifyCharacter (order.CharacterID, OnItemChange.BuildLocationChange (item, Items.LocationMarket.ID));
 
         // finally notify the character about the order change
         Notifications.NotifyCharacter (order.CharacterID, new OnOwnOrderChanged (order.TypeID, "Expiry"));

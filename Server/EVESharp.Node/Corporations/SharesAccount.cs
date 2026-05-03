@@ -11,27 +11,27 @@ public class SharesAccount : ISharesAccount
 
     public uint GetSharesForCorporation (int corporationID)
     {
-        return Lock.Creator.CrpSharesGet (this.OwnerID, corporationID);
+        return Lock.Creator.CrpSharesGet (OwnerID, corporationID);
     }
 
     public void UpdateSharesForCorporation (int corporationID, uint newSharesCount)
     {
-        Lock.Creator.CrpSharesSet (this.OwnerID, corporationID, newSharesCount);
+        Lock.Creator.CrpSharesSet (OwnerID, corporationID, newSharesCount);
     }
 
     public SharesAccount (int ownerID, IDatabase Database)
     {
-        this.OwnerID = ownerID;
-        this.Lock    = Database.GetLock (this.GenerateLockName ());
+        OwnerID = ownerID;
+        Lock    = Database.GetLock (this.GenerateLockName ());
     }
 
     private string GenerateLockName ()
     {
-        return $"shares_{this.OwnerID}";
+        return $"shares_{OwnerID}";
     }
     
     public void Dispose ()
     {
-        this.Lock.Dispose ();
+        Lock.Dispose ();
     }
 }

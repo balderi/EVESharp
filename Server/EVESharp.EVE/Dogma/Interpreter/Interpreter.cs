@@ -14,7 +14,7 @@ public class Interpreter
 
     public Interpreter (Environment environment)
     {
-        this.Environment = environment;
+        Environment = environment;
 
         // register all the opcode handlers implemented for now
         this.mOpcodes [EffectOperand.DEFSTRING]      = typeof (OpcodeDEFSTRING);

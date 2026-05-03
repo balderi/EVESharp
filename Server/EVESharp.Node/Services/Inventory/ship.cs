@@ -32,7 +32,7 @@ public class ship : ClientBoundService
     public override AccessLevel AccessLevel => AccessLevel.None;
     private ItemEntity Location { get; }
     private IItems Items { get; }
-    private ITypes Types => this.Items.Types;
+    private ITypes Types => Items.Types;
     private ISolarSystems SolarSystems { get; }
     private ISessionManager SessionManager { get; }
     private IDogmaNotifications DogmaNotifications { get; }
@@ -80,7 +80,7 @@ public class ship : ClientBoundService
     {
         int callerCharacterID = call.Session.CharacterID;
 
-        Character character = this.Items.LoadItem<Character>(callerCharacterID);
+        Character character = Items.LoadItem<Character>(callerCharacterID);
         ItemInventory capsule = DogmaItems.CreateItem<ItemInventory>(
             character.Name + "'s Capsule", Types[TypeID.Capsule], character.ID, Location.ID, Flags.Hangar, 1, true
         );
@@ -94,11 +94,11 @@ public class ship : ClientBoundService
     {
         int callerCharacterID = call.Session.CharacterID;
 
-        if (this.Items.TryGetItem(itemID, out Ship newShip) == false)
+        if (Items.TryGetItem(itemID, out Ship newShip) == false)
             throw new CustomError("Ships not loaded for player and hangar!");
 
-        Character character = this.Items.LoadItem<Character>(callerCharacterID);
-        Ship currentShip = this.Items.LoadItem<Ship>((int)call.Session.ShipID);
+        Character character = Items.LoadItem<Character>(callerCharacterID);
+        Ship currentShip = Items.LoadItem<Ship>((int)call.Session.ShipID);
 
         if (newShip.Singleton == false)
             throw new CustomError("TooFewSubSystemsToUndock");
@@ -121,7 +121,7 @@ public class ship : ClientBoundService
         int callerCharacterID = call.Session.CharacterID;
         int stationID = call.Session.StationID;
 
-        if (this.Items.TryGetItem(itemID, out Ship ship) == false)
+        if (Items.TryGetItem(itemID, out Ship ship) == false)
             throw new CustomError("Ships not loaded for player and hangar!");
 
         if (ship.OwnerID != callerCharacterID)
@@ -162,7 +162,7 @@ public class ship : ClientBoundService
         if (bindParams.ExtraValue != (int)GroupID.Station && bindParams.ExtraValue != (int)GroupID.SolarSystem)
             throw new CustomError("Cannot bind ship service to non-solarsystem and non-station locations");
 
-        if (this.Items.TryGetItem(bindParams.ObjectID, out ItemEntity location) == false)
+        if (Items.TryGetItem(bindParams.ObjectID, out ItemEntity location) == false)
             throw new CustomError("This bind request does not belong here");
 
         if (location.Type.Group.ID != bindParams.ExtraValue)
@@ -170,12 +170,12 @@ public class ship : ClientBoundService
 
         return new ship(
             location,
-            this.Items,
+            Items,
             BoundServiceManager,
             SessionManager,
-            this.DogmaNotifications,
+            DogmaNotifications,
             call.Session,
-            this.SolarSystems,
+            SolarSystems,
             DogmaItems,
             NotificationSender,
             SolarSystemDestinyMgr,
@@ -206,7 +206,7 @@ public class ship : ClientBoundService
         // ----------------------------
         // 1. STATIC STATION LOOKUP
         // ----------------------------
-        Station station = this.Items.GetStaticStation(stationID);
+        Station station = Items.GetStaticStation(stationID);
         if (station == null)
             throw new Exception($"Static station {stationID} missing.");
 
@@ -263,7 +263,7 @@ public class ship : ClientBoundService
         delta[Session.SHIP_ID]          = (PyInteger)shipID;
 
         Log.Information("[ship] Undock: Performing session update...");
-        this.SessionManager.PerformSessionUpdate(Session.CHAR_ID, charID, delta);
+        SessionManager.PerformSessionUpdate(Session.CHAR_ID, charID, delta);
         Log.Information("[ship] Undock: Session update completed");
 
         // NOTE: DoDestinyUpdate is NOT sent here. The client error log proves

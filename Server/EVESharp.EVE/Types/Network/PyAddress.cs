@@ -19,7 +19,7 @@ public abstract class PyAddress
 
     protected PyAddress (PyString type)
     {
-        this.Type = type;
+        Type = type;
     }
 
     public static implicit operator PyAddress (PyObjectData value)

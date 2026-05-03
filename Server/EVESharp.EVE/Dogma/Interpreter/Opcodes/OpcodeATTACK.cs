@@ -21,7 +21,7 @@ public class OpcodeATTACK : OpcodeRunnable
     {
         // ATTACK is a unary opcode — the expression tree only has FirstArgument.
         // Reading a second operand would read past the bytecode into padding zeros.
-        this.Operand = this.Interpreter.Step (reader);
+        Operand = Interpreter.Step (reader);
 
         return this;
     }

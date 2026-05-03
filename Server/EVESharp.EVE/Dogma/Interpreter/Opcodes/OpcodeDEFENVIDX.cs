@@ -17,7 +17,7 @@ public class OpcodeDEFENVIDX : Opcode
         if (Enum.TryParse (reader.ReadString (), out Database.Dogma.Environment environment) == false)
             throw new DogmaMachineException ("Cannot determine environment id");
 
-        this.Environment = environment;
+        Environment = environment;
 
         return this;
     }
@@ -26,26 +26,26 @@ public class OpcodeDEFENVIDX : Opcode
     {
         ItemEntity item = null;
 
-        switch (this.Environment)
+        switch (Environment)
         {
             case Database.Dogma.Environment.Self:
-                item = this.Interpreter.Environment.Self;
+                item = Interpreter.Environment.Self;
                 break;
 
             case Database.Dogma.Environment.Char:
-                item = this.Interpreter.Environment.Character;
+                item = Interpreter.Environment.Character;
                 break;
 
             case Database.Dogma.Environment.Ship:
-                item = this.Interpreter.Environment.Ship;
+                item = Interpreter.Environment.Ship;
                 break;
 
             case Database.Dogma.Environment.Target:
-                item = this.Interpreter.Environment.Target;
+                item = Interpreter.Environment.Target;
                 break;
 
             case Database.Dogma.Environment.Charge:
-                item = this.Interpreter.Environment.Charge;
+                item = Interpreter.Environment.Charge;
                 break;
 
             case Database.Dogma.Environment.Area:
@@ -55,7 +55,7 @@ public class OpcodeDEFENVIDX : Opcode
         }
 
         if (item is null)
-            throw new CustomError ($"Environment item is null for {this.Environment}");
+            throw new CustomError ($"Environment item is null for {Environment}");
 
         return item;
     }

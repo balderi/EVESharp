@@ -7,12 +7,12 @@ public class PyObjectData : PyDataType
 
     public PyObjectData (PyString name, PyDataType arguments)
     {
-        this.Name      = name;
-        this.Arguments = arguments;
+        Name      = name;
+        Arguments = arguments;
     }
 
     public override int GetHashCode ()
     {
-        return (this.Name?.GetHashCode () ?? PyNone.HASH_VALUE) ^ (this.Arguments?.GetHashCode () ?? PyNone.HASH_VALUE) ^ 0x69548514;
+        return (Name?.GetHashCode () ?? PyNone.HASH_VALUE) ^ (Arguments?.GetHashCode () ?? PyNone.HASH_VALUE) ^ 0x69548514;
     }
 }

@@ -15,14 +15,14 @@ public class OnTitleChanged : ClientNotification
 
     public OnTitleChanged (int corporationID, int titleID) : base (NOTIFICATION_NAME)
     {
-        this.CorporationID = corporationID;
-        this.TitleID       = titleID;
-        this.Changes       = new PyDictionary <PyString, PyTuple> ();
+        CorporationID = corporationID;
+        TitleID       = titleID;
+        Changes       = new PyDictionary <PyString, PyTuple> ();
     }
 
     public OnTitleChanged AddChange (PyString column, PyDataType oldValue, PyDataType newValue)
     {
-        this.Changes [column] = new PyTuple (2)
+        Changes [column] = new PyTuple (2)
         {
             [0] = oldValue,
             [1] = newValue
@@ -35,9 +35,9 @@ public class OnTitleChanged : ClientNotification
     {
         return new List <PyDataType>
         {
-            this.CorporationID,
-            this.TitleID,
-            this.Changes
+            CorporationID,
+            TitleID,
+            Changes
         };
     }
 }

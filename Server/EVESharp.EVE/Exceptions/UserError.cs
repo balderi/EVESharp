@@ -62,11 +62,11 @@ public class UserError : PyException
         
     public UserError(string type, PyDictionary extra = null) : base("ccp_exceptions.UserError", type, extra, new PyDictionary())
     {
-        this.Keywords["msg"]  = this.Reason;
-        this.Keywords["dict"] = this.Dictionary;
+        Keywords["msg"]  = Reason;
+        Keywords["dict"] = Dictionary;
     }
 
-    public PyDictionary Dictionary => this.Extra as PyDictionary;
+    public PyDictionary Dictionary => Extra as PyDictionary;
 
     /// <summary>
     /// Used to format messages' arguments so we can send things like type ids, group ids, etc without actually

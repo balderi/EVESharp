@@ -16,40 +16,40 @@ public class OnShareChange : ClientNotification
 
     public OnShareChange (int shareholderID, int corporationID, uint? oldShares, uint? newShares) : base (NOTIFICATION_NAME)
     {
-        this.OldShares = oldShares;
-        this.NewShares = newShares;
+        OldShares = oldShares;
+        NewShares = newShares;
 
         if (oldShares == 0)
-            this.OldShares = null;
+            OldShares = null;
         if (newShares == 0)
-            this.NewShares = null;
+            NewShares = null;
 
-        this.CorporationID = corporationID;
-        this.ShareholderID = shareholderID;
+        CorporationID = corporationID;
+        ShareholderID = shareholderID;
     }
 
     public override List <PyDataType> GetElements ()
     {
         return new List <PyDataType>
         {
-            this.ShareholderID,
-            this.CorporationID,
+            ShareholderID,
+            CorporationID,
             new PyDictionary
             {
                 ["ownerID"] = new PyTuple (2)
                 {
-                    [0] = this.ShareholderID,
-                    [1] = this.ShareholderID
+                    [0] = ShareholderID,
+                    [1] = ShareholderID
                 },
                 ["corporationID"] = new PyTuple (2)
                 {
-                    [0] = this.CorporationID,
-                    [1] = this.CorporationID
+                    [0] = CorporationID,
+                    [1] = CorporationID
                 },
                 ["shares"] = new PyTuple (2)
                 {
-                    [0] = this.OldShares,
-                    [1] = this.NewShares
+                    [0] = OldShares,
+                    [1] = NewShares
                 }
             }
         };

@@ -12,14 +12,14 @@ public class OnCorporationMedalAdded : ClientNotification
 
     public OnCorporationMedalAdded (int medalID) : base (NOTIFICATION_NAME)
     {
-        this.MedalID = medalID;
+        MedalID = medalID;
     }
 
     public override List <PyDataType> GetElements ()
     {
         return new List <PyDataType> ()
         {
-            this.MedalID
+            MedalID
         };
     }
 }

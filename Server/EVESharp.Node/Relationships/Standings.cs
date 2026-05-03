@@ -15,8 +15,8 @@ public class Standings : IStandings
     
     public Standings (StandingDB db, INotificationSender notifications)
     {
-        this.DB            = db;
-        this.Notifications = notifications;
+        DB            = db;
+        Notifications = notifications;
     }
     
     public void SetStanding (EventType ev, int fromID, int toID, double newStanding, string reason)

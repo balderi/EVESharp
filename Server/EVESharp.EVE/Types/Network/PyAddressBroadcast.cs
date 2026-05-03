@@ -21,9 +21,9 @@ public class PyAddressBroadcast : PyAddress
 
     public PyAddressBroadcast (PyList idsOfInterest, PyString idType, PyString service = null) : base (TYPE_BROADCAST)
     {
-        this.Service       = service;
-        this.IDsOfInterest = idsOfInterest;
-        this.IDType        = idType;
+        Service       = service;
+        IDsOfInterest = idsOfInterest;
+        IDType        = idType;
     }
 
     public static implicit operator PyAddressBroadcast (PyObjectData value)

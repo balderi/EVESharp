@@ -41,7 +41,7 @@ public class slash : Service
     private readonly Dictionary <string, Action <string [], ServiceCall>> mCommands =
         new Dictionary <string, Action <string [], ServiceCall>> ();
     public override AccessLevel         AccessLevel           => AccessLevel.None;
-    private         ITypes              Types                 => this.Items.Types;
+    private         ITypes              Types                 => Items.Types;
     private         IItems              Items                 { get; }
     private         ILogger             Log                   { get; }
     private         OldCharacterDB      CharacterDB           { get; }
@@ -72,17 +72,17 @@ public slash
 )
 {
     Log                          = logger;
-    this.Items                   = items;
+    Items                   = items;
     CharacterDB                  = characterDB;
     Notifications                = notificationSender;
-    this.Wallets                 = wallets;
-    this.DogmaNotifications      = dogmaNotifications;
-    this.DogmaItems              = dogmaItems;
-    this.SkillDB                 = skillDB;
-    this.SessionManager          = sessionManager;
-    this.SolarSystemDestinyMgr   = solarSystemDestinyMgr;
-    this.Standings               = standings;
-    this.DungeonData             = dungeonData;
+    Wallets                 = wallets;
+    DogmaNotifications      = dogmaNotifications;
+    DogmaItems              = dogmaItems;
+    SkillDB                 = skillDB;
+    SessionManager          = sessionManager;
+    SolarSystemDestinyMgr   = solarSystemDestinyMgr;
+    Standings               = standings;
+    DungeonData             = dungeonData;
 
     // register commands
     this.mCommands["create"]        = this.CreateCmd;
@@ -206,7 +206,7 @@ public slash
     private void DoMoveToStation (int targetCharacterID, Session targetSession, Station target)
     {
         // Store location change in DB
-        this.CharacterDB.UpdateStationAndLocation (
+        CharacterDB.UpdateStationAndLocation (
             targetCharacterID,
             target.ID,
             target.SolarSystemID,
@@ -219,7 +219,7 @@ public slash
 
         if (shipID.HasValue && shipID.Value > 0)
         {
-            ItemEntity ship = this.Items.GetItem <ItemEntity> (shipID.Value);
+            ItemEntity ship = Items.GetItem <ItemEntity> (shipID.Value);
 
             if (ship != null)
             {
@@ -240,7 +240,7 @@ public slash
         newSession.RegionID        = target.RegionID;
 
         // Perform REAL session change (this triggers correct client notifications)
-        this.SessionManager.PerformSessionUpdate (
+        SessionManager.PerformSessionUpdate (
             "charid",
             targetCharacterID,
             newSession
@@ -280,17 +280,17 @@ public slash
             targetCharacterID = matches [0];
         }
 
-        using IWallet wallet = this.Wallets.AcquireWallet (targetCharacterID, WalletKeys.MAIN);
+        using IWallet wallet = Wallets.AcquireWallet (targetCharacterID, WalletKeys.MAIN);
 
         {
             if (iskQuantity < 0)
             {
                 wallet.EnsureEnoughBalance (iskQuantity);
-                wallet.CreateJournalRecord (MarketReference.GMCashTransfer, this.Items.OwnerSCC.ID, null, -iskQuantity);
+                wallet.CreateJournalRecord (MarketReference.GMCashTransfer, Items.OwnerSCC.ID, null, -iskQuantity);
             }
             else
             {
-                wallet.CreateJournalRecord (MarketReference.GMCashTransfer, this.Items.OwnerSCC.ID, targetCharacterID, null, iskQuantity);
+                wallet.CreateJournalRecord (MarketReference.GMCashTransfer, Items.OwnerSCC.ID, targetCharacterID, null, iskQuantity);
             }
         }
     }
@@ -317,7 +317,7 @@ public slash
         Session targetSession =
             (targetCharacterID == call.Session.CharacterID)
                 ? call.Session
-                : this.SessionManager.FindSession ("charid", targetCharacterID).FirstOrDefault ();
+                : SessionManager.FindSession ("charid", targetCharacterID).FirstOrDefault ();
 
         if (targetSession == null)
             throw new SlashError ("Target character is not online.");
@@ -325,7 +325,7 @@ public slash
         targetSession.EnsureCharacterIsInStation ();
 
         // Lookup station
-        Station target = this.Items.GetStaticStation (stationID);
+        Station target = Items.GetStaticStation (stationID);
 
         DoMoveToStation (targetCharacterID, targetSession, target);
     }
@@ -345,7 +345,7 @@ public slash
         call.Session.EnsureCharacterIsInStation ();
 
         // ensure the typeID exists
-        if (this.Types.ContainsKey (typeID) == false)
+        if (Types.ContainsKey (typeID) == false)
             throw new SlashError ("The specified typeID doesn't exist");
 
         // create a new item with the correct locationID
@@ -377,13 +377,13 @@ public slash
         if (!string.Equals (target, "me", StringComparison.OrdinalIgnoreCase) && target != characterID.ToString ())
             throw new SlashError ("giveskill only supports me for now");
 
-        Character character = this.Items.GetItem <Character> (characterID);
+        Character character = Items.GetItem <Character> (characterID);
 
         if (skillType == "all")
         {
             // player wants all the skills!
             IEnumerable <KeyValuePair <int, Type>> skillTypes =
-                this.Types.Where (x => x.Value.Group.Category.ID == (int) CategoryID.Skill && x.Value.Published);
+                Types.Where (x => x.Value.Group.Category.ID == (int) CategoryID.Skill && x.Value.Published);
 
             Dictionary <int, Skill> injectedSkills = character.InjectedSkillsByTypeID;
 
@@ -395,7 +395,7 @@ public slash
 
                     skill.Level = level;
                     skill.Persist ();
-                    this.DogmaNotifications.QueueMultiEvent (character.ID, new OnSkillTrained (skill));
+                    DogmaNotifications.QueueMultiEvent (character.ID, new OnSkillTrained (skill));
                 }
                 else
                 {
@@ -424,9 +424,9 @@ public slash
                 skill.Level = level;
                 skill.Persist ();
 
-                this.DogmaNotifications.QueueMultiEvent (character.ID, new OnSkillStartTraining (skill));
-                this.DogmaNotifications.NotifyAttributeChange (character.ID, new [] {AttributeTypes.skillPoints, AttributeTypes.skillLevel}, skill);
-                this.DogmaNotifications.QueueMultiEvent (character.ID, new OnSkillTrained (skill));
+                DogmaNotifications.QueueMultiEvent (character.ID, new OnSkillStartTraining (skill));
+                DogmaNotifications.NotifyAttributeChange (character.ID, new [] {AttributeTypes.skillPoints, AttributeTypes.skillLevel}, skill);
+                DogmaNotifications.QueueMultiEvent (character.ID, new OnSkillTrained (skill));
             }
             else
             {
@@ -442,7 +442,7 @@ public slash
                     Types [skillTypeID], character, SkillHistoryReason.GMGiveSkill, skill.GetSkillPointsForLevel (level)
                 );
 
-                this.DogmaNotifications.QueueMultiEvent (character.ID, new OnSkillInjected ());
+                DogmaNotifications.QueueMultiEvent (character.ID, new OnSkillInjected ());
             }
         }
     }
@@ -470,13 +470,13 @@ public slash
         if (amount == 0)
         {
             // Destroy the item
-            if (this.Items.TryGetItem (targetID, out ItemEntity item) == false)
+            if (Items.TryGetItem (targetID, out ItemEntity item) == false)
                 throw new SlashError ($"Item {targetID} not found");
 
             // Unregister from destiny if in space
             int? solarSystemID = call.Session.SolarSystemID;
 
-            if (solarSystemID != null && this.SolarSystemDestinyMgr.TryGet (solarSystemID.Value, out DestinyManager dm))
+            if (solarSystemID != null && SolarSystemDestinyMgr.TryGet (solarSystemID.Value, out DestinyManager dm))
                 dm.UnregisterEntity (targetID);
 
             DogmaItems.DestroyItem (item);
@@ -485,7 +485,7 @@ public slash
         else
         {
             // Heal or damage - modify shield/armor/hull
-            if (this.Items.TryGetItem (targetID, out ItemEntity item) == false)
+            if (Items.TryGetItem (targetID, out ItemEntity item) == false)
                 throw new SlashError ($"Item {targetID} not found");
 
             if (amount > 0)
@@ -555,7 +555,7 @@ public slash
         int shipID = ResolveItemTarget (argv [1], call);
         string moduleArg = argv [2];
 
-        Ship ship = this.Items.LoadItem <Ship> (shipID);
+        Ship ship = Items.LoadItem <Ship> (shipID);
 
         if (ship == null)
             throw new SlashError ($"Ship {shipID} not found or is not a ship");
@@ -595,7 +595,7 @@ public slash
 
         int typeID = int.Parse (argv [1]);
 
-        if (this.Types.ContainsKey (typeID) == false)
+        if (Types.ContainsKey (typeID) == false)
             throw new SlashError ("The specified typeID doesn't exist");
 
         int solarSystemID = call.Session.EnsureCharacterIsInSpace ();
@@ -604,7 +604,7 @@ public slash
         // Get the caller's position
         double x = 0, y = 0, z = 0;
 
-        if (shipID != 0 && this.SolarSystemDestinyMgr.TryGet (solarSystemID, out DestinyManager dm) &&
+        if (shipID != 0 && SolarSystemDestinyMgr.TryGet (solarSystemID, out DestinyManager dm) &&
             dm.TryGetEntity (shipID, out BubbleEntity shipEnt))
         {
             x = shipEnt.Position.X + 5000;
@@ -626,7 +626,7 @@ public slash
         newItem.Persist ();
 
         // Register in DestinyManager and broadcast AddBalls
-        if (this.SolarSystemDestinyMgr.TryGet (solarSystemID, out DestinyManager destinyMgr))
+        if (SolarSystemDestinyMgr.TryGet (solarSystemID, out DestinyManager destinyMgr))
         {
             bool isShipCategory = type.Group.Category.ID == (int) CategoryID.Ship;
 
@@ -681,7 +681,7 @@ public slash
         int typeID = int.Parse (argv [2]);
         int qty    = argv.Length > 3 ? int.Parse (argv [3]) : 1;
 
-        if (this.Types.ContainsKey (typeID) == false)
+        if (Types.ContainsKey (typeID) == false)
             throw new SlashError ("The specified typeID doesn't exist");
 
         Type type       = Types [typeID];
@@ -726,7 +726,7 @@ public slash
     /// </summary>
     private Flags FindFreeSlot (int shipID, Type moduleType)
     {
-        Ship ship = this.Items.LoadItem <Ship> (shipID);
+        Ship ship = Items.LoadItem <Ship> (shipID);
         int  effectCategory = GetModuleSlotCategory (moduleType);
 
         Flags startFlag, endFlag;
@@ -798,7 +798,7 @@ public slash
             throw new SlashError ("Usage: /online <target|me>");
 
         int shipID = ResolveItemTarget (argv [1], call);
-        Ship ship  = this.Items.LoadItem <Ship> (shipID);
+        Ship ship  = Items.LoadItem <Ship> (shipID);
 
         if (ship == null)
             throw new SlashError ($"Ship {shipID} not found");
@@ -848,7 +848,7 @@ public slash
         Session targetSession =
             (targetCharacterID == call.Session.CharacterID)
                 ? call.Session
-                : this.SessionManager.FindSession ("charid", targetCharacterID).FirstOrDefault ();
+                : SessionManager.FindSession ("charid", targetCharacterID).FirstOrDefault ();
 
         if (targetSession == null)
             throw new SlashError ("Target character is not online.");
@@ -859,7 +859,7 @@ public slash
         // Try as station first
         try
         {
-            Station station = this.Items.GetStaticStation (destID);
+            Station station = Items.GetStaticStation (destID);
 
             // It's a valid station - move there
             DoMoveToStation (targetCharacterID, targetSession, station);
@@ -871,7 +871,7 @@ public slash
         }
 
         // Try as another character - teleport to their position in space
-        Session destSession = this.SessionManager.FindSession ("charid", destID).FirstOrDefault ();
+        Session destSession = SessionManager.FindSession ("charid", destID).FirstOrDefault ();
 
         if (destSession != null)
         {
@@ -883,7 +883,7 @@ public slash
             int? destShipID = destSession.ShipID;
 
             if (destShipID != null && destShipID.Value != 0 &&
-                this.SolarSystemDestinyMgr.TryGet (destSystemID.Value, out DestinyManager dm) &&
+                SolarSystemDestinyMgr.TryGet (destSystemID.Value, out DestinyManager dm) &&
                 dm.TryGetEntity (destShipID.Value, out BubbleEntity destEnt))
             {
                 // Teleport target's ship to destination character's position
@@ -893,11 +893,11 @@ public slash
                 if (myShipID == null || myShipID.Value == 0)
                     throw new SlashError ("You don't have an active ship");
 
-                if (mySystemID != null && this.SolarSystemDestinyMgr.TryGet (mySystemID.Value, out DestinyManager srcDm))
+                if (mySystemID != null && SolarSystemDestinyMgr.TryGet (mySystemID.Value, out DestinyManager srcDm))
                     srcDm.UnregisterEntity (myShipID.Value);
 
                 // Update ship position
-                if (this.Items.TryGetItem (myShipID.Value, out ItemEntity shipEntity))
+                if (Items.TryGetItem (myShipID.Value, out ItemEntity shipEntity))
                 {
                     shipEntity.X = destEnt.Position.X + 5000;
                     shipEntity.Y = destEnt.Position.Y;
@@ -912,7 +912,7 @@ public slash
                     newSession.SolarSystemID2 = destSystemID.Value;
                     newSession.LocationID     = destSystemID.Value;
 
-                    this.SessionManager.PerformSessionUpdate ("charid", targetCharacterID, newSession);
+                    SessionManager.PerformSessionUpdate ("charid", targetCharacterID, newSession);
                 }
 
                 Log.Information ("Slash /tr: teleported {CharID} to character {DestCharID}", targetCharacterID, destID);
@@ -934,7 +934,7 @@ public slash
         int    characterID = ResolveCharacterTarget (argv [1], call);
         string skillArg    = argv [2];
 
-        Character character = this.Items.GetItem <Character> (characterID);
+        Character character = Items.GetItem <Character> (characterID);
         Dictionary <int, Skill> injectedSkills = character.InjectedSkillsByTypeID;
 
         if (skillArg == "all")
@@ -975,7 +975,7 @@ public slash
         if (qty <= 0 || qty > 100)
             throw new SlashError ("qty must be between 1 and 100");
 
-        if (this.Types.ContainsKey (typeID) == false)
+        if (Types.ContainsKey (typeID) == false)
             throw new SlashError ("The specified typeID doesn't exist");
 
         int solarSystemID = call.Session.EnsureCharacterIsInSpace ();
@@ -983,7 +983,7 @@ public slash
 
         double baseX = 0, baseY = 0, baseZ = 0;
 
-        if (shipID != 0 && this.SolarSystemDestinyMgr.TryGet (solarSystemID, out DestinyManager dm) &&
+        if (shipID != 0 && SolarSystemDestinyMgr.TryGet (solarSystemID, out DestinyManager dm) &&
             dm.TryGetEntity (shipID, out BubbleEntity shipEnt))
         {
             baseX = shipEnt.Position.X;
@@ -1013,7 +1013,7 @@ public slash
             newItem.Z = z;
             newItem.Persist ();
 
-            if (this.SolarSystemDestinyMgr.TryGet (solarSystemID, out DestinyManager destinyMgr))
+            if (SolarSystemDestinyMgr.TryGet (solarSystemID, out DestinyManager destinyMgr))
             {
                 BubbleEntity bubble = new BubbleEntity
                 {
@@ -1074,7 +1074,7 @@ public slash
         if (qty <= 0 || qty > 100)
             throw new SlashError ("qty must be between 1 and 100");
 
-        if (this.Types.ContainsKey (typeID) == false)
+        if (Types.ContainsKey (typeID) == false)
             throw new SlashError ("The specified typeID doesn't exist");
 
         Type type = Types [typeID];
@@ -1087,7 +1087,7 @@ public slash
 
         double baseX = 0, baseY = 0, baseZ = 0;
 
-        if (shipID != 0 && this.SolarSystemDestinyMgr.TryGet (solarSystemID, out DestinyManager dm) &&
+        if (shipID != 0 && SolarSystemDestinyMgr.TryGet (solarSystemID, out DestinyManager dm) &&
             dm.TryGetEntity (shipID, out BubbleEntity shipEnt))
         {
             baseX = shipEnt.Position.X;
@@ -1114,7 +1114,7 @@ public slash
             newItem.Z = z;
             newItem.Persist ();
 
-            if (this.SolarSystemDestinyMgr.TryGet (solarSystemID, out DestinyManager destinyMgr))
+            if (SolarSystemDestinyMgr.TryGet (solarSystemID, out DestinyManager destinyMgr))
             {
                 Vector3 spawnPos = new Vector3 { X = x, Y = y, Z = z };
 
@@ -1280,7 +1280,7 @@ public slash
 
         int typeID = int.Parse (argv [1]);
 
-        if (this.Types.ContainsKey (typeID) == false)
+        if (Types.ContainsKey (typeID) == false)
             throw new SlashError ("The specified typeID doesn't exist");
 
         call.Session.EnsureCharacterIsInStation ();
@@ -1304,7 +1304,7 @@ public slash
         int typeID      = int.Parse (argv [2]);
         int qty         = int.Parse (argv [3]);
 
-        if (this.Types.ContainsKey (typeID) == false)
+        if (Types.ContainsKey (typeID) == false)
             throw new SlashError ("The specified typeID doesn't exist");
 
         DogmaItems.CreateItem <ItemEntity> (
@@ -1324,7 +1324,7 @@ public slash
         if (shipID == null || shipID.Value == 0)
             throw new SlashError ("You don't have an active ship");
 
-        Ship ship = this.Items.LoadItem <Ship> (shipID.Value);
+        Ship ship = Items.LoadItem <Ship> (shipID.Value);
 
         if (ship == null)
             throw new SlashError ("Could not load ship");
@@ -1362,7 +1362,7 @@ public slash
         double value  = double.Parse (argv [3]);
         string reason = string.Join (" ", argv.Skip (4));
 
-        this.Standings.SetStanding (EventType.StandingSlashSet, fromID, toID, value, reason);
+        Standings.SetStanding (EventType.StandingSlashSet, fromID, toID, value, reason);
         Log.Information ("Slash /setstanding: {FromID} -> {ToID} = {Value} ({Reason})", fromID, toID, value, reason);
     }
 
@@ -1386,7 +1386,7 @@ public slash
             }
         }
 
-        if (!this.SolarSystemDestinyMgr.TryGet (solarSystemID, out DestinyManager dm))
+        if (!SolarSystemDestinyMgr.TryGet (solarSystemID, out DestinyManager dm))
             throw new SlashError ("No destiny manager for this solar system");
 
         Vector3 myPos = default (Vector3);
@@ -1417,7 +1417,7 @@ public slash
         {
             dm.UnregisterEntity (itemID);
 
-            if (this.Items.TryGetItem (itemID, out ItemEntity item))
+            if (Items.TryGetItem (itemID, out ItemEntity item))
                 DogmaItems.DestroyItem (item);
 
             destroyed++;
@@ -1437,7 +1437,7 @@ public slash
         if (int.TryParse (argv [1], out int stationID) == false)
             throw new SlashError ("stationID must be a number");
 
-        Station target = this.Items.GetStaticStation (stationID);
+        Station target = Items.GetStaticStation (stationID);
         DoMoveToStation (call.Session.CharacterID, call.Session, target);
     }
 
@@ -1456,7 +1456,7 @@ public slash
         Session targetSession =
             (targetCharacterID == call.Session.CharacterID)
                 ? call.Session
-                : this.SessionManager.FindSession ("charid", targetCharacterID).FirstOrDefault ();
+                : SessionManager.FindSession ("charid", targetCharacterID).FirstOrDefault ();
 
         if (targetSession == null)
             throw new SlashError ("Target character is not online.");
@@ -1471,7 +1471,7 @@ public slash
         if (shipID == 0)
             throw new SlashError ("Target character has no active ship.");
 
-        if (!this.SolarSystemDestinyMgr.TryGet (solarSystemID.Value, out DestinyManager dm))
+        if (!SolarSystemDestinyMgr.TryGet (solarSystemID.Value, out DestinyManager dm))
             throw new SlashError ("No destiny manager for the target's solar system.");
 
         // Get ship position
@@ -1485,7 +1485,7 @@ public slash
         }
 
         // Check if ship is a capsule
-        ItemEntity shipEntity = this.Items.LoadItem (shipID);
+        ItemEntity shipEntity = Items.LoadItem (shipID);
 
         if (shipEntity == null)
             throw new SlashError ($"Ship {shipID} not found.");
@@ -1509,19 +1509,19 @@ public slash
         if (isCapsule)
         {
             // --- POD KILL: respawn at clone station ---
-            Character character = this.Items.LoadItem<Character> (targetCharacterID);
+            Character character = Items.LoadItem<Character> (targetCharacterID);
 
             int cloneStationID = character.StationID;
 
             if (character.ActiveCloneID != null && character.ActiveCloneID.Value != 0)
             {
-                ItemEntity cloneItem = this.Items.LoadItem (character.ActiveCloneID.Value);
+                ItemEntity cloneItem = Items.LoadItem (character.ActiveCloneID.Value);
 
                 if (cloneItem != null && cloneItem.LocationID != 0)
                     cloneStationID = cloneItem.LocationID;
             }
 
-            Station station = this.Items.GetStaticStation (cloneStationID);
+            Station station = Items.GetStaticStation (cloneStationID);
 
             if (station == null)
                 throw new SlashError ($"Clone station {cloneStationID} not found.");
@@ -1534,7 +1534,7 @@ public slash
             DogmaItems.MoveItem (character, capsule.ID, Flags.Pilot);
 
             // Update character location in DB
-            this.CharacterDB.UpdateStationAndLocation (
+            CharacterDB.UpdateStationAndLocation (
                 targetCharacterID,
                 cloneStationID,
                 station.SolarSystemID,
@@ -1561,7 +1561,7 @@ public slash
         else
         {
             // --- SHIP DEATH: spawn capsule at ship's position ---
-            Character character = this.Items.LoadItem<Character> (targetCharacterID);
+            Character character = Items.LoadItem<Character> (targetCharacterID);
 
             ItemInventory capsule = DogmaItems.CreateItem<ItemInventory> (
                 character.Name + "'s Capsule", Types [TypeID.Capsule], targetCharacterID, solarSystemID.Value, Flags.None, 1, true
@@ -1760,8 +1760,8 @@ public slash
                 }
 
                 List <int> spawnedList = DungeonData.SpawnedEntities.GetOrAdd (
-                    call.Session.CharacterID, _ => new System.Collections.Generic.List<int> ());
-                List <BubbleEntity> spawnedBubbles = new System.Collections.Generic.List<BubbleEntity> ();
+                    call.Session.CharacterID, _ => new List<int> ());
+                List <BubbleEntity> spawnedBubbles = new List<BubbleEntity> ();
 
                 foreach (int objID in room.ObjectIDs)
                 {
@@ -1834,7 +1834,7 @@ public slash
                     throw new SlashError ("No spawned dungeon entities to reset");
 
                 int        solarSystemID = call.Session.EnsureCharacterIsInSpace ();
-                List <int> removedIDs    = new System.Collections.Generic.List<int> ();
+                List <int> removedIDs    = new List<int> ();
 
                 foreach (int itemID in spawnedList.ToArray ())
                 {

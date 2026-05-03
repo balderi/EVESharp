@@ -26,7 +26,7 @@ namespace EVESharp.Node.Services.Insurance;
 public class inventoryInsurancesSvc : ClientBoundService
 {
     // ❗ FORCE C# TO USE YOUR CUSTOM DB, NOT EVESharp.Database.OldInsuranceDB
-    private readonly EVESharp.Node.Services.Insurance.OldInsuranceDB DB;
+    private readonly OldInsuranceDB DB;
 
     private readonly IDatabase Database;
 
@@ -41,7 +41,7 @@ public class inventoryInsurancesSvc : ClientBoundService
         this.Database = database;
 
         // ❗ FULLY QUALIFIED NAME — GUARANTEED CORRECT CLASS
-        this.DB = new EVESharp.Node.Services.Insurance.OldInsuranceDB(database);
+        this.DB = new OldInsuranceDB(database);
     }
 
     // Bound constructor (station-bound instance)
@@ -55,7 +55,7 @@ public class inventoryInsurancesSvc : ClientBoundService
         this.Database = database;
 
         // ❗ FULLY QUALIFIED NAME — GUARANTEED CORRECT CLASS
-        this.DB = new EVESharp.Node.Services.Insurance.OldInsuranceDB(database);
+        this.DB = new OldInsuranceDB(database);
     }
 
     // Called by client UI: insuranceSvc.GetContractForShip
@@ -72,7 +72,7 @@ public class inventoryInsurancesSvc : ClientBoundService
     protected override BoundService CreateBoundInstance(ServiceCall call, ServiceBindParams bindParams)
     {
         return new inventoryInsurancesSvc(
-            this.BoundServiceManager,
+            BoundServiceManager,
             call.Session,
             bindParams.ObjectID,
             this.Database

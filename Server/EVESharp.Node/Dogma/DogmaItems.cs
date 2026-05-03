@@ -45,7 +45,7 @@ public class DogmaItems : IDogmaItems
     
     public T CreateItem <T> (Type type, int ownerID, ItemInventory location, Flags flag, int quantity = 1, bool singleton = false, bool contraband = false) where T : ItemEntity
     {
-        ItemEntity newItem = this.Items.CreateSimpleItem (
+        ItemEntity newItem = Items.CreateSimpleItem (
             type, ownerID, location.ID, flag, quantity, contraband, singleton
         );
 
@@ -62,7 +62,7 @@ public class DogmaItems : IDogmaItems
     public T CreateItem <T> (Type type, int ownerID, int locationID, Flags flag, int quantity = 1, bool singleton = false, bool contraband = false) where T : ItemEntity
     {
         if (this.TryFindInventory (locationID, ownerID, out ItemInventory location) == false)
-            return this.Items.CreateSimpleItem (
+            return Items.CreateSimpleItem (
                 type, ownerID, locationID, flag, quantity, contraband, singleton
             ) as T;
 
@@ -76,7 +76,7 @@ public class DogmaItems : IDogmaItems
     
     public T CreateItem <T> (string itemName, Type type, int ownerID, ItemInventory location, Flags flag, int quantity = 1, bool singleton = false, bool   contraband = false) where T : ItemEntity
     {
-        ItemEntity newItem = this.Items.CreateSimpleItem (
+        ItemEntity newItem = Items.CreateSimpleItem (
             itemName, type.ID, ownerID, location.ID, flag, quantity, contraband, singleton
         );
 
@@ -92,7 +92,7 @@ public class DogmaItems : IDogmaItems
     public T CreateItem <T> (string itemName, Type type, int ownerID, int locationID, Flags flag, int quantity = 1, bool singleton = false, bool   contraband = false) where T : ItemEntity
     {
         if (this.TryFindInventory (locationID, ownerID, out ItemInventory location) == false)
-            return this.Items.CreateSimpleItem (
+            return Items.CreateSimpleItem (
                 type, ownerID, locationID, flag, quantity, contraband, singleton
             ) as T;
 
@@ -102,11 +102,11 @@ public class DogmaItems : IDogmaItems
     public ItemInventory LoadInventory (int inventoryID, int ownerID)
     {
         // try to get the inventory from the metainventories list
-        if (this.MetaInventories.TryGetInventoryForOwner (inventoryID, ownerID, out ItemInventoryByOwnerID ownerInventory) == true)
+        if (MetaInventories.TryGetInventoryForOwner (inventoryID, ownerID, out ItemInventoryByOwnerID ownerInventory) == true)
             return ownerInventory;
         
         // inventory not found, check if normal item is loaded and create an inventory off it
-        ItemEntity entity = this.Items.LoadItem (inventoryID);
+        ItemEntity entity = Items.LoadItem (inventoryID);
 
         if (entity is not ItemInventory itemInventory)
             throw new ItemNotContainer (inventoryID);
@@ -114,14 +114,14 @@ public class DogmaItems : IDogmaItems
             throw new AssembleCCFirst ();
         
         // create a new meta inventory with the required data
-        return this.MetaInventories.Create (itemInventory, ownerID);
+        return MetaInventories.Create (itemInventory, ownerID);
     }
 
     public bool TryFindInventory (int inventoryID, int ownerID, out ItemInventory inventory)
     {
         inventory = null;
 
-        if (this.MetaInventories.TryGetInventoryForOwner (inventoryID, ownerID, out ItemInventoryByOwnerID ownerInventory) == false)
+        if (MetaInventories.TryGetInventoryForOwner (inventoryID, ownerID, out ItemInventoryByOwnerID ownerInventory) == false)
             return Items.TryGetItem (inventoryID, out inventory);
 
         inventory = ownerInventory;
@@ -238,7 +238,7 @@ public class DogmaItems : IDogmaItems
         if (TryFindInventory (newLocationID, item.OwnerID, out ItemInventory inventory) == true)
             inventory.AddItem (item);
 
-        this.DogmaNotifications.QueueMultiEvent (
+        DogmaNotifications.QueueMultiEvent (
             item.OwnerID, oldOwnerID == newOwnerID ? OnItemChange.BuildLocationChange (item, oldFlag, oldLocationID) : OnItemChange.BuildNewItemChange (item)
         );
     }

@@ -27,9 +27,9 @@ public class IndexRowset
 
     public IndexRowset (string idName, PyList <PyString> headers)
     {
-        this.Headers = headers;
-        this.Lines   = new PyDictionary <PyInteger, PyList> ();
-        this.IDName  = idName;
+        Headers = headers;
+        Lines   = new PyDictionary <PyInteger, PyList> ();
+        IDName  = idName;
     }
 
     public static implicit operator PyDataType (IndexRowset rowset)
@@ -47,9 +47,9 @@ public class IndexRowset
 
     public void AddRow (int index, PyList data)
     {
-        if (data.Count != this.Headers.Count)
+        if (data.Count != Headers.Count)
             throw new InvalidParameterException ("The row doesn't have the same amount of items as the header of the IndexRowset");
 
-        this.Lines [index] = data;
+        Lines [index] = data;
     }
 }

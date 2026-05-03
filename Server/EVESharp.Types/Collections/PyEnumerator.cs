@@ -24,7 +24,7 @@ public class PyEnumerator <T> : IPyEnumerator <T> where T : PyDataType
 
     public T Current => this.mEnumerator.Current as T;
 
-    object? IEnumerator.Current => this.Current;
+    object? IEnumerator.Current => Current;
 
     public void Dispose ()
     {

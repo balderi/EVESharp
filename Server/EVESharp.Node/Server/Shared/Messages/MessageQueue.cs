@@ -36,8 +36,8 @@ public abstract class MessageQueue : MessageQueue <MachoMessage>
         MachoNet             = machoNet;
         ServiceManager       = serviceManager;
         BoundServiceManager  = boundServiceManager;
-        this.Items           = items;
-        this.SolarSystems    = solarSystems;
+        Items           = items;
+        SolarSystems    = solarSystems;
         Notifications        = notifications;
         RemoteServiceManager = remoteServiceManager;
         SessionManager       = sessionManager;
@@ -45,7 +45,7 @@ public abstract class MessageQueue : MessageQueue <MachoMessage>
         LocalPingHandler     = new LocalPingHandler (MachoNet);
 
         LocalNotificationHandler = new LocalNotificationHandler (
-            MachoNet, logger, ServiceManager, BoundServiceManager, this.Items, this.SolarSystems, Notifications, SessionManager
+            MachoNet, logger, ServiceManager, BoundServiceManager, Items, SolarSystems, Notifications, SessionManager
         );
     }
 }

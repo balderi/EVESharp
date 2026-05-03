@@ -26,7 +26,7 @@ public class ChatDB : DatabaseAccessor
     /// <param name="characterID"></param>
     public void GrantAccessToStandardChannels (int characterID)
     {
-        this.Database.Prepare (
+        Database.Prepare (
             $"INSERT INTO lscChannelPermissions(channelID, accessor, mode) SELECT channelID, @characterID AS accessor, @mode AS `mode` FROM lscGeneralChannels WHERE channelID < {MIN_CHANNEL_ENTITY_ID}",
             new Dictionary <string, object>
             {
@@ -60,7 +60,7 @@ public class ChatDB : DatabaseAccessor
     public long CreateChannel (int owner, int? relatedEntity, string name, bool maillist)
     {
         if (relatedEntity == null)
-            return -(long) this.Database.Insert (
+            return -(long) Database.Insert (
                 "INSERT INTO lscPrivateChannels(channelID, ownerID, displayName, motd, comparisonKey, memberless, password, mailingList, cspa, temporary, estimatedMemberCount)VALUES(NULL, @ownerID, @displayName, '', NULL, 0, NULL, @mailinglist, 0, 0, 0)",
                 new Dictionary <string, object>
                 {
@@ -73,7 +73,7 @@ public class ChatDB : DatabaseAccessor
         // maillist 
         if (maillist)
         {
-            this.Database.Prepare (
+            Database.Prepare (
                 "INSERT INTO lscGeneralChannels(channelID, ownerID, relatedEntityID, displayName, motd, comparisonKey, memberless, password, mailingList, cspa, temporary, estimatedMemberCount)VALUES(@channelID, @ownerID, @relatedEntityID, @displayName, '', NULL, 0, NULL, 1, 0, 0, 0)",
                 new Dictionary <string, object>
                 {
@@ -87,7 +87,7 @@ public class ChatDB : DatabaseAccessor
             return (long) relatedEntity;
         }
 
-        return (long) this.Database.Insert (
+        return (long) Database.Insert (
             "INSERT INTO lscGeneralChannels(channelID, ownerID, relatedEntityID, displayName, motd, comparisonKey, memberless, password, mailingList, cspa, temporary, estimatedMemberCount)VALUES(NULL, @ownerID, @relatedEntityID, @displayName, '', NULL, 0, NULL, 0, 0, 0, 0)",
             new Dictionary <string, object>
             {
@@ -133,7 +133,7 @@ public class ChatDB : DatabaseAccessor
     /// <param name="role">Role for the player</param>
     public void JoinChannel (int channelID, int characterID, int role = Roles.CONVERSATIONALIST)
     {
-        this.Database.Prepare (
+        Database.Prepare (
             "REPLACE INTO lscChannelPermissions(channelID, accessor, `mode`, untilWhen, originalMode, admin, reason)VALUES(@channelID, @characterID, @role, NULL, @role, @admin, '')",
             new Dictionary <string, object>
             {
@@ -152,17 +152,17 @@ public class ChatDB : DatabaseAccessor
     public void DestroyChannel (int channelID)
     {
         if (channelID < 0)
-            this.Database.Prepare (
+            Database.Prepare (
                 "DELETE FROM lscPrivateChannels WHERE channelID = @channelID",
                 new Dictionary <string, object> {{"@channelID", -channelID}}
             );
         else
-            this.Database.Prepare (
+            Database.Prepare (
                 "DELETE FROM lscGeneralChannels WHERE channelID = @channelID",
                 new Dictionary <string, object> {{"@channelID", channelID}}
             );
 
-        this.Database.Prepare (
+        Database.Prepare (
             "DELETE FROM lscChannelPermissions WHERE channelID = @channelID",
             new Dictionary <string, object> {{"@channelID", channelID}}
         );
@@ -175,7 +175,7 @@ public class ChatDB : DatabaseAccessor
     /// <param name="characterID"></param>
     public void LeaveChannel (int channelID, int characterID)
     {
-        this.Database.Prepare (
+        Database.Prepare (
             "DELETE FROM lscChannelPermissions WHERE accessor = @characterID AND channelID = @channelID",
             new Dictionary <string, object>
             {
@@ -298,7 +298,7 @@ public class ChatDB : DatabaseAccessor
     /// <returns></returns>
     public CRowset GetAddressBookMembers (int characterID)
     {
-        return this.Database.PrepareCRowset (
+        return Database.PrepareCRowset (
             "SELECT accessor AS characterID, online FROM lscChannelPermissions, chrInformation WHERE channelID = @characterID AND chrInformation.characterID = lscChannelPermissions.accessor",
             new Dictionary <string, object> {{"@characterID", characterID}}
         );
@@ -314,7 +314,7 @@ public class ChatDB : DatabaseAccessor
     {
         // TODO: SEEMS THAT CHANNELS ARE USED FOR ADDRESSBOOK TOO?! WTF CCP?! TAKE THAT INTO ACCOUNT
         if (channelID == characterID)
-            return this.Database.PrepareRowset (
+            return Database.PrepareRowset (
                 "SELECT accessor AS charID, corporationID AS corpID, allianceID, 0 AS warFactionID, account.role AS role, 0 AS extra FROM lscChannelPermissions LEFT JOIN chrInformation ON accessor = characterID LEFT JOIN corporation USING(corporationID) LEFT JOIN account ON account.accountID = chrInformation.accountID WHERE channelID = @channelID AND accessor != @characterID",
                 new Dictionary <string, object>
                 {
@@ -323,7 +323,7 @@ public class ChatDB : DatabaseAccessor
                 }
             );
 
-        return this.Database.PrepareRowset (
+        return Database.PrepareRowset (
             "SELECT accessor AS charID, corporationID AS corpID, allianceID, 0 AS warFactionID, account.role AS role, 0 AS extra FROM lscChannelPermissions LEFT JOIN chrInformation ON accessor = characterID LEFT JOIN corporation USING(corporationID) LEFT JOIN account ON account.accountID = chrInformation.accountID WHERE channelID = @channelID AND account.online = 1",
             new Dictionary <string, object> {{"@channelID", channelID}}
         );
@@ -336,7 +336,7 @@ public class ChatDB : DatabaseAccessor
     /// <returns></returns>
     public Rowset GetChannelMods (int channelID)
     {
-        return this.Database.PrepareRowset (
+        return Database.PrepareRowset (
             "SELECT accessor, `mode`, untilWhen, originalMode, admin, reason FROM lscChannelPermissions WHERE channelID = @channelID",
             new Dictionary <string, object> {{"@channelID", channelID}}
         );
@@ -376,7 +376,7 @@ public class ChatDB : DatabaseAccessor
     /// <returns></returns>
     public bool IsPlayerAllowedToChat (int channelID, int characterID)
     {
-        DbDataReader reader = this.Database.Select (
+        DbDataReader reader = Database.Select (
             "SELECT `mode` FROM lscChannelPermissions WHERE channelID = @channelID AND accessor = @characterID",
             new Dictionary <string, object>
             {
@@ -402,7 +402,7 @@ public class ChatDB : DatabaseAccessor
     /// <returns></returns>
     public bool IsPlayerAllowedToRead (int channelID, int characterID)
     {
-        DbDataReader reader = this.Database.Select (
+        DbDataReader reader = Database.Select (
             "SELECT `mode` FROM lscChannelPermissions WHERE channelID = @channelID AND accessor = @characterID",
             new Dictionary <string, object>
             {
@@ -428,7 +428,7 @@ public class ChatDB : DatabaseAccessor
     /// <returns></returns>
     public bool IsPlayerAllowedToChatOnRelatedEntity (int relatedEntityID, int characterID)
     {
-        DbDataReader reader = this.Database.Select (
+        DbDataReader reader = Database.Select (
             "SELECT `mode` FROM lscChannelPermissions, lscGeneralChannels WHERE lscGeneralChannels.channelID = lscChannelPermissions.channelID AND lscGeneralChannels.relatedEntityID = @relatedEntityID AND accessor = @characterID",
             new Dictionary <string, object>
             {
@@ -454,7 +454,7 @@ public class ChatDB : DatabaseAccessor
     /// <returns></returns>
     public int GetChannelIDFromRelatedEntity (int relatedEntityID, bool isMailingList = false)
     {
-        DbDataReader reader = this.Database.Select (
+        DbDataReader reader = Database.Select (
             "SELECT channelID FROM lscGeneralChannels WHERE relatedEntityID = @itemID AND mailingList = @mailingList",
             new Dictionary <string, object>
             {
@@ -482,7 +482,7 @@ public class ChatDB : DatabaseAccessor
         if (channelID < 0)
             return ChannelType.NORMAL;
 
-        DbDataReader reader = this.Database.Select (
+        DbDataReader reader = Database.Select (
             "SELECT displayName FROM lscGeneralChannels WHERE channelID = @channelID",
             new Dictionary <string, object> {{"@channelID", channelID}}
         );
@@ -510,7 +510,7 @@ public class ChatDB : DatabaseAccessor
         else
             query = "SELECT displayName FROM lscGeneralChannels WHERE channelID = @channelID";
 
-        DbDataReader reader = this.Database.Select (
+        DbDataReader reader = Database.Select (
             query,
             new Dictionary <string, object> {{"@channelID", channelID}}
         );
@@ -555,7 +555,7 @@ public class ChatDB : DatabaseAccessor
     /// <returns></returns>
     public bool IsCharacterMemberOfChannel (int channelID, int characterID)
     {
-        DbDataReader reader = this.Database.Select (
+        DbDataReader reader = Database.Select (
             "SELECT 0 AS extra FROM lscChannelPermissions WHERE channelID = @channelID AND accessor = @characterID",
             new Dictionary <string, object>
             {
@@ -578,7 +578,7 @@ public class ChatDB : DatabaseAccessor
     /// <returns></returns>
     public bool IsCharacterAdminOfChannel (int channelID, int characterID)
     {
-        DbDataReader reader = this.Database.Select (
+        DbDataReader reader = Database.Select (
             "SELECT `mode` FROM lscChannelPermissions WHERE channelID = @channelID AND accessor = @characterID",
             new Dictionary <string, object>
             {
@@ -604,7 +604,7 @@ public class ChatDB : DatabaseAccessor
     /// <returns></returns>
     public bool IsCharacterOperatorOrAdminOfChannel (int channelID, int characterID)
     {
-        DbDataReader reader = this.Database.Select (
+        DbDataReader reader = Database.Select (
             "SELECT `mode` FROM lscChannelPermissions WHERE channelID = @channelID AND accessor = @characterID",
             new Dictionary <string, object>
             {
@@ -630,7 +630,7 @@ public class ChatDB : DatabaseAccessor
     /// <param name="permissions">The new permissions for that character</param>
     public void UpdatePermissionsForCharacterOnChannel (int channelID, int characterID, sbyte permissions)
     {
-        this.Database.Prepare (
+        Database.Prepare (
             "REPLACE INTO lscChannelPermissions(channelID, accessor, mode, untilWhen, originalMode, admin, reason)VALUES(@channelID, @characterID, @mode, NULL, @mode, @admin, '')",
             new Dictionary <string, object>
             {

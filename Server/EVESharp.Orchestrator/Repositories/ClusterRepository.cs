@@ -11,7 +11,7 @@ public class ClusterRepository : IClusterRepository
 
     public ClusterRepository (IDatabase db, IConfiguration configuration, ILogger<ClusterRepository> logger)
     {
-        this.DB = db;
+        DB = db;
         
         // check if things have to be cleared
         if (bool.Parse (configuration.GetSection ("Cluster") ["ResetOnStartup"]) != true)
@@ -29,15 +29,15 @@ public class ClusterRepository : IClusterRepository
     {
         List <Node> result = new List <Node> ();
 
-        using (DbDataReader reader = this.DB.Select ("SELECT id, address, ip, port, role, lastHeartBeat FROM cluster;"))
+        using (DbDataReader reader = DB.Select ("SELECT id, address, ip, port, role, lastHeartBeat FROM cluster;"))
         {
             while (reader.Read ())
             {
                 Node node = new Node
                 {
-                    NodeID        = reader.GetInt32 (0),
+                    NodeId        = reader.GetInt32 (0),
                     Address       = reader.GetString (1),
-                    IP            = reader.GetString (2),
+                    Ip            = reader.GetString (2),
                     Port          = reader.GetInt16 (3),
                     Role          = reader.GetString (4),
                     LastHeartBeat = reader.GetInt64 (5)
@@ -52,7 +52,7 @@ public class ClusterRepository : IClusterRepository
 
     public Node FindByAddress (string address)
     {
-        DbDataReader reader = this.DB.Select (
+        DbDataReader reader = DB.Select (
             "SELECT id, address, ip, port, role, lastHeartBeat FROM cluster WHERE address = @address;",
             new Dictionary <string, object> ()
             {
@@ -67,9 +67,9 @@ public class ClusterRepository : IClusterRepository
 
             return new Node
             {
-                NodeID        = reader.GetInt32 (0),
+                NodeId        = reader.GetInt32 (0),
                 Address       = reader.GetString (1),
-                IP            = reader.GetString (2),
+                Ip            = reader.GetString (2),
                 Port          = reader.GetInt32 (3),
                 Role          = reader.GetString (4),
                 LastHeartBeat = reader.GetInt64 (5)
@@ -79,7 +79,7 @@ public class ClusterRepository : IClusterRepository
 
     public Node FindById (int nodeId)
     {
-        DbDataReader reader = this.DB.Select (
+        DbDataReader reader = DB.Select (
             "SELECT id, address, ip, port, role, lastHeartBeat FROM cluster WHERE id = @nodeID;",
             new Dictionary <string, object> ()
             {
@@ -94,9 +94,9 @@ public class ClusterRepository : IClusterRepository
 
             return new Node
             {
-                NodeID        = reader.GetInt32 (0),
+                NodeId        = reader.GetInt32 (0),
                 Address       = reader.GetString (1),
-                IP            = reader.GetString (2),
+                Ip            = reader.GetString (2),
                 Port          = reader.GetInt16 (3),
                 Role          = reader.GetString (4),
                 LastHeartBeat = reader.GetInt64 (5)
@@ -106,7 +106,7 @@ public class ClusterRepository : IClusterRepository
 
     private List <Node> FindByMode (string mode)
     {
-        DbDataReader reader = this.DB.Select (
+        DbDataReader reader = DB.Select (
             "SELECT id, address, ip, port, role, lastHeartBeat FROM cluster WHERE role = @mode;",
             new Dictionary <string, object> ()
             {
@@ -122,9 +122,9 @@ public class ClusterRepository : IClusterRepository
                 result.Add (
                     new Node
                     {
-                        NodeID        = reader.GetInt32 (0),
+                        NodeId        = reader.GetInt32 (0),
                         Address       = reader.GetString (1),
-                        IP            = reader.GetString (2),
+                        Ip            = reader.GetString (2),
                         Port          = reader.GetInt16 (3),
                         Role          = reader.GetString (4),
                         LastHeartBeat = reader.GetInt64 (5)
@@ -153,7 +153,7 @@ public class ClusterRepository : IClusterRepository
         long currentTime = DateTime.UtcNow.ToFileTimeUtc ();
         Guid address     = Guid.NewGuid ();
         
-        ulong nodeId = this.DB.Insert (
+        ulong nodeId = DB.Insert (
             "INSERT INTO cluster(id, ip, address, port, role, lastHeartBeat)VALUES(NULL, @ip, @address, @port, @role, @lastHeartBeat);",
             new Dictionary <string, object> ()
             {
@@ -167,9 +167,9 @@ public class ClusterRepository : IClusterRepository
         
         return new Node
         {
-            NodeID = (int) nodeId,
+            NodeId = (int) nodeId,
             Address = address.ToString (),
-            IP   = ip,
+            Ip   = ip,
             Port = port,
             Role = role,
             LastHeartBeat = currentTime,
@@ -178,7 +178,7 @@ public class ClusterRepository : IClusterRepository
 
     public Node GetLeastLoadedNode ()
     {
-        DbDataReader reader = this.DB.Select (
+        DbDataReader reader = DB.Select (
             "SELECT id, address, ip, port, role, lastHeartBeat, `load` FROM cluster WHERE lastHeartBeat > @lastHeartBeat AND role LIKE @role ORDER BY `load` DESC LIMIT 1",
             new Dictionary <string, object> ()
             {
@@ -194,9 +194,9 @@ public class ClusterRepository : IClusterRepository
 
             return new Node
             {
-                NodeID        = reader.GetInt32 (0),
+                NodeId        = reader.GetInt32 (0),
                 Address       = reader.GetString (1),
-                IP            = reader.GetString (2),
+                Ip            = reader.GetString (2),
                 Port          = reader.GetInt16 (3),
                 Role          = reader.GetString (4),
                 LastHeartBeat = reader.GetInt64 (5),
@@ -207,7 +207,7 @@ public class ClusterRepository : IClusterRepository
 
     public void Hearbeat (string address, double load)
     {
-        this.DB.Query (
+        DB.Query (
             "UPDATE cluster SET lastHeartBeat = @lastHeartBeat, `load` = @load WHERE address LIKE @address;",
             new Dictionary <string, object> ()
             {

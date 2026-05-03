@@ -10,8 +10,8 @@ public class MustBeCharacter : CallValidator
 {
     public MustBeCharacter ()
     {
-        this.Exception           = typeof (CustomError);
-        this.ExceptionParameters = new object [] {"NoCharacterSelected"};
+        Exception           = typeof (CustomError);
+        ExceptionParameters = new object [] {"NoCharacterSelected"};
     }
     
     public override bool Validate (Session session)

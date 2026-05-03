@@ -54,11 +54,11 @@ public class SolarSystems : Dictionary <int, SolarSystem>, ISolarSystems
 
     public SolarSystems (HttpClient httpClient, IStations stations, IClusterManager clusterManager, IDatabase database, IMachoNet machoNet)
     {
-        this.HttpClient     = httpClient;
-        this.MachoNet       = machoNet;
-        this.Database       = database;
-        this.Stations       = stations;
-        this.ClusterManager = clusterManager;
+        HttpClient     = httpClient;
+        MachoNet       = machoNet;
+        Database       = database;
+        Stations       = stations;
+        ClusterManager = clusterManager;
     }
 
     private void LoadSolarSystemOnNode (int solarSystemID, long nodeID)
@@ -66,18 +66,18 @@ public class SolarSystems : Dictionary <int, SolarSystem>, ISolarSystems
         this.SignalSolarSystemLoaded (solarSystemID, nodeID);
 
         // now tell the server to load it
-        this.MachoNet.QueueOutputPacket (
+        MachoNet.QueueOutputPacket (
             new PyPacket (PyPacket.PacketType.NOTIFICATION)
             {
                 Destination = new PyAddressNode (nodeID),
-                Source      = new PyAddressNode (this.MachoNet.NodeID),
+                Source      = new PyAddressNode (MachoNet.NodeID),
                 Payload = new PyTuple (2)
                 {
                     [0] = "OnSolarSystemLoad",
                     [1] = new PyTuple (1) {[0] = solarSystemID}
                 },
                 OutOfBounds = new PyDictionary (),
-                UserID      = this.MachoNet.NodeID
+                UserID      = MachoNet.NodeID
             }
         );
     }
@@ -90,7 +90,7 @@ public class SolarSystems : Dictionary <int, SolarSystem>, ISolarSystems
         if (nodeID != 0)
         {
             // if the id is ours means that this belongs to us
-            if (nodeID == this.MachoNet.NodeID)
+            if (nodeID == MachoNet.NodeID)
             {
                 // TODO: CHECK FOR STATIC OR DYNAMIC SOLAR SYSTEMS!
                 // make sure it is marked as loaded locally
@@ -102,17 +102,17 @@ public class SolarSystems : Dictionary <int, SolarSystem>, ISolarSystems
         }
 
         // determine mode the server is running on
-        if (this.MachoNet.Mode == RunMode.Single)
+        if (MachoNet.Mode == RunMode.Single)
         {
             this.LoadSolarSystemLocally (solarSystemID);
 
-            return this.MachoNet.NodeID;
+            return MachoNet.NodeID;
         }
 
-        if (this.MachoNet.Mode == RunMode.Proxy)
+        if (MachoNet.Mode == RunMode.Proxy)
         {
             // determine what node is going to load it and let it know
-            Task <long> task = this.ClusterManager.GetLessLoadedNode ();
+            Task <long> task = ClusterManager.GetLessLoadedNode ();
 
             task.Wait ();
 
@@ -127,20 +127,20 @@ public class SolarSystems : Dictionary <int, SolarSystem>, ISolarSystems
 
     private void LoadSolarSystemLocally (int solarSystemID)
     {
-        this.SignalSolarSystemLoaded (solarSystemID, this.MachoNet.NodeID);
+        this.SignalSolarSystemLoaded (solarSystemID, MachoNet.NodeID);
     }
 
     private void SignalSolarSystemLoaded (int solarSystemID, long nodeID)
     {
         // mark the item as loaded by that node
-        this.Database.InvSetItemNode (solarSystemID, nodeID);
+        Database.InvSetItemNode (solarSystemID, nodeID);
 
         this.mSolarsystemToNodeID [solarSystemID] = nodeID;
     }
 
     public bool StationBelongsToUs (int stationID)
     {
-        Station station = this.Stations [stationID];
+        Station station = Stations [stationID];
 
         return this.SolarSystemBelongsToUs (station.SolarSystemID);
     }
@@ -154,7 +154,7 @@ public class SolarSystems : Dictionary <int, SolarSystem>, ISolarSystems
     public long GetNodeStationBelongsTo (int stationID)
     {
         // TODO: CHECK FOR STATIC OR DYNAMIC STATIONS!
-        Station station = this.Stations [stationID];
+        Station station = Stations [stationID];
 
         return this.GetNodeSolarSystemBelongsTo (station.LocationID);
     }
@@ -165,6 +165,6 @@ public class SolarSystems : Dictionary <int, SolarSystem>, ISolarSystems
         if (this.mSolarsystemToNodeID.TryGetValue (solarSystemID, out long nodeID))
             return nodeID;
 
-        return this.Database.InvGetItemNode (solarSystemID);
+        return Database.InvGetItemNode (solarSystemID);
     }
 }

@@ -18,7 +18,7 @@ public class onlineStatus : Service
     {
         ChatDB      = chatDB;
         CharacterDB = characterDB;
-        this.Items  = items;
+        Items  = items;
     }
 
     public PyDataType GetInitialState (ServiceCall call)

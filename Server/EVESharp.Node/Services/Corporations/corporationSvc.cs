@@ -44,8 +44,8 @@ public class corporationSvc : Service
         Database      = database;
         DB            = db;
         Constants     = constants;
-        this.Wallets  = wallets;
-        this.Items    = items;
+        Wallets  = wallets;
+        Items    = items;
         Notifications = notificationSender;
         CacheStorage  = cacheStorage;
     }
@@ -195,7 +195,7 @@ public class corporationSvc : Service
         if (pay == false)
             throw new ConfirmCreatingMedal (Constants.MedalCost);
 
-        using (IWallet wallet = this.Wallets.AcquireWallet (call.Session.CorporationID, call.Session.CorpAccountKey, true))
+        using (IWallet wallet = Wallets.AcquireWallet (call.Session.CorporationID, call.Session.CorpAccountKey, true))
         {
             wallet.EnsureEnoughBalance (Constants.MedalCost);
             wallet.CreateJournalRecord (MarketReference.MedalCreation, Constants.MedalTaxCorporation, null, -Constants.MedalCost);
@@ -268,7 +268,7 @@ public class corporationSvc : Service
         if (pay == false)
             throw new ConfirmGivingMedal (Constants.MedalCost);
 
-        using (IWallet wallet = this.Wallets.AcquireWallet (call.Session.CorporationID, call.Session.CorpAccountKey, true))
+        using (IWallet wallet = Wallets.AcquireWallet (call.Session.CorporationID, call.Session.CorpAccountKey, true))
         {
             wallet.EnsureEnoughBalance (Constants.MedalCost);
             wallet.CreateJournalRecord (MarketReference.MedalIssuing, Constants.MedalTaxCorporation, null, -Constants.MedalCost);

@@ -46,7 +46,7 @@ public class facWarMgr : Service
         ChatDB         = chatDB;
         CharacterDB    = characterDB;
         CacheStorage   = cacheStorage;
-        this.Items     = items;
+        Items     = items;
         Notifications  = notificationSender;
         SessionManager = sessionManager;
     }
@@ -96,7 +96,7 @@ public class facWarMgr : Service
 
     public PyInteger GetFactionMilitiaCorporation (ServiceCall call, PyInteger factionID)
     {
-        return this.Items.GetStaticFaction (factionID).MilitiaCorporationId;
+        return Items.GetStaticFaction (factionID).MilitiaCorporationId;
     }
 
     public PyDataType GetFactionalWarStatus (ServiceCall call)
@@ -133,8 +133,8 @@ public class facWarMgr : Service
             throw new FactionCharJoinDenied (MLS.UI_CORP_MILITIAJOIN_DENIED_TOOFREQUENT, TimeSpan.FromTicks (minimumDateTime - lastTime).Hours);
 
         // first join the character to the militia corporation
-        Faction   faction   = this.Items.Factions [factionID];
-        Character character = this.Items.GetItem <Character> (callerCharacterID);
+        Faction   faction   = Items.Factions [factionID];
+        Character character = Items.GetItem <Character> (callerCharacterID);
 
         // build the notification of corporation change
         OnCorporationMemberChanged change = new OnCorporationMemberChanged (character.ID, call.Session.CorporationID, faction.MilitiaCorporationId);

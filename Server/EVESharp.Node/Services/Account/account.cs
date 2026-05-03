@@ -35,7 +35,7 @@ public class account : Service
     [MustBeCharacter]
     private PyDataType GetCashBalance (Session session)
     {
-        return this.Wallets.GetWalletBalance (session.CharacterID);
+        return Wallets.GetWalletBalance (session.CharacterID);
     }
 
     public PyDataType GetCashBalance (ServiceCall call, PyBool isCorpWallet)
@@ -53,10 +53,10 @@ public class account : Service
         if (isCorpWallet == 0)
             return this.GetCashBalance (call.Session);
 
-        if (this.Wallets.IsAccessAllowed (call.Session, walletKey, call.Session.CorporationID) == false)
+        if (Wallets.IsAccessAllowed (call.Session, walletKey, call.Session.CorporationID) == false)
             throw new CrpAccessDenied (MLS.UI_CORP_ACCESSTOWALLETDIVISIONDENIED);
 
-        return this.Wallets.GetWalletBalance (call.Session.CorporationID, walletKey);
+        return Wallets.GetWalletBalance (call.Session.CorporationID, walletKey);
     }
 
     public PyDataType GetKeyMap (ServiceCall call)
@@ -95,7 +95,7 @@ public class account : Service
         if (isCorpWallet == true)
             entityID = call.Session.CorporationID;
 
-        if (this.Wallets.IsAccessAllowed (call.Session, accountKey, entityID) == false)
+        if (Wallets.IsAccessAllowed (call.Session, accountKey, entityID) == false)
             throw new CrpAccessDenied (MLS.UI_CORP_ACCESSTOWALLETDIVISIONDENIED);
 
         // journal requires accountant roles for corporation
@@ -111,25 +111,25 @@ public class account : Service
         // build a list of divisions the user can access
         List <int> walletKeys = new List <int> ();
 
-        if (this.Wallets.IsAccessAllowed (call.Session, WalletKeys.MAIN, call.Session.CorporationID))
+        if (Wallets.IsAccessAllowed (call.Session, WalletKeys.MAIN, call.Session.CorporationID))
             walletKeys.Add (WalletKeys.MAIN);
 
-        if (this.Wallets.IsAccessAllowed (call.Session, WalletKeys.SECOND, call.Session.CorporationID))
+        if (Wallets.IsAccessAllowed (call.Session, WalletKeys.SECOND, call.Session.CorporationID))
             walletKeys.Add (WalletKeys.SECOND);
 
-        if (this.Wallets.IsAccessAllowed (call.Session, WalletKeys.THIRD, call.Session.CorporationID))
+        if (Wallets.IsAccessAllowed (call.Session, WalletKeys.THIRD, call.Session.CorporationID))
             walletKeys.Add (WalletKeys.THIRD);
 
-        if (this.Wallets.IsAccessAllowed (call.Session, WalletKeys.FOURTH, call.Session.CorporationID))
+        if (Wallets.IsAccessAllowed (call.Session, WalletKeys.FOURTH, call.Session.CorporationID))
             walletKeys.Add (WalletKeys.FOURTH);
 
-        if (this.Wallets.IsAccessAllowed (call.Session, WalletKeys.FIFTH, call.Session.CorporationID))
+        if (Wallets.IsAccessAllowed (call.Session, WalletKeys.FIFTH, call.Session.CorporationID))
             walletKeys.Add (WalletKeys.FIFTH);
 
-        if (this.Wallets.IsAccessAllowed (call.Session, WalletKeys.SIXTH, call.Session.CorporationID))
+        if (Wallets.IsAccessAllowed (call.Session, WalletKeys.SIXTH, call.Session.CorporationID))
             walletKeys.Add (WalletKeys.SIXTH);
 
-        if (this.Wallets.IsAccessAllowed (call.Session, WalletKeys.SEVENTH, call.Session.CorporationID))
+        if (Wallets.IsAccessAllowed (call.Session, WalletKeys.SEVENTH, call.Session.CorporationID))
             walletKeys.Add (WalletKeys.SEVENTH);
 
         return Database.MktWalletGet (call.Session.CorporationID, walletKeys);
@@ -147,14 +147,14 @@ public class account : Service
 
         // acquire the origin wallet, subtract quantity
         // TODO: CHECK IF THE WALLETKEY IS INDICATED IN SOME WAY
-        using (IWallet originWallet = this.Wallets.AcquireWallet (callerCharacterID, WalletKeys.MAIN))
+        using (IWallet originWallet = Wallets.AcquireWallet (callerCharacterID, WalletKeys.MAIN))
         {
             originWallet.EnsureEnoughBalance (quantity);
             originWallet.CreateJournalRecord (MarketReference.CorporationPayment, destinationID, null, -quantity, reason);
         }
 
         // acquire the destination wallet, add quantity
-        using (IWallet destinationWallet = this.Wallets.AcquireWallet (destinationID, accountKey, true))
+        using (IWallet destinationWallet = Wallets.AcquireWallet (destinationID, accountKey, true))
         {
             destinationWallet.CreateJournalRecord (MarketReference.CorporationPayment, callerCharacterID, destinationID, -1, quantity, reason);
         }
@@ -165,12 +165,12 @@ public class account : Service
     public PyDataType GiveCashFromCorpAccount (ServiceCall call, PyInteger destinationID, PyDecimal quantity, PyInteger accountKey)
     {
         // ensure the character can take from the account in question
-        if (this.Wallets.IsTakeAllowed (call.Session, accountKey, call.Session.CorporationID) == false)
+        if (Wallets.IsTakeAllowed (call.Session, accountKey, call.Session.CorporationID) == false)
             throw new CrpAccessDenied (MLS.UI_CORP_ACCESSTOWALLETDIVISIONDENIED);
 
         // acquire the origin wallet, subtract quantity
         // TODO: CHECK IF THE WALLETKEY IS INDICATED IN SOME WAY
-        using (IWallet originWallet = this.Wallets.AcquireWallet (call.Session.CorporationID, accountKey, true))
+        using (IWallet originWallet = Wallets.AcquireWallet (call.Session.CorporationID, accountKey, true))
         {
             originWallet.EnsureEnoughBalance (quantity);
             originWallet.CreateJournalRecord (MarketReference.CorporationPayment, destinationID, call.Session.CharacterID, -quantity);
@@ -178,7 +178,7 @@ public class account : Service
 
         // TODO: CHECK IF THE DESTINATION IS A CORPORATION OR NOT
         // acquire the destination wallet, add quantity
-        using (IWallet destinationWallet = this.Wallets.AcquireWallet (destinationID, WalletKeys.MAIN))
+        using (IWallet destinationWallet = Wallets.AcquireWallet (destinationID, WalletKeys.MAIN))
         {
             destinationWallet.CreateJournalRecord (MarketReference.CorporationPayment, call.Session.CorporationID, destinationID, -1, quantity);
         }

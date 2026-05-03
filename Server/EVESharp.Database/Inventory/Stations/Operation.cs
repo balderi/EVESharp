@@ -14,7 +14,7 @@ public class Operation
         {
             int value = 0;
 
-            foreach (int service in this.Services)
+            foreach (int service in Services)
                 value |= service;
 
             return value;
@@ -23,9 +23,9 @@ public class Operation
 
     public Operation (int operationID, string name, string description, List <int> services)
     {
-        this.Name        = name;
-        this.Description = description;
-        this.OperationID = operationID;
-        this.Services    = services;
+        Name        = name;
+        Description = description;
+        OperationID = operationID;
+        Services    = services;
     }
 }

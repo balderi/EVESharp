@@ -28,7 +28,7 @@ public class standing2 : Service
     {
         CacheStorage  = cacheStorage;
         DB            = db;
-        this.Items    = items;
+        Items    = items;
         Notifications = notificationSender;
         Standings     = standings;
     }
@@ -94,9 +94,9 @@ public class standing2 : Service
 
     public PyDecimal GetSecurityRating (ServiceCall call, PyInteger characterID)
     {
-        return this.Items.TryGetItem (characterID, out Character character)
+        return Items.TryGetItem (characterID, out Character character)
             ? character.SecurityRating
-            : this.DB.GetSecurityRating (characterID);
+            : DB.GetSecurityRating (characterID);
     }
 
     public PyDataType GetNPCStandingsTo (ServiceCall call, PyInteger characterID)

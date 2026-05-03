@@ -44,8 +44,8 @@ public class LocalNotificationHandler
         MachoNet            = machoNet;
         ServiceManager      = serviceManager;
         BoundServiceManager = boundServiceManager;
-        this.Items          = items;
-        this.SolarSystems   = solarSystems;
+        Items          = items;
+        SolarSystems   = solarSystems;
         Notifications       = notificationSender;
         SessionManager      = sessionManager;
         Log                 = logger;
@@ -62,7 +62,7 @@ public class LocalNotificationHandler
 
         if (call != "ClientHasReleasedTheseObjects")
         {
-            Log.Error ($"Received notification from client with unknown method {call}");
+            Log.Error ("Received notification from client with unknown method {Call}", call);
 
             return;
         }
@@ -92,7 +92,7 @@ public class LocalNotificationHandler
 
             if (regexMatch.Groups.Count != 3)
             {
-                Log.Fatal ($"Cannot find nodeID and boundID in the boundString {boundString}");
+                Log.Fatal ("Cannot find nodeID and boundID in the boundString {BoundString}", boundString);
 
                 return;
             }
@@ -212,7 +212,7 @@ public class LocalNotificationHandler
         PyInteger solarSystemID = first as PyInteger;
 
         // mark as loaded
-        this.SolarSystems.LoadSolarSystemOnCluster (solarSystemID);
+        SolarSystems.LoadSolarSystemOnCluster (solarSystemID);
     }
 
     private void HandleOnItemUpdate (OnItemChange change)
@@ -222,7 +222,7 @@ public class LocalNotificationHandler
         {
             PyDictionary <PyString, PyTuple> changes = _changes.GetEnumerable <PyString, PyTuple> ();
 
-            ItemEntity item = this.Items.LoadItem (itemID, out bool loadRequired);
+            ItemEntity item = Items.LoadItem (itemID, out bool loadRequired);
 
             // if the item was just loaded there's extra things to take into account
             // as the item might not even need a notification to the character it belongs to
@@ -231,7 +231,7 @@ public class LocalNotificationHandler
                 // trust that the notification got to the correct node
                 // load the item and check the owner, if it's logged in and the locationID is loaded by us
                 // that means the item should be kept here
-                if (this.Items.TryGetItem (item.LocationID, out ItemEntity location) == false)
+                if (Items.TryGetItem (item.LocationID, out ItemEntity location) == false)
                     return;
 
                 bool locationBelongsToUs = true;
@@ -239,17 +239,17 @@ public class LocalNotificationHandler
                 switch (location)
                 {
                     case Station _:
-                        locationBelongsToUs = this.SolarSystems.StationBelongsToUs (location.ID);
+                        locationBelongsToUs = SolarSystems.StationBelongsToUs (location.ID);
                         break;
 
                     case SolarSystem _:
-                        locationBelongsToUs = this.SolarSystems.SolarSystemBelongsToUs (location.ID);
+                        locationBelongsToUs = SolarSystems.SolarSystemBelongsToUs (location.ID);
                         break;
                 }
 
                 if (locationBelongsToUs == false)
                 {
-                    this.Items.UnloadItem (item);
+                    Items.UnloadItem (item);
 
                     return;
                 }
@@ -302,12 +302,12 @@ public class LocalNotificationHandler
                 new PyTuple (1) {[0] = new PyList (1) {[0] = itemChange}}
             );
 
-            if (item.LocationID == this.Items.LocationRecycler.ID)
+            if (item.LocationID == Items.LocationRecycler.ID)
                 // the item is removed off the database if the new location is the recycler
                 item.Destroy ();
-            else if (item.LocationID == this.Items.LocationMarket.ID)
+            else if (item.LocationID == Items.LocationMarket.ID)
                 // items that are moved to the market can be unloaded
-                this.Items.UnloadItem (item);
+                Items.UnloadItem (item);
             else
                 // save the item if the new location is not removal
                 item.Persist ();
@@ -418,7 +418,7 @@ public class LocalNotificationHandler
         }
 
         // the only thing needed is to check for a Character reference and update it's corporationID to the correct one
-        if (this.Items.TryGetItem (change.MemberID, out Character character) == false)
+        if (Items.TryGetItem (change.MemberID, out Character character) == false)
             // if the character is not loaded it could mean that the package arrived on to the node while the player was logging out
             // so this is safe to ignore 
             return;
@@ -438,7 +438,7 @@ public class LocalNotificationHandler
         // persist the character
         character.Persist ();
         // nothing else needed
-        Log.Debug ($"Updated character ({character.ID}) coporation ID from {change.OldCorporationID} to {change.NewCorporationID}");
+        Log.Debug ("Updated character ({I}) coporation ID from {ChangeOldCorporation} to {ChangeNewCorporation}", character.ID, change.OldCorporationID, change.NewCorporationID);
     }
 
     private void HandleOnCorporationMemberUpdated (OnCorporationMemberUpdated change)
@@ -447,7 +447,7 @@ public class LocalNotificationHandler
         // by the session change
 
         // the only thing needed is to check for a Character reference and update it's roles to the correct onews
-        if (this.Items.TryGetItem (change.CharacterID, out Character character) == false)
+        if (Items.TryGetItem (change.CharacterID, out Character character) == false)
             // if the character is not loaded it could mean that the package arrived on the node wile the player was logging out
             // so this is safe to ignore
             return;
@@ -462,7 +462,7 @@ public class LocalNotificationHandler
         character.GrantableRolesAtOther = change.GrantableRolesAtOther;
         character.GrantableRolesAtHQ    = change.GrantableRolesAtHQ;
         // some debugging is well received
-        Log.Debug ($"Updated character ({character.ID}) roles");
+        Log.Debug ("Updated character ({I}) roles", character.ID);
     }
 
     private void HandleOnCorporationChanged (OnCorporationChanged change)
@@ -471,7 +471,7 @@ public class LocalNotificationHandler
         // by the session change
 
         // the only thing needed is to check for a Corporation reference and update it's alliance information to the new values
-        if (this.Items.TryGetItem (change.CorporationID, out Corporation corporation) == false)
+        if (Items.TryGetItem (change.CorporationID, out Corporation corporation) == false)
             // if the corporation is not loaded it could mean that the package arrived on the node wile the last player was logging out
             // so this is safe to ignore
             return;
@@ -483,7 +483,7 @@ public class LocalNotificationHandler
         corporation.Persist ();
 
         // some debugging is well received
-        Log.Debug ($"Updated corporation affiliation ({corporation.ID}) to ({corporation.AllianceID})");
+        Log.Debug ("Updated corporation affiliation ({I}) to ({CorporationAlliance})", corporation.ID, corporation.AllianceID);
     }
 
     private void HandleOnCorporationOfficeRented (OnCorporationOfficeRented change)

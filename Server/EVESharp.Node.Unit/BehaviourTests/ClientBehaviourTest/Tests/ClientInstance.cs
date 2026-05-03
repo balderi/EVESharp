@@ -92,25 +92,25 @@ public class ClientInstance
         // send the LowLevelVersionExchange back to start the authentication process so it continues the chain
         this.mSocket.SimulateDataReceived (data);
         // if no queue check was done, send one
-        if (this.ReceivedQueueCheckResponse == false)
+        if (ReceivedQueueCheckResponse == false)
         {
-            this.ReceivedFirstLowLevelVersionExchange = true;
+            ReceivedFirstLowLevelVersionExchange = true;
                 
             this.mSocket.DataSent -= this.ExpectLowLevelVersionExchange;
             this.mSocket.DataSent += this.ExpectQueueCheckResponse;
             this.mSocket.SimulateDataReceived (new ClientCommand ("QC"));
-            this.SentQueueCheck = true;
+            SentQueueCheck = true;
         }
         else
         {
-            this.ReceivedSecondLowLevelVersionExchange = true;
+            ReceivedSecondLowLevelVersionExchange = true;
             // update the packet handler
             this.mSocket.DataSent -= this.ExpectLowLevelVersionExchange;
             this.mSocket.DataSent += this.ExpectOKCC;
             // send vipkey command and placebo request
             this.mSocket.SimulateDataReceived (new ClientCommand ("VK"));
             this.mSocket.SimulateDataReceived (new PlaceboRequest ("placebo", new PyDictionary()));
-            this.SentVipKey = true;
+            SentVipKey = true;
         }
     }
 
@@ -120,7 +120,7 @@ public class ClientInstance
         this.mSocket.DataSent += this.ExpectLowLevelVersionExchange;
         // we should be the only one in the queue
         PyAssert.Integer (data, 0);
-        this.ReceivedQueueCheckResponse = true;
+        ReceivedQueueCheckResponse = true;
     }
 
     private void ExpectOKCC (PyDataType data)
@@ -128,7 +128,7 @@ public class ClientInstance
         this.mSocket.DataSent -= this.ExpectOKCC;
         this.mSocket.DataSent += this.ExpectPlainPasswordRequest;
 
-        this.ReceivedOKCC = true;
+        ReceivedOKCC = true;
         
         PyAssert.String (data, "OK CC");
         
@@ -147,7 +147,7 @@ public class ClientInstance
         };
 
         this.mSocket.SimulateDataReceived (req);
-        this.SentAuthenticationReq = true;
+        SentAuthenticationReq = true;
     }
 
     private void ExpectPlainPasswordRequest (PyDataType data)
@@ -155,7 +155,7 @@ public class ClientInstance
         this.mSocket.DataSent -= this.ExpectPlainPasswordRequest;
         this.mSocket.DataSent += this.ExpectLoginResult;
 
-        this.ReceivedPlainPasswordRequest = true;
+        ReceivedPlainPasswordRequest = true;
         
         PyAssert.Integer (data, 1);
         
@@ -175,7 +175,7 @@ public class ClientInstance
 
         this.mSocket.SimulateDataReceived (req);
 
-        this.SentPlainAuthenticationReq = true;
+        SentPlainAuthenticationReq = true;
     }
 
     private void ExpectLoginResult (PyDataType data)
@@ -183,7 +183,7 @@ public class ClientInstance
         this.mSocket.DataSent -= this.ExpectLoginResult;
         this.mSocket.DataSent += this.ExpectHandshakeAcknowledge;
 
-        this.ReceivedLoginResult = true;
+        ReceivedLoginResult = true;
         
         AuthenticationRsp rsp = data;
 
@@ -194,7 +194,7 @@ public class ClientInstance
         // send login result, this one is not really parsed by the server, so no extra stuff to set
         this.mSocket.SimulateDataReceived (new PyTuple (3));
 
-        this.SentLoginResultResponse = true;
+        SentLoginResultResponse = true;
     }
 
     private void ExpectHandshakeAcknowledge (PyDataType data)
@@ -203,7 +203,7 @@ public class ClientInstance
         this.mSocket.DataSent += this.ExpectSessionInitialState;
         HandshakeAck ack = data;
 
-        this.ReceivedHandshakeAck = true;
+        ReceivedHandshakeAck = true;
         
         // ensure some data is right
         PyAssert.List (ack.LiveUpdates,  0);
@@ -227,12 +227,12 @@ public class ClientInstance
     {
         PyPacket packet = data;
 
-        this.ReceivedSessionInitialState = true;
+        ReceivedSessionInitialState = true;
         
         Assert.AreEqual (PyPacket.PacketType.SESSIONINITIALSTATENOTIFICATION, packet.Type);
         Assert.AreEqual ("macho.SessionInitialStateNotification",             packet.TypeString);
 
-        this.LoginProcessDone = true;
+        LoginProcessDone = true;
     }
 
     /// <summary>
@@ -240,19 +240,19 @@ public class ClientInstance
     /// </summary>
     public void Verify ()
     {
-        Assert.True (this.SentQueueCheck);
-        Assert.True (this.SentVipKey);
-        Assert.True (this.SentAuthenticationReq);
-        Assert.True (this.SentPlainAuthenticationReq);
-        Assert.True (this.SentLoginResultResponse);
-        Assert.True (this.ReceivedFirstLowLevelVersionExchange);
-        Assert.True (this.ReceivedSecondLowLevelVersionExchange);
-        Assert.True (this.ReceivedQueueCheckResponse);
-        Assert.True (this.ReceivedOKCC);
-        Assert.True (this.ReceivedPlainPasswordRequest);
-        Assert.True (this.ReceivedLoginResult);
-        Assert.True (this.ReceivedHandshakeAck);
-        Assert.True (this.ReceivedSessionInitialState);
-        Assert.True (this.LoginProcessDone);
+        Assert.True (SentQueueCheck);
+        Assert.True (SentVipKey);
+        Assert.True (SentAuthenticationReq);
+        Assert.True (SentPlainAuthenticationReq);
+        Assert.True (SentLoginResultResponse);
+        Assert.True (ReceivedFirstLowLevelVersionExchange);
+        Assert.True (ReceivedSecondLowLevelVersionExchange);
+        Assert.True (ReceivedQueueCheckResponse);
+        Assert.True (ReceivedOKCC);
+        Assert.True (ReceivedPlainPasswordRequest);
+        Assert.True (ReceivedLoginResult);
+        Assert.True (ReceivedHandshakeAck);
+        Assert.True (ReceivedSessionInitialState);
+        Assert.True (LoginProcessDone);
     }
 }

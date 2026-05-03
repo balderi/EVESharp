@@ -17,7 +17,7 @@ public class TransportManager : Server.Shared.Transports.TransportManager
 
     public override MachoServerTransport OpenServerTransport (IMachoNet machoNet, MachoNet configuration)
     {
-        return this.ServerTransport = new TestMachoServerTransport (configuration.Port, machoNet, this.Log.ForContext <TestMachoServerTransport> ());
+        return ServerTransport = new TestMachoServerTransport (configuration.Port, machoNet, Log.ForContext <TestMachoServerTransport> ());
     }
 
     public override IMachoTransport OpenNewTransport (IMachoNet machoNet, string ip, ushort port)

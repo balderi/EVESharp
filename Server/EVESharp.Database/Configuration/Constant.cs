@@ -7,8 +7,8 @@ public class Constant
 
     public Constant (string name, long value)
     {
-        this.Name  = name;
-        this.Value = value;
+        Name  = name;
+        Value = value;
     }
 
     public static implicit operator long (Constant constant)

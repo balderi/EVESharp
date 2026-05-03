@@ -69,10 +69,10 @@ public class MachoNet : IMachoNet
         Database.CluRegisterSingleNode (NodeID);
         
         // start the login queue processing
-        this.LoginProcessor.Start ();
+        LoginProcessor.Start ();
 
         // start the server socket
-        this.TransportManager.OpenServerTransport (this, Configuration.MachoNet).Listen ();
+        TransportManager.OpenServerTransport (this, Configuration.MachoNet).Listen ();
     }
 
     public void QueueOutputPacket (IMachoTransport origin, PyPacket packet)
@@ -115,7 +115,7 @@ public class MachoNet : IMachoNet
     public void QueueInputPacket (IMachoTransport origin, PyPacket packet)
     {
         // add the packet to the processor
-        this.MessageProcessor?.Queue.Enqueue (
+        MessageProcessor?.Queue.Enqueue (
             new MachoMessage
             {
                 Packet    = packet,

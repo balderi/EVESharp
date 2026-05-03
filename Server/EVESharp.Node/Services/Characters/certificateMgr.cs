@@ -29,9 +29,9 @@ public class certificateMgr : Service
     public certificateMgr (IItems items, ICacheStorage cacheStorage, IDogmaNotifications dogmaNotifications, IDatabase database)
     {
         Database                = database;
-        this.Items              = items;
+        Items              = items;
         CacheStorage            = cacheStorage;
-        this.DogmaNotifications = dogmaNotifications;
+        DogmaNotifications = dogmaNotifications;
 
         // get the full list of requirements
         CertificateRelationships = Database.GetCertificateRelationships ();
@@ -81,7 +81,7 @@ public class certificateMgr : Service
     public PyBool GrantCertificate (ServiceCall call, PyInteger certificateID)
     {
         int       callerCharacterID = call.Session.CharacterID;
-        Character character         = this.Items.GetItem <Character> (callerCharacterID);
+        Character character         = Items.GetItem <Character> (callerCharacterID);
 
         Dictionary <int, Skill> skills              = character.InjectedSkillsByTypeID;
         List <int>              grantedCertificates = Database.GetCertificateListForCharacter (callerCharacterID);
@@ -104,7 +104,7 @@ public class certificateMgr : Service
         Database.CrtGrantCertificate (callerCharacterID, certificateID);
 
         // notify the character about the granting of the certificate
-        this.DogmaNotifications.QueueMultiEvent (callerCharacterID, new OnCertificateIssued (certificateID));
+        DogmaNotifications.QueueMultiEvent (callerCharacterID, new OnCertificateIssued (certificateID));
 
         return null;
     }
@@ -112,7 +112,7 @@ public class certificateMgr : Service
     public PyDataType BatchCertificateGrant (ServiceCall call, PyList certificateList)
     {
         int       callerCharacterID = call.Session.CharacterID;
-        Character character         = this.Items.GetItem <Character> (callerCharacterID);
+        Character character         = Items.GetItem <Character> (callerCharacterID);
 
         PyList <PyInteger>      result              = new PyList <PyInteger> ();
         Dictionary <int, Skill> skills              = character.InjectedSkillsByTypeID;
@@ -147,7 +147,7 @@ public class certificateMgr : Service
         }
 
         // notify the client about the granting of certificates
-        this.DogmaNotifications.QueueMultiEvent (callerCharacterID, new OnCertificateIssued ());
+        DogmaNotifications.QueueMultiEvent (callerCharacterID, new OnCertificateIssued ());
 
         return result;
     }

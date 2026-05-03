@@ -15,26 +15,26 @@ public class PyDecimal : PyDataType
 
     public PyDecimal (double value)
     {
-        this.Value       = value;
-        this.DecimalType = DecimalTypeEnum.Double;
+        Value       = value;
+        DecimalType = DecimalTypeEnum.Double;
     }
 
     public PyDecimal (float value)
     {
-        this.Value       = value;
-        this.DecimalType = DecimalTypeEnum.Float;
+        Value       = value;
+        DecimalType = DecimalTypeEnum.Float;
     }
 
     private bool Equals (PyDecimal other)
     {
         if (ReferenceEquals (null, other)) return false;
 
-        return this.Value.Equals (other.Value);
+        return Value.Equals (other.Value);
     }
 
     public override int GetHashCode ()
     {
-        return this.Value.GetHashCode ();
+        return Value.GetHashCode ();
     }
 
     public static bool operator > (PyDecimal obj, PyDecimal value)
@@ -102,6 +102,6 @@ public class PyDecimal : PyDataType
 
     public override string ToString ()
     {
-        return this.Value.ToString (CultureInfo.InvariantCulture);
+        return Value.ToString (CultureInfo.InvariantCulture);
     }
 }

@@ -53,7 +53,7 @@ public class LSC : Service
     {
         DB                   = db;
         CharacterDB          = characterDB;
-        this.Items           = items;
+        Items           = items;
         Notifications        = notificationSender;
         MailManager          = mailManager;
         Log                  = logger;
@@ -293,7 +293,7 @@ public class LSC : Service
                     // notify all characters in the channel
                     Notifications.NotifyCharacter (callerCharacterID, new OnLSC (call.Session, "DestroyChannel", channelID, new PyTuple (0)));
 
-                Log.Error ($"LSC could not get channel information. Error: {e.Message}");
+                Log.Error ("LSC could not get channel information. Error: {EMessage}", e.Message);
             }
         }
 
@@ -553,7 +553,7 @@ public class LSC : Service
                     answer,
                     new PyDictionary
                     {
-                        ["channel"] = this.DB.GetChannelName (call.ChannelID),
+                        ["channel"] = DB.GetChannelName (call.ChannelID),
                         ["char"]    = Database.ChrGetName (call.ToCharacterID)
                     }
                 )
@@ -603,7 +603,7 @@ public class LSC : Service
         // if the call timed out the character is not connected
         InviteExtraInfo call = callInfo.ExtraInfo as InviteExtraInfo;
 
-        this.PacketCallHelper.SendException (call.OriginalCall, PyPacket.PacketType.CALL_REQ, new ChtCharNotReachable (call.ToCharacterID));
+        PacketCallHelper.SendException (call.OriginalCall, PyPacket.PacketType.CALL_REQ, new ChtCharNotReachable (call.ToCharacterID));
     }
 
     public PyDataType Invite (ServiceCall call, PyInteger characterID, PyInteger channelID, PyString channelTitle, PyBool addAllowed)
@@ -627,7 +627,7 @@ public class LSC : Service
                 throw new ChtAlreadyInChannel (characterID);
 
             // TODO: THIS WONT WORK ON MULTIPLE-NODES ENVIRONMENTS, NEEDS FIXING
-            Character character = this.Items.GetItem <Character> (callerCharacterID);
+            Character character = Items.GetItem <Character> (callerCharacterID);
 
             PyTuple args = new PyTuple (4)
             {

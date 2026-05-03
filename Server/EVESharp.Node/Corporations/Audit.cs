@@ -12,7 +12,7 @@ public class Audit : IAudit
     
     public Audit (IDatabase database)
     {
-        this.DB = database;
+        DB = database;
     }
     
     public void RecordAudit (int corporationID, int characterID, DateTime dateTime, CorporationLogEvent eventType)

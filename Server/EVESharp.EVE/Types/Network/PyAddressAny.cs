@@ -14,8 +14,8 @@ public class PyAddressAny : PyAddress
 
     public PyAddressAny (PyInteger id, PyString service = null) : base (TYPE_ANY)
     {
-        this.Service = service;
-        this.CallID      = id;
+        Service = service;
+        CallID      = id;
     }
 
     public static implicit operator PyDataType (PyAddressAny value)

@@ -15,18 +15,18 @@ public class OnMachoObjectDisconnect : ClientNotification
     
     public OnMachoObjectDisconnect (PyString objectID, PyInteger clientID, PyString referenceID) : base (NOTIFICATION_NAME)
     {
-        this.ObjectID    = objectID;
-        this.ClientID    = clientID;
-        this.ReferenceID = referenceID;
+        ObjectID    = objectID;
+        ClientID    = clientID;
+        ReferenceID = referenceID;
     }
 
     public override List <PyDataType> GetElements ()
     {
         return new List <PyDataType>
         {
-            this.ObjectID,
-            this.ClientID,
-            this.ReferenceID
+            ObjectID,
+            ClientID,
+            ReferenceID
         };
     }
 

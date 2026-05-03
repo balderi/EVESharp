@@ -16,20 +16,20 @@ public class OnModuleAttributeChange : ClientNotification
 
     public OnModuleAttributeChange (ItemEntity item, Attribute attribute) : base (NOTIFICATION_NAME)
     {
-        this.Item      = item;
-        this.Attribute = attribute;
+        Item      = item;
+        Attribute = attribute;
     }
 
     public override List <PyDataType> GetElements ()
     {
         return new List <PyDataType>
         {
-            this.Item.OwnerID,
-            this.Item.ID,
-            this.Attribute.ID,
+            Item.OwnerID,
+            Item.ID,
+            Attribute.ID,
             DateTime.UtcNow.ToFileTimeUtc (),
-            this.Attribute, // newValue
-            this.Attribute // this should be oldValue, but the client doesn't check, so who cares
+            Attribute, // newValue
+            Attribute // this should be oldValue, but the client doesn't check, so who cares
         };
     }
 }

@@ -12,14 +12,14 @@ public class OnContractOutbid : ClientNotification
 
     public OnContractOutbid (int contractID) : base (NOTIFICATION_NAME)
     {
-        this.ContractID = contractID;
+        ContractID = contractID;
     }
 
     public override List <PyDataType> GetElements ()
     {
         return new List <PyDataType>
         {
-            this.ContractID,
+            ContractID,
             null
         };
     }

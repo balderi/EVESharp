@@ -107,14 +107,14 @@ public class Contract : IContract
     
     public Contract (int contractID, IDatabase Database, ITypes types, IItems Items, IWallets wallets, INotificationSender notificationSender, IDogmaNotifications dogmaNotifications)
     {
-        this.ID                 = contractID;
-        this.Lock               = Database.GetLock (this.GenerateLockName ());
-        this.mInformation       = this.Lock.ConGet (contractID);
+        ID                 = contractID;
+        Lock               = Database.GetLock (this.GenerateLockName ());
+        this.mInformation       = Lock.ConGet (contractID);
         this.Items              = Items;
-        this.Types              = types;
-        this.Wallets            = wallets;
-        this.Notifications      = notificationSender;
-        this.DogmaNotifications = dogmaNotifications;
+        Types              = types;
+        Wallets            = wallets;
+        Notifications      = notificationSender;
+        DogmaNotifications = dogmaNotifications;
 
         if (this.mInformation is null)
             throw new ConContractNotFound ();
@@ -129,13 +129,13 @@ public class Contract : IContract
             EndStationID != 0 ? Items.GetItem <Station> (EndStationID).Name : null,
             (int) TypeID.PlasticWrap,
             Items.LocationSystem.ID,
-            this.StartStationID,
+            StartStationID,
             Flags.None, 1, false, true
         );
 
         // store the crateID and initialize the volume
-        this.CrateID = item.ID;
-        this.Volume  = 0;
+        CrateID = item.ID;
+        Volume  = 0;
 
         // unload the container as it's not really needed for anything
         Items.UnloadItem (item);
@@ -146,13 +146,13 @@ public class Contract : IContract
         PreloadedContractItem preloadValue = Lock.ConGetItemPreloadValues (itemID, ownerID, stationID);
 
         if (preloadValue.Damage > 0)
-            throw new ConCannotTradeDamagedItem (this.Types [preloadValue.TypeID]);
+            throw new ConCannotTradeDamagedItem (Types [preloadValue.TypeID]);
         if (preloadValue.Contraband == true)
-            throw new ConCannotTradeContraband (this.Types [preloadValue.TypeID]);
+            throw new ConCannotTradeContraband (Types [preloadValue.TypeID]);
         if (quantity != preloadValue.Quantity)
             throw new ConCannotTradeItemSanity ();
         if (preloadValue.CategoryID == (int) CategoryID.Ship && preloadValue.Singleton == false)
-            throw new ConCannotTradeNonSingletonShip (this.Types [preloadValue.TypeID], stationID);
+            throw new ConCannotTradeNonSingletonShip (Types [preloadValue.TypeID], stationID);
             
         Lock.ConAddItem (ID, preloadValue.TypeID, preloadValue.Quantity, 1, itemID);
 
@@ -195,7 +195,7 @@ public class Contract : IContract
             throw new ConBidTooLow (quantity, nextMinimumBid);
 
         // take the bid's money off the wallet
-        using (IWallet bidderWallet = this.Wallets.AcquireWallet (bidderID, walletKey))
+        using (IWallet bidderWallet = Wallets.AcquireWallet (bidderID, walletKey))
         {
             bidderWallet.EnsureEnoughBalance (quantity);
             bidderWallet.CreateJournalRecord (MarketReference.ContractAuctionBid, null, null, -quantity);
@@ -211,7 +211,7 @@ public class Contract : IContract
             return bidID;
         
         // return the money for the player that was the highest bidder
-        using (IWallet maximumBidderWallet = this.Wallets.AcquireWallet (maximumBidderID, bidderWalletKey))
+        using (IWallet maximumBidderWallet = Wallets.AcquireWallet (maximumBidderID, bidderWalletKey))
         {
             maximumBidderWallet.CreateJournalRecord (MarketReference.ContractAuctionBidRefund, null, null, maximumBid);
         }
@@ -245,7 +245,7 @@ public class Contract : IContract
                 if (item.Damage > 0)
                     continue;
                 // ships must be singleton
-                if (this.Types [typeID].Group.Category.ID == (int) CategoryID.Ship && item.Singleton == false)
+                if (Types [typeID].Group.Category.ID == (int) CategoryID.Ship && item.Singleton == false)
                     continue;
                 // TODO: HANDLE MODULES? THOSE SHOULD BE SINGLETON TOO, RIGHT?
                 int quantityRequested = Math.Min (quantityLeft, item.Quantity);
@@ -260,7 +260,7 @@ public class Contract : IContract
             }
 
             if (quantityLeft > 0)
-                throw new ConReturnItemsMissingNonSingleton (this.Types [typeID], locationID);
+                throw new ConReturnItemsMissingNonSingleton (Types [typeID], locationID);
         }
 
         return result;
@@ -272,7 +272,7 @@ public class Contract : IContract
         int contractCreator = ForCorp ? IssuerCorpID : IssuerID;
         
         // change the ownership of all the player's items
-        foreach ((RequestedContractItem item, int quantity) in ValidateRequestedItems (this.StartStationID, acceptorID))
+        foreach ((RequestedContractItem item, int quantity) in ValidateRequestedItems (StartStationID, acceptorID))
         {
             ItemEntity loadedItem = Items.LoadItem (item.ItemID, out bool loadRequired);
 
@@ -388,7 +388,7 @@ public class Contract : IContract
 
     private string GenerateLockName ()
     {
-        return $"contract_{this.ID}";
+        return $"contract_{ID}";
     }
 
     private void Dispose (bool save)

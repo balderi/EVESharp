@@ -19,7 +19,7 @@ public class config : Service
     public config (ConfigDB db, IItems items, ILogger log)
     {
         DB         = db;
-        this.Items = items;
+        Items = items;
         Log        = log;
     }
 

@@ -15,14 +15,14 @@ public class OnCorporationApplicationChanged : ClientNotification
 
     public OnCorporationApplicationChanged (int corporationID, int applicantID) : base (NOTIFICATION_NAME)
     {
-        this.CorporationID = corporationID;
-        this.ApplicantID   = applicantID;
-        this.Changes       = new PyDictionary <PyString, PyTuple> ();
+        CorporationID = corporationID;
+        ApplicantID   = applicantID;
+        Changes       = new PyDictionary <PyString, PyTuple> ();
     }
 
     public OnCorporationApplicationChanged AddValue (string columnName, PyDataType oldValue, PyDataType newValue)
     {
-        this.Changes [columnName] = new PyTuple (2)
+        Changes [columnName] = new PyTuple (2)
         {
             [0] = oldValue,
             [1] = newValue
@@ -35,9 +35,9 @@ public class OnCorporationApplicationChanged : ClientNotification
     {
         return new List <PyDataType>
         {
-            this.ApplicantID,
-            this.CorporationID,
-            this.Changes
+            ApplicantID,
+            CorporationID,
+            Changes
         };
     }
 }

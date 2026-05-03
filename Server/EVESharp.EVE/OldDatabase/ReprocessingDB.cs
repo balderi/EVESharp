@@ -10,7 +10,7 @@ public class ReprocessingDB : DatabaseAccessor
 
     public List <Recoverables> GetRecoverables (int typeID)
     {
-        DbDataReader reader = this.Database.Select (
+        DbDataReader reader = Database.Select (
             "SELECT requiredTypeID, MIN(quantity) FROM typeActivityMaterials LEFT JOIN invBlueprintTypes ON typeID = blueprintTypeID WHERE damagePerJob = 1 AND ((activityID = 6 AND typeID = @typeID) OR (activityID = 1 AND productTypeID = @typeID)) GROUP BY requiredTypeID",
             new Dictionary <string, object> {{"@typeID", typeID}}
         );

@@ -59,23 +59,23 @@ public class Type
         Dictionary <int, Effect> effects
     )
     {
-        this.ID                  = id;
-        this.Group               = group;
-        this.Name                = name;
-        this.Description         = description;
-        this.GraphicID           = graphicID;
-        this.Radius              = radius;
-        this.Mass                = mass;
-        this.Volume              = volume;
-        this.Capacity            = capacity;
-        this.PortionSize         = portionSize;
-        this.RaceID              = raceID;
-        this.BasePrice           = basePrice;
-        this.Published           = published;
-        this.MarketGroupID       = marketGroupId;
-        this.ChanceOfDuplicating = chanceOfDuplicating;
-        this.Attributes          = defaultAttributes;
-        this.Effects             = effects;
-        this.EffectsByName       = this.Effects.ToDictionary (x => x.Value.EffectName, x => x.Value);
+        ID                  = id;
+        Group               = group;
+        Name                = name;
+        Description         = description;
+        GraphicID           = graphicID;
+        Radius              = radius;
+        Mass                = mass;
+        Volume              = volume;
+        Capacity            = capacity;
+        PortionSize         = portionSize;
+        RaceID              = raceID;
+        BasePrice           = basePrice;
+        Published           = published;
+        MarketGroupID       = marketGroupId;
+        ChanceOfDuplicating = chanceOfDuplicating;
+        Attributes          = defaultAttributes;
+        Effects             = effects;
+        EffectsByName       = Effects.ToDictionary (x => x.Value.EffectName, x => x.Value);
     }
 }

@@ -16,11 +16,11 @@ public class OnSkillTrained : ClientNotification
 
     public OnSkillTrained (Skill skill) : base (NOTIFICATION_NAME)
     {
-        this.Skill = skill;
+        Skill = skill;
     }
 
     public override List <PyDataType> GetElements ()
     {
-        return new List <PyDataType> {this.Skill.ID};
+        return new List <PyDataType> {Skill.ID};
     }
 }

@@ -13,16 +13,16 @@ public class OnModuleAttributeChanges : ClientNotification
 
     public OnModuleAttributeChanges () : base (NOTITIFATION_NAME)
     {
-        this.Changes = new PyList ();
+        Changes = new PyList ();
     }
 
     public void AddChange (OnModuleAttributeChange change)
     {
-        this.Changes.Add (change);
+        Changes.Add (change);
     }
 
     public override List <PyDataType> GetElements ()
     {
-        return new List <PyDataType> {this.Changes};
+        return new List <PyDataType> {Changes};
     }
 }

@@ -38,7 +38,7 @@ public class repairSvc : ClientBoundService
     public override  AccessLevel         AccessLevel        => AccessLevel.None;
     private          IItems              Items              { get; }
     private          ISolarSystems       SolarSystems       { get; }
-    private          ITypes              Types              => this.Items.Types;
+    private          ITypes              Types              => Items.Types;
     private          MarketDB            MarketDB           { get; }
     private          RepairDB            RepairDB           { get; }
     private          InsuranceDB         InsuranceDB        { get; }
@@ -60,7 +60,7 @@ public class repairSvc : ClientBoundService
         RepairDB           = repairDb;
         InsuranceDB        = insuranceDb;
         Notifications      = notificationSender;
-        this.Wallets       = wallets;
+        Wallets       = wallets;
         DogmaNotifications = dogmaNotifications;
         Database           = database;
         SolarSystems       = solarSystems;
@@ -75,13 +75,13 @@ public class repairSvc : ClientBoundService
     ) : base (manager, session, inventory.ID)
     {
         this.mInventory         = inventory;
-        this.Items              = items;
+        Items              = items;
         MarketDB                = marketDb;
         RepairDB                = repairDb;
         InsuranceDB             = insuranceDb;
         Notifications           = notificationSender;
-        this.Wallets            = wallets;
-        this.DogmaNotifications = dogmaNotifications;
+        Wallets            = wallets;
+        DogmaNotifications = dogmaNotifications;
         DogmaItems              = dogmaItems;
     }
 
@@ -171,10 +171,10 @@ public class repairSvc : ClientBoundService
     public PyDataType RepairItems (ServiceCall call, PyList itemIDs, PyDecimal iskRepairValue)
     {
         // ensure the player has enough balance to do the fixing
-        Station station = this.Items.GetStaticStation (call.Session.StationID);
+        Station station = Items.GetStaticStation (call.Session.StationID);
 
         // take the wallet lock and ensure the character has enough balance
-        using IWallet wallet = this.Wallets.AcquireWallet (call.Session.CharacterID, WalletKeys.MAIN);
+        using IWallet wallet = Wallets.AcquireWallet (call.Session.CharacterID, WalletKeys.MAIN);
 
         {
             wallet.EnsureEnoughBalance (iskRepairValue);
@@ -282,7 +282,7 @@ public class repairSvc : ClientBoundService
             throw new CustomError ("Cannot repair items from more than one station at the same time");
 
         int stationID = stationIDs.First ();
-        int nodeID    = (int) this.SolarSystems.GetNodeStationBelongsTo (stationID);
+        int nodeID    = (int) SolarSystems.GetNodeStationBelongsTo (stationID);
 
         if (nodeID != call.MachoNet.NodeID && nodeID != 0)
             throw new RedirectCallRequest (nodeID);
@@ -350,7 +350,7 @@ public class repairSvc : ClientBoundService
         if (this.MachoResolveObject (call, bindParams) != BoundServiceManager.MachoNet.NodeID)
             throw new CustomError ("Trying to bind an object that does not belong to us!");
 
-        Station station = this.Items.GetStaticStation (bindParams.ObjectID);
+        Station station = Items.GetStaticStation (bindParams.ObjectID);
 
         if (station.HasService (Service.RepairFacilities) == false)
             throw new CustomError ("This station does not allow for repair facilities services");
@@ -363,8 +363,8 @@ public class repairSvc : ClientBoundService
         ItemInventory inventory = DogmaItems.LoadInventory (station.ID, call.Session.CharacterID);
 
         return new repairSvc (
-            RepairDB, MarketDB, InsuranceDB, Notifications, inventory, this.Items, BoundServiceManager,
-            this.Wallets, this.DogmaNotifications, call.Session, DogmaItems
+            RepairDB, MarketDB, InsuranceDB, Notifications, inventory, Items, BoundServiceManager,
+            Wallets, DogmaNotifications, call.Session, DogmaItems
         );
     }
 }

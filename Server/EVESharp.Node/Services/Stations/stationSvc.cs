@@ -21,8 +21,8 @@ public class stationSvc : Service
     public stationSvc(IItems items, ICacheStorage cacheStorage)
            
     {
-        this.Items        = items;
-        this.CacheStorage = cacheStorage;
+        Items        = items;
+        CacheStorage = cacheStorage;
     }
 
     public PyDataType GetStation(ServiceCall call, PyInteger stationID)
@@ -30,7 +30,7 @@ public class stationSvc : Service
         if (CacheStorage.Exists("stationSvc", $"GetStation_{stationID}") == false)
             CacheStorage.StoreCall(
                 "stationSvc", $"GetStation_{stationID}",
-                this.Items.Stations[stationID].GetStationInfo(),
+                Items.Stations[stationID].GetStationInfo(),
                 DateTime.UtcNow.ToFileTimeUtc()
             );
 
@@ -39,7 +39,7 @@ public class stationSvc : Service
 
     public PyDataType GetSolarSystem(ServiceCall call, PyInteger solarSystemID)
     {
-        return this.Items.SolarSystems[solarSystemID].GetSolarSystemInfo();
+        return Items.SolarSystems[solarSystemID].GetSolarSystemInfo();
     }
 
         

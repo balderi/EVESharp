@@ -25,7 +25,7 @@ public class bookmark : Service
     public bookmark (IDatabase connection, IItems items, IRemoteServiceManager remoteServiceManager)
     {
         Database             = connection;
-        this.Items           = items;
+        Items           = items;
         RemoteServiceManager = remoteServiceManager;
     }
 
@@ -39,7 +39,7 @@ public class bookmark : Service
         if (ItemRanges.IsStaticData (itemID) == false)
             throw new CustomError ("Bookmarks for non-static locations are not supported yet!");
 
-        ItemEntity item = this.Items.GetItem (itemID);
+        ItemEntity item = Items.GetItem (itemID);
 
         if (item.HasPosition == false)
             throw new CustomError ("Cannot bookmark a non-location item");

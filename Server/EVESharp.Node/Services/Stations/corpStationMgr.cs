@@ -42,7 +42,7 @@ public class corpStationMgr : ClientBoundService
     private         IItems              Items         { get; }
     private         ItemDB              ItemDB        { get; }
     private         StationDB           StationDB     { get; }
-    private         ITypes              Types         => this.Items.Types;
+    private         ITypes              Types         => Items.Types;
     private         ISolarSystems       SolarSystems  { get; }
     private         IWallets            Wallets       { get; }
     private         IConstants          Constants     { get; }
@@ -61,7 +61,7 @@ public class corpStationMgr : ClientBoundService
         Notifications = notificationSender;
         Items         = items;
         Constants     = constants;
-        this.Wallets  = wallets;
+        Wallets  = wallets;
         Database      = database;
         SolarSystems  = solarSystems;
         ItemDB        = itemDB;
@@ -82,7 +82,7 @@ public class corpStationMgr : ClientBoundService
         Notifications = notificationSender;
         Items         = items;
         Constants     = constants;
-        this.Wallets  = wallets;
+        Wallets  = wallets;
         ItemDB        = itemDB;
         Database      = database;
         DogmaItems    = dogmaItems;
@@ -154,7 +154,7 @@ public class corpStationMgr : ClientBoundService
         // TODO: ADD CURRENT CORPORATION'S STATION BACK TO THE LIST
         List <Station> availableStations = new List <Station>
         {
-            this.Items.Stations [stationID]
+            Items.Stations [stationID]
             // this.ItemFactory.Stations[character.Corporation.StationID]
         };
 
@@ -193,7 +193,7 @@ public class corpStationMgr : ClientBoundService
     {
         int callerCharacterID = call.Session.CharacterID;
 
-        Character character = this.Items.GetItem <Character> (callerCharacterID);
+        Character character = Items.GetItem <Character> (callerCharacterID);
 
         // ensure the station selected is in the list of available stations for this character
         Station station = this.GetPotentialHomeStations (call.Session).Find (x => x.ID == stationID);
@@ -218,7 +218,7 @@ public class corpStationMgr : ClientBoundService
                 throw new MedicalYouAlreadyHaveACloneContractAtThatStation ();
         }
 
-        using IWallet wallet = this.Wallets.AcquireWallet (character.ID, WalletKeys.MAIN);
+        using IWallet wallet = Wallets.AcquireWallet (character.ID, WalletKeys.MAIN);
 
         {
             double contractCost = Constants.CostCloneContract;
@@ -272,7 +272,7 @@ public class corpStationMgr : ClientBoundService
             throw new CrpJunkContainsLockedItem ();
         
         // TODO: THIS MIGHT NEED CHANGES WHEN POS ARE SUPPORTED?
-        Station station = this.Items.GetStaticStation (call.Session.StationID);
+        Station station = Items.GetStaticStation (call.Session.StationID);
         
         using (IWallet corporationWallet = Wallets.AcquireWallet (call.Session.CorporationID, call.Session.CorpAccountKey, true))
         {
@@ -283,7 +283,7 @@ public class corpStationMgr : ClientBoundService
         }
         
         // now take all the items from the impounded office and move them to player's hangar
-        OfficeFolder folder = this.Items.LoadItem <OfficeFolder> (officeFolderID);
+        OfficeFolder folder = Items.LoadItem <OfficeFolder> (officeFolderID);
 
         foreach ((int _, ItemEntity item) in folder.Items)
         {
@@ -317,7 +317,7 @@ public class corpStationMgr : ClientBoundService
         int stationID = call.Session.StationID;
 
         // if no amount of office slots are indicated in the station type return 24 as a default value
-        int maximumOffices = this.Items.GetItem <Station> (stationID).StationType.OfficeSlots ?? 24;
+        int maximumOffices = Items.GetItem <Station> (stationID).StationType.OfficeSlots ?? 24;
 
         return maximumOffices - StationDB.CountRentedOffices (stationID);
     }
@@ -328,8 +328,8 @@ public class corpStationMgr : ClientBoundService
         int callerCharacterID = call.Session.CharacterID;
         int stationID         = call.Session.StationID;
 
-        Character character    = this.Items.GetItem <Character> (callerCharacterID);
-        Type      newCloneType = this.Types [cloneTypeID];
+        Character character    = Items.GetItem <Character> (callerCharacterID);
+        Type      newCloneType = Types [cloneTypeID];
 
         if (newCloneType.Group.ID != (int) GroupID.Clone)
             throw new CustomError ("Only clone types allowed!");
@@ -337,14 +337,14 @@ public class corpStationMgr : ClientBoundService
         //if (character.ActiveClone.Type.BasePrice > newCloneType.BasePrice)
         //    throw new MedicalThisCloneIsWorse();
 
-        Station station = this.Items.GetStaticStation (stationID);
+        Station station = Items.GetStaticStation (stationID);
 
-        using (IWallet wallet = this.Wallets.AcquireWallet (character.ID, WalletKeys.MAIN))
+        using (IWallet wallet = Wallets.AcquireWallet (character.ID, WalletKeys.MAIN))
         {
             wallet.EnsureEnoughBalance (newCloneType.BasePrice);
 
             wallet.CreateTransactionRecord (
-                TransactionType.Buy, character.ID, this.Items.LocationSystem.ID, newCloneType.ID, 1, newCloneType.BasePrice, station.ID
+                TransactionType.Buy, character.ID, Items.LocationSystem.ID, newCloneType.ID, 1, newCloneType.BasePrice, station.ID
             );
         }
 
@@ -362,7 +362,7 @@ public class corpStationMgr : ClientBoundService
     [MustHaveCorporationRole (typeof (RentingOfficeQuotesOnlyGivenToActiveCEOsOrEquivale), CorporationRole.Director, CorporationRole.CanRentOffice)]
     public PyInteger GetQuoteForRentingAnOffice (ServiceCall call)
     {
-        return this.Items.Stations [call.Session.StationID].OfficeRentalCost;
+        return Items.Stations [call.Session.StationID].OfficeRentalCost;
     }
 
     [MustBeInStation]
@@ -386,12 +386,12 @@ public class corpStationMgr : ClientBoundService
             throw new RentingYouHaveAnOfficeHere ();
 
         // ensure the character has the required skill to manage offices
-        this.Items.GetItem <Character> (characterID).EnsureSkillLevel (TypeID.PublicRelations);
+        Items.GetItem <Character> (characterID).EnsureSkillLevel (TypeID.PublicRelations);
         // RentingOfficeRequestDenied
-        int ownerCorporationID = this.Items.Stations [stationID].OwnerID;
+        int ownerCorporationID = Items.Stations [stationID].OwnerID;
 
         // perform the transaction
-        using (IWallet corpWallet = this.Wallets.AcquireWallet (call.Session.CorporationID, call.Session.CorpAccountKey, true))
+        using (IWallet corpWallet = Wallets.AcquireWallet (call.Session.CorporationID, call.Session.CorpAccountKey, true))
         {
             corpWallet.EnsureEnoughBalance (rentalCost);
             corpWallet.CreateJournalRecord (MarketReference.OfficeRentalFee, ownerCorporationID, null, -rentalCost);
@@ -410,8 +410,8 @@ public class corpStationMgr : ClientBoundService
         if (Database.CrpOfficesGetAtStation (call.Session.CorporationID, stationID, true, out int officeFolderID) == false)
         {
             // create the office folder
-            ItemEntity item = this.Items.CreateSimpleItem (
-                this.Types [TypeID.OfficeFolder], call.Session.CorporationID,
+            ItemEntity item = Items.CreateSimpleItem (
+                Types [TypeID.OfficeFolder], call.Session.CorporationID,
                 stationID, Flags.Office, 1, false, true
             );
             
@@ -484,8 +484,8 @@ public class corpStationMgr : ClientBoundService
             throw new CustomError ("Trying to bind an object that does not belong to us!");
 
         return new corpStationMgr (
-            StationDB, Notifications, this.Items, Constants, BoundServiceManager, this.Wallets,
-            call.Session, this.ItemDB, this.Database, DogmaItems
+            StationDB, Notifications, Items, Constants, BoundServiceManager, Wallets,
+            call.Session, ItemDB, Database, DogmaItems
         );
     }
 }

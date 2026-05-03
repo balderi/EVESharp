@@ -15,7 +15,7 @@ public class FileLog
         set
         {
             this.mLogFile = value;
-            this.Enabled  = true;
+            Enabled  = true;
         }
     }
     public virtual bool Enabled { get; set; } = false;

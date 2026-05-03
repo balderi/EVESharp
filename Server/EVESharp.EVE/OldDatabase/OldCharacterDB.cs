@@ -23,8 +23,8 @@ public class OldCharacterDB : DatabaseAccessor
 
     public OldCharacterDB (IDatabase db, ItemDB itemDB, ITypes types) : base (db)
     {
-        this.Types  = types;
-        this.ItemDB = itemDB;
+        Types  = types;
+        ItemDB = itemDB;
     }
 
     /// <summary>
@@ -34,7 +34,7 @@ public class OldCharacterDB : DatabaseAccessor
     /// <returns></returns>
     public Rowset GetCharacterList (int accountID)
     {
-        DbDataReader reader = this.Database.Select (
+        DbDataReader reader = Database.Select (
             "SELECT" +
             " characterID, itemName AS characterName, 0 as deletePrepareDateTime," +
             " gender, accessoryID, beardID, costumeID, decoID, eyebrowsID, eyesID, hairID," +
@@ -64,7 +64,7 @@ public class OldCharacterDB : DatabaseAccessor
     /// <returns></returns>
     public Rowset GetCharacterSelectionInfo (int characterID, int accountID)
     {
-        DbDataReader reader = this.Database.Select (
+        DbDataReader reader = Database.Select (
             "SELECT " +
             " itemName AS shortName,bloodlineID,gender,bounty,chrInformation.corporationID,allianceID,title,startDateTime,createDateTime," +
             " securityRating,IF(balance IS NULL, 0, balance) AS balance,chrInformation.stationID,solarSystemID,constellationID,regionID," +
@@ -95,7 +95,7 @@ public class OldCharacterDB : DatabaseAccessor
     /// <returns></returns>
     public bool IsCharacterNameTaken (string characterName)
     {
-        DbDataReader reader = this.Database.Select (
+        DbDataReader reader = Database.Select (
             "SELECT COUNT(*) FROM eveNames WHERE groupID = 1 AND itemName LIKE @characterName",
             new Dictionary <string, object> {{"@characterName", characterName}}
         );
@@ -186,13 +186,13 @@ public class OldCharacterDB : DatabaseAccessor
     )
     {
         // create the item first
-        int itemID = (int) this.Database.InvCreateItem (
+        int itemID = (int) Database.InvCreateItem (
             name, from, owner.ID, stationID, Flags.Connected, false,
             true, 1, 0, 0, 0, ""
         );
 
         // now create the character record in the database
-        this.Database.Prepare (
+        Database.Prepare (
             "INSERT INTO chrInformation(" +
             "characterID, accountID, title, description, bounty, securityRating, petitionMessage, " +
             "logonMinutes, corporationID, roles, rolesAtBase, rolesAtHQ, rolesAtOther, " +
@@ -298,7 +298,7 @@ public class OldCharacterDB : DatabaseAccessor
     public void CreateEmploymentRecord (int itemID, int corporationID, long createDateTime)
     {
         // create employment record
-        this.Database.Prepare (
+        Database.Prepare (
             "INSERT INTO chrEmployment(characterID, corporationID, startDate)VALUES(@characterID, @corporationID, @startDate)",
             new Dictionary <string, object>
             {
@@ -320,7 +320,7 @@ public class OldCharacterDB : DatabaseAccessor
     /// <returns>Whether the information was found or not</returns>
     public bool GetRandomCareerForRace (int raceID, out int careerID, out int schoolID, out int careerSpecialityID, out int corporationID)
     {
-        DbDataReader reader = this.Database.Select (
+        DbDataReader reader = Database.Select (
             "SELECT careerID, corporationID, schoolID FROM chrSchools WHERE raceID = @raceID ORDER BY RAND();",
             new Dictionary <string, object> {{"@raceID", raceID}}
         );
@@ -362,7 +362,7 @@ public class OldCharacterDB : DatabaseAccessor
         out int constellationID, out int regionID
     )
     {
-        DbDataReader reader = this.Database.Select (
+        DbDataReader reader = Database.Select (
             "SELECT staStations.stationID, solarSystemID, constellationID, regionID" +
             " FROM staStations, corporation" +
             " WHERE staStations.stationID = corporation.stationID AND corporation.corporationID = @corporationID",
@@ -399,7 +399,7 @@ public class OldCharacterDB : DatabaseAccessor
     {
         Dictionary <int, int> skills = new Dictionary <int, int> ();
 
-        DbDataReader reader = this.Database.Select (
+        DbDataReader reader = Database.Select (
             "SELECT skillTypeID, levels FROM chrRaceSkills WHERE raceID = @raceID",
             new Dictionary <string, object> {{"@raceID", raceID}}
         );
@@ -421,7 +421,7 @@ public class OldCharacterDB : DatabaseAccessor
     /// <returns></returns>
     public List <Character.SkillQueueEntry> LoadSkillQueue (Character character, Dictionary <int, Skill> skillsInTraining)
     {
-        DbDataReader reader = this.Database.Select (
+        DbDataReader reader = Database.Select (
             "SELECT skillItemID, level FROM chrSkillQueue WHERE characterID = @characterID ORDER BY orderIndex",
             new Dictionary <string, object> {{"@characterID", character.ID}}
         );
@@ -450,7 +450,7 @@ public class OldCharacterDB : DatabaseAccessor
     /// <returns></returns>
     public Rowset GetOwnerNoteLabels (int characterID)
     {
-        return this.Database.PrepareRowset (
+        return Database.PrepareRowset (
             "SELECT noteID, label FROM chrOwnerNote WHERE ownerID = @ownerID",
             new Dictionary <string, object> {{"@ownerID", characterID}}
         );
@@ -463,7 +463,7 @@ public class OldCharacterDB : DatabaseAccessor
     /// <returns></returns>
     public bool IsOnline (int characterID)
     {
-        DbDataReader reader = this.Database.Select (
+        DbDataReader reader = Database.Select (
             "SELECT online FROM chrInformation WHERE characterID = @characterID",
             new Dictionary <string, object> {{"@characterID", characterID}}
         );
@@ -484,7 +484,7 @@ public class OldCharacterDB : DatabaseAccessor
     /// <returns></returns>
     public PyList <PyInteger> GetOnlineFriendList (Character character)
     {
-        DbDataReader reader = this.Database.Select (
+        DbDataReader reader = Database.Select (
             "SELECT accessor AS characterID FROM lscChannelPermissions, chrInformation WHERE lscChannelPermissions.channelID = @characterID AND chrInformation.characterID = lscChannelPermissions.accessor and chrInformation.online = 1",
             new Dictionary <string, object> {{"@characterID", character.ID}}
         );
@@ -506,7 +506,7 @@ public class OldCharacterDB : DatabaseAccessor
     /// <param name="character"></param>
     public void UpdateCharacterInformation (Character character)
     {
-        this.Database.Prepare (
+        Database.Prepare (
             "UPDATE chrInformation SET activeCloneID = @activeCloneID, freeRespecs = @freeRespecs, nextRespecTime = @nextRespecTime, timeLastJump = @timeLastJump, description = @description, warFactionID = @warFactionID, corporationID = @corporationID, corporationDateTime = @corporationDateTime, corpAccountKey = @corpAccountKey WHERE characterID = @characterID",
             new Dictionary <string, object>
             {
@@ -526,7 +526,7 @@ public class OldCharacterDB : DatabaseAccessor
         if (character.ContentsLoaded)
         {
             // ensure the skill queue is saved too
-            this.Database.Prepare (
+            Database.Prepare (
                 "DELETE FROM chrSkillQueue WHERE characterID = @characterID",
                 new Dictionary <string, object> {{"@characterID", character.ID}}
             );
@@ -534,7 +534,7 @@ public class OldCharacterDB : DatabaseAccessor
             // re-create the whole skill queue
             IDbConnection connection = Database.OpenConnection ();
             
-            MySqlCommand create = (MySqlCommand) this.Database.Prepare (
+            MySqlCommand create = (MySqlCommand) Database.Prepare (
                 connection,
                 "INSERT INTO chrSkillQueue(orderIndex, characterID, skillItemID, level) VALUE (@orderIndex, @characterID, @skillItemID, @level)"
             );
@@ -599,7 +599,7 @@ public class OldCharacterDB : DatabaseAccessor
 
         query += " ORDER BY transactionID DESC";
 
-        return this.Database.PrepareRowset (query, parameters);
+        return Database.PrepareRowset (query, parameters);
     }
 
     /// <summary>
@@ -613,7 +613,7 @@ public class OldCharacterDB : DatabaseAccessor
     {
         // TODO: WRITE A GENERATOR FOR THE KILL LOGS, THESE SEEM TO BE KIND OF AN XML FILE WITH ALL THE INFORMATION
         // TODO: FOR MORE INFORMATION CHECK CombatLog_CopyText ON eveCommonUtils.py
-        return this.Database.PrepareRowset (
+        return Database.PrepareRowset (
             "SELECT killID, solarSystemID, moonID, victimCharacterID, victimCorporationID, victimAllianceID, victimFactionID, victimShipTypeID, victimDamageTaken, finalCharacterID, finalCorporationID, finalAllianceID, finalFactionID, finalDamageDone, finalSecurityStatus, finalShipTypeID, finalWeaponTypeID, killTime, killBlob FROM chrCombatLogs WHERE victimCharacterID = @characterID OR finalCharacterID = @characterID LIMIT @startIndex, @limit",
             new Dictionary <string, object>
             {
@@ -631,7 +631,7 @@ public class OldCharacterDB : DatabaseAccessor
     public Rowset GetTopBounties ()
     {
         // return the 100 topmost bounties
-        return this.Database.PrepareRowset (
+        return Database.PrepareRowset (
             "SELECT characterID, itemName AS ownerName, SUM(bounty) AS bounty, 0 AS online FROM chrBounties, eveNames WHERE eveNames.itemID = chrBounties.ownerID GROUP BY characterID ORDER BY bounty DESC LIMIT 100"
         );
     }
@@ -645,7 +645,7 @@ public class OldCharacterDB : DatabaseAccessor
     public void AddToBounty (int characterID, int ownerID, double bounty)
     {
         // create bounty record
-        this.Database.Prepare (
+        Database.Prepare (
             "INSERT INTO chrBounties(characterID, ownerID, bounty)VALUES(@characterID, @ownerID, @bounty)",
             new Dictionary <string, object>
             {
@@ -656,7 +656,7 @@ public class OldCharacterDB : DatabaseAccessor
         );
 
         // add the bounty to the player
-        this.Database.Prepare (
+        Database.Prepare (
             "UPDATE chrInformation SET bounty = bounty + @bounty WHERE characterID = @characterID",
             new Dictionary <string, object>
             {
@@ -673,7 +673,7 @@ public class OldCharacterDB : DatabaseAccessor
     /// <returns></returns>
     public PyDataType GetPrivateInfo (int characterID)
     {
-        return this.Database.PrepareKeyVal (
+        return Database.PrepareKeyVal (
             "SELECT gender, createDateTime, itemName AS charName, bloodlineName, raceName " +
             "FROM chrInformation " +
             "LEFT JOIN eveNames ON eveNames.itemID = chrInformation.characterID " +
@@ -692,7 +692,7 @@ public class OldCharacterDB : DatabaseAccessor
     /// <returns></returns>
     public Rowset GetCharacterAppearanceInfo (int characterID)
     {
-        return this.Database.PrepareRowset (
+        return Database.PrepareRowset (
             "SELECT accessoryID, beardID, costumeID, decoID, eyebrowsID, eyesID, hairID," +
             " lipstickID, makeupID, skinID, backgroundID, lightID," +
             " headRotation1, headRotation2, headRotation3, eyeRotation1," +
@@ -715,7 +715,7 @@ public class OldCharacterDB : DatabaseAccessor
     {
         // remove the note if no text is present
         if (note.Length == 0)
-            this.Database.Prepare (
+            Database.Prepare (
                 "DELETE FROM chrNotes WHERE itemID = @itemID AND ownerID = @ownerID",
                 new Dictionary <string, object>
                 {
@@ -724,7 +724,7 @@ public class OldCharacterDB : DatabaseAccessor
                 }
             );
         else
-            this.Database.Prepare (
+            Database.Prepare (
                 "REPLACE INTO chrNotes (itemID, ownerID, note)VALUES(@itemID, @ownerID, @note)",
                 new Dictionary <string, object>
                 {
@@ -743,7 +743,7 @@ public class OldCharacterDB : DatabaseAccessor
     /// <returns></returns>
     public int GetSkillLevelForCharacter (TypeID skill, int characterID)
     {
-        DbDataReader reader = this.Database.Select (
+        DbDataReader reader = Database.Select (
             "SELECT valueInt FROM invItemsAttributes LEFT JOIN invItems USING(itemID) WHERE typeID = @skillTypeID AND ownerID = @characterID",
             new Dictionary <string, object>
             {
@@ -768,7 +768,7 @@ public class OldCharacterDB : DatabaseAccessor
     /// <returns></returns>
     public List <int> FindCharacters (string namePart)
     {
-        DbDataReader reader = this.Database.Select (
+        DbDataReader reader = Database.Select (
             "SELECT itemID FROM eveNames WHERE groupID = 1 AND itemName LIKE @name",
             new Dictionary <string, object> {{"@name", $"%{namePart}%"}}
         );
@@ -791,7 +791,7 @@ public class OldCharacterDB : DatabaseAccessor
     /// <returns></returns>
     public long GetLastFactionJoinDate (int characterID)
     {
-        DbDataReader reader = this.Database.Select (
+        DbDataReader reader = Database.Select (
             "SELECT startDate FROM chrEmployment WHERE corporationID IN (SELECT militiaCorporationID FROM chrFactions) AND characterID = @characterID",
             new Dictionary <string, object> {{"@characterID", characterID}}
         );
@@ -827,7 +827,7 @@ public class OldCharacterDB : DatabaseAccessor
         out long grantableRolesAtOther, out int? blockRoles,     out int? baseID,               out int  titleMask
     )
     {
-        DbDataReader reader = this.Database.Select (
+        DbDataReader reader = Database.Select (
             "SELECT roles, rolesAtBase, rolesAtHQ, rolesAtOther, grantableRoles, grantableRolesAtBase, grantableRolesAtHQ, grantableRolesAtOther, blockRoles, baseID, titleMask FROM chrInformation WHERE characterID = @characterID",
             new Dictionary <string, object> {{"@characterID", characterID}}
         );
@@ -870,7 +870,7 @@ public class OldCharacterDB : DatabaseAccessor
         long grantableRoles, long grantableRolesAtHQ, long grantableRolesAtBase, long grantableRolesAtOther, long titleMask
     )
     {
-        this.Database.Prepare (
+        Database.Prepare (
             "UPDATE chrInformation SET roles = @roles, rolesAtBase = @rolesAtBase, rolesAtHQ = @rolesAtHQ, rolesAtOther = @rolesAtOther, grantableRoles = @grantableRoles, grantableRolesAtBase = @grantableRolesAtBase, grantableRolesAtHQ = @grantableRolesAtHQ, grantableRolesAtOther = @grantableRolesAtOther, titleMask = @titleMask WHERE characterID = @characterID",
             new Dictionary <string, object>
             {
@@ -895,7 +895,7 @@ public class OldCharacterDB : DatabaseAccessor
     /// <param name="blockRoles"></param>
     public void UpdateCharacterBlockRole (int characterID, int? blockRoles)
     {
-        this.Database.Prepare (
+        Database.Prepare (
             "UPDATE chrInformation SET blockRoles = @blockRoles WHERE characterID = @characterID",
             new Dictionary <string, object>
             {
@@ -912,7 +912,7 @@ public class OldCharacterDB : DatabaseAccessor
     /// <returns></returns>
     public int GetCharacterCorporationID (int characterID)
     {
-        DbDataReader reader = this.Database.Select (
+        DbDataReader reader = Database.Select (
             "SELECT corporationID FROM chrInformation WHERE characterID = @characterID",
             new Dictionary <string, object> {{"@characterID", characterID}}
         );
@@ -935,7 +935,7 @@ public class OldCharacterDB : DatabaseAccessor
     /// <param name="corporationID"></param>
 public void UpdateCorporationID(int characterID, int corporationID)
 {
-    this.Database.Prepare(
+    Database.Prepare(
         "UPDATE chrInformation SET corporationID = @corporationID, corporationDateTime = @corporationDateTime WHERE characterID = @characterID",
         new Dictionary<string, object>
         {
@@ -949,7 +949,7 @@ public void UpdateCorporationID(int characterID, int corporationID)
 //
 public void UpdateStationAndLocation(int characterID, int stationID, int solarSystemID, int constellationID, int regionID)
 {
-    this.Database.Prepare(
+    Database.Prepare(
         "UPDATE chrInformation " +
         "SET stationID = @stationID, solarSystemID = @solarSystemID, constellationID = @constellationID, regionID = @regionID " +
         "WHERE characterID = @characterID",

@@ -44,7 +44,7 @@ public class StreamPacketizer
                     // go back to the size indicator
                     this.mInputStream.Seek (-4, SeekOrigin.Current);
 
-                    return this.PacketCount;
+                    return PacketCount;
                 }
 
                 // read the packet's data and queue it on the packets queue
@@ -67,7 +67,7 @@ public class StreamPacketizer
                 this.mInputStream.Seek (0, SeekOrigin.Begin);
             }
 
-            return this.PacketCount;
+            return PacketCount;
         }
     }
 

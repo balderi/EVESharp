@@ -29,20 +29,20 @@ public class Rowset
 
     public Row this [int index]
     {
-        get => new Row (this.Header, this.Rows [index]);
-        set => this.Rows.Add (value.Line);
+        get => new Row (Header, Rows [index]);
+        set => Rows.Add (value.Line);
     }
 
     public Rowset (PyList <PyString> headers)
     {
-        this.Header = headers;
-        this.Rows   = new PyList <PyList> ();
+        Header = headers;
+        Rows   = new PyList <PyList> ();
     }
 
     public Rowset (PyList <PyString> headers, PyList <PyList> rows)
     {
-        this.Header = headers;
-        this.Rows   = rows;
+        Header = headers;
+        Rows   = rows;
     }
 
     public static implicit operator PyDataType (Rowset rowset)

@@ -62,7 +62,7 @@ public class character : Service
     private CorporationDB       CorporationDB  { get; }
     private ChatDB              ChatDB         { get; }
     private IItems              Items          { get; }
-    private ITypes              Types          => this.Items.Types;
+    private ITypes              Types          => Items.Types;
     private ICacheStorage       CacheStorage   { get; }
     private INotificationSender Notifications  { get; }
     private IWallets            Wallets        { get; }
@@ -85,10 +85,10 @@ public class character : Service
         DB                  = db;
         ChatDB              = chatDB;
         CorporationDB       = corporationDB;
-        this.Items          = items;
+        Items          = items;
         CacheStorage        = cacheStorage;
         Notifications       = notificationSender;
-        this.Wallets        = wallets;
+        Wallets        = wallets;
         Ancestries          = ancestries;
         Bloodlines          = bloodlines;
         SessionManager      = sessionManager;
@@ -166,7 +166,7 @@ public class character : Service
         if (found)
             return;
 
-        Log.Error ($"Cannot find random career for race {raceID}");
+        Log.Error ("Cannot find random career for race {Race}", raceID);
 
         throw new CustomError ($"Cannot find random career for race {raceID}");
     }
@@ -186,7 +186,7 @@ public class character : Service
         if (found)
             return;
 
-        Log.Error ($"Cannot find location for corporation {corporationID}");
+        Log.Error ("Cannot find location for corporation {Corporation}", corporationID);
 
         throw new CustomError ($"Cannot find location for corporation {corporationID}");
     }
@@ -257,7 +257,7 @@ public class character : Service
     )
     {
         // load the item into memory
-        ItemEntity owner = this.Items.LocationSystem;
+        ItemEntity owner = Items.LocationSystem;
 
         this.GetRandomCareerForRace (ancestry.Bloodline.RaceID, out int careerID, out int schoolID, out int careerSpecialityID, out int corporationID);
         this.GetLocationForCorporation (corporationID, out int stationID, out int solarSystemID, out int constellationID, out int regionID);
@@ -293,9 +293,9 @@ public class character : Service
         );
 
         // create the wallet for the player
-        this.Wallets.CreateWallet (itemID, WalletKeys.MAIN, this.mConfiguration.Balance);
+        Wallets.CreateWallet (itemID, WalletKeys.MAIN, this.mConfiguration.Balance);
 
-        return this.Items.LoadItem (itemID) as Character;
+        return Items.LoadItem (itemID) as Character;
     }
 
     [MustNotBeCharacter]
@@ -329,7 +329,7 @@ public class character : Service
 
         if (ancestry.Bloodline.ID != bloodlineID)
         {
-            Log.Error ($"The ancestry {ancestryID} doesn't belong to the given bloodline {bloodlineID}");
+            Log.Error ("The ancestry {PyInteger} doesn't belong to the given bloodline {Bloodline}", ancestryID, bloodlineID);
 
             throw new BannedBloodline (ancestry, bloodline);
         }
@@ -337,7 +337,7 @@ public class character : Service
         Character character =
             this.CreateCharacter (call, characterName, ancestry, genderID, appearance, currentTime);
 
-        Station station = this.Items.GetStaticStation (character.StationID);
+        Station station = Items.GetStaticStation (character.StationID);
 
         // TODO: CREATE DEFAULT STANDINGS FOR THE CHARACTER
         // change character attributes based on the picked ancestry
@@ -352,46 +352,46 @@ public class character : Service
 
         foreach ((int skillTypeID, int level) in skills)
         {
-            Type skillType = this.Types [skillTypeID];
+            Type skillType = Types [skillTypeID];
 
             // create the skill at the required level
-            this.Items.CreateSkill (skillType, character, level);
+            Items.CreateSkill (skillType, character, level);
         }
 
         // create the ship for the character
-        Ship ship = this.Items.CreateShip (
+        Ship ship = Items.CreateShip (
             bloodline.ShipType, station,
             character
         );
 
         // add one unit of Tritanium to the station's hangar for the player
-        Type tritaniumType = this.Types [TypeID.Tritanium];
+        Type tritaniumType = Types [TypeID.Tritanium];
 
         ItemEntity tritanium =
-            this.Items.CreateSimpleItem (
+            Items.CreateSimpleItem (
                 tritaniumType, character,
                 station, Flags.Hangar
             );
 
         // add one unit of Damage Control I to the station's hangar for the player
-        Type damageControlType = this.Types [TypeID.DamageControlI];
+        Type damageControlType = Types [TypeID.DamageControlI];
 
         ItemEntity damageControl =
-            this.Items.CreateSimpleItem (
+            Items.CreateSimpleItem (
                 damageControlType, character,
                 station, Flags.Hangar
             );
 
         // create an alpha clone
-        Type cloneType = this.Types [TypeID.CloneGradeAlpha];
+        Type cloneType = Types [TypeID.CloneGradeAlpha];
 
-        Clone clone = this.Items.CreateClone (cloneType, station, character);
+        Clone clone = Items.CreateClone (cloneType, station, character);
 
         character.LocationID    = ship.ID;
         character.ActiveCloneID = clone.ID;
 
         // get the wallet for the player and give the money specified in the configuration
-        using IWallet wallet = this.Wallets.AcquireWallet (character.ID, WalletKeys.MAIN);
+        using IWallet wallet = Wallets.AcquireWallet (character.ID, WalletKeys.MAIN);
         {
             wallet.CreateJournalRecord (MarketReference.Inheritance, null, null, this.mConfiguration.Balance);
         }
@@ -417,11 +417,11 @@ public class character : Service
         ChatDB.JoinEntityMailingList (character.CorporationID, character.ID);
 
         // unload items from list
-        this.Items.UnloadItem (clone);
-        this.Items.UnloadItem (damageControl);
-        this.Items.UnloadItem (tritanium);
-        this.Items.UnloadItem (ship);
-        this.Items.UnloadItem (character);
+        Items.UnloadItem (clone);
+        Items.UnloadItem (damageControl);
+        Items.UnloadItem (tritanium);
+        Items.UnloadItem (ship);
+        Items.UnloadItem (character);
 
         // finally return the new character's ID and wait for the subsequent calls from the EVE client :)
         return character.ID;
@@ -457,12 +457,12 @@ public class character : Service
     )
     {
         // ensure the character belongs to the current account
-        Character character = this.Items.LoadItem <Character> (characterID);
+        Character character = Items.LoadItem <Character> (characterID);
 
         if (character.AccountID != call.Session.UserID)
         {
             // unload character
-            this.Items.UnloadItem (character);
+            Items.UnloadItem (character);
 
             // throw proper error
             throw new CustomError ("The selected character does not belong to this account, aborting...");
@@ -497,12 +497,12 @@ public class character : Service
         updates.StationID = character.StationID;
 
         Log.Information(
-            $"[character] Session restored: station={character.StationID}, system={character.SolarSystemID}, constellation={character.ConstellationID}, region={character.RegionID}"
+            "[character] Session restored: station={CharacterStation}, system={CharacterSolarSystem}, constellation={CharacterConstellation}, region={CharacterRegion}", character.StationID, character.SolarSystemID, character.ConstellationID, character.RegionID
         );
         
 
         // Log for sanity
-        Log.Information($"[character] Session location set: station={character.StationID}, system={character.SolarSystemID}");
+        Log.Information("[character] Session location set: station={CharacterStation}, system={CharacterSolarSystem}", character.StationID, character.SolarSystemID);
 
 
         if (character.StationID == 0)
@@ -541,7 +541,7 @@ public class character : Service
         Console.WriteLine ($"[character]   CharTypeID={character.Type.ID} ({character.Type.Name})");
         try
         {
-            ItemEntity shipItem = this.Items.GetItem (character.LocationID);
+            ItemEntity shipItem = Items.GetItem (character.LocationID);
             Console.WriteLine ($"[character]   ShipItem: exists={shipItem != null} typeID={shipItem?.Type?.ID} typeName={shipItem?.Type?.Name} locationID={shipItem?.LocationID}");
 
             if (shipItem?.Type != null)
@@ -553,7 +553,7 @@ public class character : Service
         }
 
         // check if the character has any accounting roles and set the correct accountKey based on the data
-        if (this.Wallets.IsAccessAllowed (updates, character.CorpAccountKey, updates.CorporationID))
+        if (Wallets.IsAccessAllowed (updates, character.CorpAccountKey, updates.CorporationID))
             updates.CorpAccountKey = character.CorpAccountKey;
 
         // set the war faction id if present
@@ -569,7 +569,7 @@ public class character : Service
         Notifications.NotifyCharacters (onlineFriends, new OnContactLoggedOn (character.ID));
 
         // unload the character
-        this.Items.UnloadItem (characterID);
+        Items.UnloadItem (characterID);
 
         // send the session change
         SessionManager.PerformSessionUpdate (Session.USERID, call.Session.UserID, updates);
@@ -599,7 +599,7 @@ public class character : Service
     [MustBeCharacter]
     public PyDataType GetHomeStation (ServiceCall call)
     {
-        Character character = this.Items.GetItem <Character> (call.Session.CharacterID);
+        Character character = Items.GetItem <Character> (call.Session.CharacterID);
 
         if (character.ActiveCloneID is null)
             throw new CustomError ("You do not have any medical clone...");
@@ -612,7 +612,7 @@ public class character : Service
     [MustBeCharacter]
     public PyDataType GetCharacterDescription (ServiceCall call, PyInteger characterID)
     {
-        Character character = this.Items.GetItem <Character> (call.Session.CharacterID);
+        Character character = Items.GetItem <Character> (call.Session.CharacterID);
 
         return character.Description;
     }
@@ -620,7 +620,7 @@ public class character : Service
     [MustBeCharacter]
     public PyDataType SetCharacterDescription (ServiceCall call, PyString newBio)
     {
-        Character character = this.Items.GetItem <Character> (call.Session.CharacterID);
+        Character character = Items.GetItem <Character> (call.Session.CharacterID);
 
         character.Description = newBio;
         character.Persist ();
@@ -675,7 +675,7 @@ public class character : Service
     {
         PyList result = new PyList ();
 
-        foreach ((int factionID, Faction faction) in this.Items.Factions)
+        foreach ((int factionID, Faction faction) in Items.Factions)
             result.Add (faction.GetKeyVal ());
 
         return result;

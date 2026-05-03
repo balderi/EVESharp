@@ -10,30 +10,30 @@ public class Skill : ItemEntity
 
     public long Level
     {
-        get => this.Attributes [AttributeTypes.skillLevel].Integer;
+        get => Attributes [AttributeTypes.skillLevel].Integer;
         set
         {
-            this.Attributes [AttributeTypes.skillLevel].Integer = value;
-            this.Points                                         = this.GetSkillPointsForLevel (value);
+            Attributes [AttributeTypes.skillLevel].Integer = value;
+            Points                                         = this.GetSkillPointsForLevel (value);
         }
     }
 
     public double Points
     {
-        get => this.Attributes [AttributeTypes.skillPoints].Float;
-        set => this.Attributes [AttributeTypes.skillPoints].Float = value;
+        get => Attributes [AttributeTypes.skillPoints].Float;
+        set => Attributes [AttributeTypes.skillPoints].Float = value;
     }
 
-    public Attribute TimeConstant => this.Attributes [AttributeTypes.skillTimeConstant];
+    public Attribute TimeConstant => Attributes [AttributeTypes.skillTimeConstant];
 
-    public Attribute PrimaryAttribute => this.Attributes [AttributeTypes.primaryAttribute];
+    public Attribute PrimaryAttribute => Attributes [AttributeTypes.primaryAttribute];
 
-    public Attribute SecondaryAttribute => this.Attributes [AttributeTypes.secondaryAttribute];
+    public Attribute SecondaryAttribute => Attributes [AttributeTypes.secondaryAttribute];
 
     public long ExpiryTime
     {
-        get => this.Attributes [AttributeTypes.expiryTime].Integer;
-        set => this.Attributes [AttributeTypes.expiryTime].Integer = value;
+        get => Attributes [AttributeTypes.expiryTime].Integer;
+        set => Attributes [AttributeTypes.expiryTime].Integer = value;
     }
 
     public Skill (Database.Inventory.Types.Information.Item info, double skillPointMultiplier) : base (info)
@@ -43,6 +43,6 @@ public class Skill : ItemEntity
 
     public double GetSkillPointsForLevel (long level)
     {
-        return Skills.GetSkillPointsForLevel (level, this.TimeConstant, this.mSkillPointMultiplier);
+        return Skills.GetSkillPointsForLevel (level, TimeConstant, this.mSkillPointMultiplier);
     }
 }

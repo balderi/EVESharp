@@ -138,7 +138,7 @@ return false;
         {
         
             Console.WriteLine($"[Service.ExecuteCall] MISSING method '{method}' on service '{this.GetType().FullName}'");
-            throw new MissingCallException(this.Name, method);
+            throw new MissingCallException(Name, method);
         }
 
         List <CallValidator> requirements = this.GetType ().GetCustomAttributes <CallValidator> ().Concat (methodInfo.GetCustomAttributes <CallValidator> ()).ToList ();

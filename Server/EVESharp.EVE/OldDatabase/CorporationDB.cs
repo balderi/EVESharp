@@ -45,13 +45,13 @@ public class CorporationDB : DatabaseAccessor
 
     public CorporationDB (ItemDB itemDB, ITypes types, IDatabase db) : base (db)
     {
-        this.Types  = types;
-        this.ItemDB = itemDB;
+        Types  = types;
+        ItemDB = itemDB;
     }
 
     public Rowset GetEveOwners (int corporationID)
     {
-        return this.Database.PrepareRowset (
+        return Database.PrepareRowset (
             "SELECT characterID as ownerID, itemName AS ownerName, typeID FROM chrInformation, eveNames WHERE eveNames.itemID = chrInformation.characterID AND corporationID = @corporationID",
             new Dictionary <string, object> {{"@corporationID", corporationID}}
         );
@@ -59,7 +59,7 @@ public class CorporationDB : DatabaseAccessor
 
     public Rowset GetSharesByShareholder (int characterID)
     {
-        return this.Database.PrepareRowset (
+        return Database.PrepareRowset (
             "SELECT corporationID, shares FROM crpShares WHERE ownerID = @characterID",
             new Dictionary <string, object> {{"@characterID", characterID}}
         );
@@ -67,7 +67,7 @@ public class CorporationDB : DatabaseAccessor
 
     public PyDataType GetShareholders (int corporationID)
     {
-        return this.Database.PrepareDictRowList (
+        return Database.PrepareDictRowList (
             "SELECT ownerID AS shareholderID, crpShares.corporationID, chrInformation.corporationID AS shareholderCorporationID, shares FROM crpShares LEFT JOIN chrInformation ON characterID = ownerID WHERE crpShares.corporationID = @corporationID",
             new Dictionary <string, object> {{"@corporationID", corporationID}}
         );
@@ -75,7 +75,7 @@ public class CorporationDB : DatabaseAccessor
 
     public Dictionary <int, int> GetShareholdersList (int corporationID)
     {
-        DbDataReader reader = this.Database.Select (
+        DbDataReader reader = Database.Select (
             "SELECT ownerID, shares FROM crpShares WHERE corporationID = @corporationID",
             new Dictionary <string, object> {{"@corporationID", corporationID}}
         );
@@ -93,7 +93,7 @@ public class CorporationDB : DatabaseAccessor
 
     public Rowset GetMedalsReceived (int characterID, bool publicOnly = false)
     {
-        return this.Database.PrepareRowset (
+        return Database.PrepareRowset (
             "SELECT medalID, title, description, ownerID, issuerID, chrMedals.date, reason, status FROM chrMedals LEFT JOIN crpMedals USING (medalID) WHERE ownerID = @characterID AND status >= @status",
             new Dictionary <string, object>
             {
@@ -105,7 +105,7 @@ public class CorporationDB : DatabaseAccessor
 
     public CRowset GetMedalsReceivedDetails (int characterID, bool publicOnly = false)
     {
-        return this.Database.PrepareCRowset (
+        return Database.PrepareCRowset (
             "SELECT medalID, part, graphic, color FROM crpMedalParts LEFT JOIN chrMedals USING(medalID) WHERE ownerID = @characterID AND status >= @status",
             new Dictionary <string, object>
             {
@@ -117,7 +117,7 @@ public class CorporationDB : DatabaseAccessor
 
     public Rowset GetEmploymentRecord (int characterID)
     {
-        return this.Database.PrepareRowset (
+        return Database.PrepareRowset (
             "SELECT corporationID, startDate, deleted FROM chrEmployment WHERE characterID=@characterID ORDER BY startDate DESC",
             new Dictionary <string, object> {{"@characterID", characterID}}
         );
@@ -125,7 +125,7 @@ public class CorporationDB : DatabaseAccessor
 
     public double GetLPForCharacterCorp (int corporationID, int characterID)
     {
-        DbDataReader reader = this.Database.Select (
+        DbDataReader reader = Database.Select (
             "SELECT balance FROM chrLPbalance WHERE characterID=@characterID AND corporationID=@corporationID",
             new Dictionary <string, object>
             {
@@ -149,7 +149,7 @@ public class CorporationDB : DatabaseAccessor
         // TODO: GENERATE PROPER FIELDS FOR THE FOLLOWING FIELDS
         // TODO: divisionID, squadronID
         // TODO: CHECK IF THIS startDateTime IS THE CORP'S MEMBERSHIP OR CHARACTER'S MEMBERSHIP
-        return this.Database.PrepareKeyVal (
+        return Database.PrepareKeyVal (
             "SELECT" +
             " characterID, title, startDateTime, roles, rolesAtHQ, rolesAtBase, rolesAtOther," +
             " titleMask, grantableRoles, grantableRolesAtHQ, grantableRolesAtBase," +
@@ -168,7 +168,7 @@ public class CorporationDB : DatabaseAccessor
 
     public Dictionary <PyDataType, int> GetOffices (int corporationID)
     {
-        DbDataReader reader = this.Database.Select (
+        DbDataReader reader = Database.Select (
             "SELECT officeID FROM crpOffices WHERE corporationID = @corporationID AND impounded = 0",
             new Dictionary <string, object> {{"@corporationID", corporationID}}
         );
@@ -187,7 +187,7 @@ public class CorporationDB : DatabaseAccessor
 
     public PyDataType GetOfficesLocation (int corporationID)
     {
-        return this.Database.PrepareRowset (
+        return Database.PrepareRowset (
             "SELECT stationID AS locationID FROM crpOffices WHERE corporationID = @corporationID AND impounded = 0",
             new Dictionary <string, object> {{"@corporationID", corporationID}}
         );
@@ -195,7 +195,7 @@ public class CorporationDB : DatabaseAccessor
 
     public PyDataType GetImpoundedLocations (int corporationID)
     {
-        return this.Database.PrepareRowset (
+        return Database.PrepareRowset (
             "SELECT stationID AS locationID FROM crpOffices WHERE corporationID = @corporationID AND impounded = 1",
             new Dictionary <string, object>
             {
@@ -206,7 +206,7 @@ public class CorporationDB : DatabaseAccessor
 
     public Rowset GetAssetsInOfficesAtStation (int corporationID, int stationID, int impounded)
     {
-        return this.Database.PrepareRowset (
+        return Database.PrepareRowset (
             "SELECT itemID, typeID, locationID, ownerID, flag, contraband, singleton, quantity, groupID, categoryID " +
             "FROM invItems " +
             "LEFT JOIN invTypes USING(typeID) " +
@@ -243,7 +243,7 @@ public class CorporationDB : DatabaseAccessor
         // TODO: GENERATE PROPER FIELDS FOR THE FOLLOWING FIELDS
         // TODO: divisionID, squadronID
         // TODO: CHECK IF THIS startDateTime IS THE CORP'S MEMBERSHIP OR CHARACTER'S MEMBERSHIP
-        using (DbDataReader reader = this.Database.Select (query, parameters))
+        using (DbDataReader reader = Database.Select (query, parameters))
         {
             return header.FetchByKey (0, reader, rowsIndex);
         }
@@ -267,7 +267,7 @@ public class CorporationDB : DatabaseAccessor
         // TODO: GENERATE PROPER FIELDS FOR THE FOLLOWING FIELDS
         // TODO: divisionID, squadronID
         // TODO: CHECK IF THIS startDateTime IS THE CORP'S MEMBERSHIP OR CHARACTER'S MEMBERSHIP
-        using (DbDataReader reader = this.Database.Select (query, parameters))
+        using (DbDataReader reader = Database.Select (query, parameters))
         {
             return header.FetchByKey (0, reader, rowsIndex);
         }
@@ -275,7 +275,7 @@ public class CorporationDB : DatabaseAccessor
 
     public PyList <PyTuple> GetOffices (int corporationID, int startPos, int limit, SparseRowset header)
     {
-        DbDataReader reader = this.Database.Select (
+        DbDataReader reader = Database.Select (
             "SELECT officeID, stationID, typeID, officeFolderID FROM crpOffices LEFT JOIN invItems ON itemID = stationID WHERE corporationID = @corporationID AND impounded = 0 LIMIT @startPos,@limit",
             new Dictionary <string, object>
             {
@@ -294,7 +294,7 @@ public class CorporationDB : DatabaseAccessor
     public SparseRowset GetOfficesSparseRowset (int corporationID)
     {
         DbDataReader reader =
-            this.Database.Select (
+            Database.Select (
                 "SELECT COUNT(*) AS recordCount FROM crpOffices WHERE corporationID = @corporationID AND impounded = 0",
                 new Dictionary <string, object> {{"@corporationID", corporationID}}
             );
@@ -320,7 +320,7 @@ public class CorporationDB : DatabaseAccessor
 
     public Dictionary <PyDataType, int> GetMembers (int corporationID)
     {
-        DbDataReader reader = this.Database.Select (
+        DbDataReader reader = Database.Select (
             "SELECT characterID FROM chrInformation WHERE corporationID = @corporationID",
             new Dictionary <string, object> {{"@corporationID", corporationID}}
         );
@@ -361,7 +361,7 @@ public class CorporationDB : DatabaseAccessor
 
         parameters ["@corporationID"] = corporationID;
 
-        using (DbDataReader reader = this.Database.Select (query, parameters))
+        using (DbDataReader reader = Database.Select (query, parameters))
         {
             return header.FetchByKey (0, reader, rowsIndex);
         }
@@ -372,7 +372,7 @@ public class CorporationDB : DatabaseAccessor
         // TODO: GENERATE PROPER FIELDS FOR THE FOLLOWING FIELDS
         // TODO: divisionID, squadronID
         // TODO: CHECK IF THIS startDateTime IS THE CORP'S MEMBERSHIP OR CHARACTER'S MEMBERSHIP
-        DbDataReader reader = this.Database.Select (
+        DbDataReader reader = Database.Select (
             "SELECT" +
             " characterID, title, corporationDateTime AS startDateTime, roles, rolesAtHQ, rolesAtBase, rolesAtOther," +
             " titleMask, grantableRoles, grantableRolesAtHQ, grantableRolesAtBase," +
@@ -400,7 +400,7 @@ public class CorporationDB : DatabaseAccessor
         // TODO: GENERATE PROPER FIELDS FOR THE FOLLOWING FIELDS
         // TODO: divisionID, squadronID
         // TODO: CHECK IF THIS startDateTime IS THE CORP'S MEMBERSHIP OR CHARACTER'S MEMBERSHIP
-        DbDataReader reader = this.Database.Select (
+        DbDataReader reader = Database.Select (
             "SELECT" +
             " characterID, title, corporationDateTime AS startDateTime, roles, rolesAtHQ, rolesAtBase, rolesAtOther," +
             " titleMask, grantableRoles, grantableRolesAtHQ, grantableRolesAtBase," +
@@ -426,7 +426,7 @@ public class CorporationDB : DatabaseAccessor
     public SparseRowset GetMembersSparseRowset (int corporationID)
     {
         DbDataReader reader =
-            this.Database.Select (
+            Database.Select (
                 "SELECT COUNT(*) AS recordCount FROM chrInformation WHERE corporationID=@corporationID",
                 new Dictionary <string, object> {{"@corporationID", corporationID}}
             );
@@ -484,7 +484,7 @@ public class CorporationDB : DatabaseAccessor
 
     public Rowset GetMemberTrackingInfoSimple (int corporationID)
     {
-        return this.Database.PrepareRowset (
+        return Database.PrepareRowset (
             "SELECT characterID, title, baseID, corporationDateTime AS startDateTime, corporationID, IF(online = 1, -1, IF(lastOnline = 0, NULL, (@currentTicks - lastOnline) / @ticksPerHour)) AS lastOnline, logonDateTime, logoffDateTime FROM chrInformation WHERE corporationID = @corporationID",
             new Dictionary <string, object>
             {
@@ -497,7 +497,7 @@ public class CorporationDB : DatabaseAccessor
 
     public Rowset GetMemberTrackingInfo (int corporationID)
     {
-        return this.Database.PrepareRowset (
+        return Database.PrepareRowset (
             "SELECT characterID, shp.typeID AS shipTypeID, shp.locationID AS locationID, baseID, corporationDateTime AS startDateTime, title, corporationID, logonDateTime, logoffDateTime, roles, grantableRoles, IF(online = 1, -1, IF(lastOnline = 0, NULL, (@currentTicks - lastOnline) / @ticksPerHour)) AS lastOnline FROM chrInformation LEFT JOIN invItems chr ON chr.itemID = characterID LEFT JOIN invItems shp ON shp.itemID = chr.locationID WHERE corporationID = @corporationID",
             new Dictionary <string, object>
             {
@@ -510,7 +510,7 @@ public class CorporationDB : DatabaseAccessor
 
     public Rowset GetMemberTrackingInfo (int corporationID, int characterID)
     {
-        return this.Database.PrepareRowset (
+        return Database.PrepareRowset (
             "SELECT characterID, shp.typeID AS shipTypeID, shp.locationID AS locationID, baseID, corporationDateTime AS startDateTime, title, corporationID, logonDateTime, logoffDateTime, roles, grantableRoles, IF(online = 1, -1, IF(lastOnline = 0, NULL, (@currentTicks - lastOnline) / @ticksPerHour)) AS lastOnline FROM chrInformation LEFT JOIN invItems chr ON chr.itemID = characterID LEFT JOIN invItems shp ON shp.itemID = chr.locationID WHERE corporationID = @corporationID AND characterID = @characterID",
             new Dictionary <string, object>
             {
@@ -524,7 +524,7 @@ public class CorporationDB : DatabaseAccessor
 
     public int GetTitleMaskForCharacter (int characterID)
     {
-        DbDataReader reader = this.Database.Select (
+        DbDataReader reader = Database.Select (
             "SELECT titleMask FROM chrInformation WHERE characterID = @characterID",
             new Dictionary <string, object> {{"@characterID", characterID}}
         );
@@ -540,7 +540,7 @@ public class CorporationDB : DatabaseAccessor
 
     public void GetCorporationInformationForCharacter (int characterID, out string title, out int titleMask, out int corporationID, out int? allianceID)
     {
-        DbDataReader reader = this.Database.Select (
+        DbDataReader reader = Database.Select (
             "SELECT title, titleMask, corporationID, allianceID FROM chrInformation LEFT JOIN corporation USING(corporationID) WHERE characterID = @characterID",
             new Dictionary <string, object> {{"@characterID", characterID}}
         );
@@ -564,7 +564,7 @@ public class CorporationDB : DatabaseAccessor
 
     public Dictionary <int, string> GetTitlesNames (int corporationID)
     {
-        DbDataReader reader = this.Database.Select (
+        DbDataReader reader = Database.Select (
             "SELECT titleID, titleName FROM crpTitles WHERE corporationID = @corporationID",
             new Dictionary <string, object> {{"@corporationID", corporationID}}
         );
@@ -641,12 +641,12 @@ public class CorporationDB : DatabaseAccessor
             parameters ["@corporationID"] =  corporationID;
         }
 
-        return this.Database.PrepareRowset (query, parameters);
+        return Database.PrepareRowset (query, parameters);
     }
 
     public Rowset GetCharacterApplications (int characterID)
     {
-        return this.Database.PrepareRowset (
+        return Database.PrepareRowset (
             "SELECT corporationID, characterID, applicationText, 0 AS status, applicationDateTime FROM chrApplications WHERE characterID = @characterID",
             new Dictionary <string, object> {{"@characterID", characterID}}
         );
@@ -654,7 +654,7 @@ public class CorporationDB : DatabaseAccessor
 
     public Rowset GetStations (int corporationID)
     {
-        return this.Database.PrepareRowset (
+        return Database.PrepareRowset (
             "SELECT stationID, stationTypeID as typeID FROM staStations WHERE corporationID = @corporationID UNION SELECT stationID, stationTypeID AS typeID FROM crpOffices LEFT JOIN staStations USING(stationID) WHERE crpOffices.corporationID = @corporationID",
             new Dictionary <string, object> {{"@corporationID", corporationID}}
         );
@@ -662,7 +662,7 @@ public class CorporationDB : DatabaseAccessor
 
     public PyDataType GetPublicInfo (int corporationID)
     {
-        return this.Database.PrepareKeyVal (
+        return Database.PrepareKeyVal (
             "SELECT corporationID, corporationName, allianceID, stationID, ceoID, creatorID, taxRate, memberCount, shares, tickerName, url, description, deleted FROM corporation WHERE corporationID = @corporationID",
             new Dictionary <string, object> {{"@corporationID", corporationID}}
         );
@@ -670,7 +670,7 @@ public class CorporationDB : DatabaseAccessor
 
     public int GetCorporationIDForCharacter (int characterID)
     {
-        DbDataReader reader = this.Database.Select (
+        DbDataReader reader = Database.Select (
             "SELECT corporationID FROM chrInformation WHERE characterID = @characterID",
             new Dictionary <string, object> {{"@characterID", characterID}}
         );
@@ -693,12 +693,12 @@ public class CorporationDB : DatabaseAccessor
     )
     {
         // create the item first
-        int corporationID = (int) this.Database.InvCreateItem (
-            name, this.Types [TypeID.Corporation], creatorID, stationID, Flags.None, false,
+        int corporationID = (int) Database.InvCreateItem (
+            name, Types [TypeID.Corporation], creatorID, stationID, Flags.None, false,
             true, 1, 0, 0, 0, ""
         );
 
-        this.Database.Prepare (
+        Database.Prepare (
             "INSERT INTO corporation(" +
             "corporationID, corporationName, description, tickerName, url, taxRate, creatorID, ceoID, stationID, memberCount, memberLimit, raceID, allowedMemberRaceIDs, shape1, shape2, shape3, color1, color2, color3, typeface" +
             ")VALUES(" +
@@ -732,7 +732,7 @@ public class CorporationDB : DatabaseAccessor
 
     public void CreateDefaultTitlesForCorporation (int corporationID)
     {
-        this.Database.Prepare (
+        Database.Prepare (
             "INSERT INTO crpTitles SELECT @corporationID AS corporationID, titleID, titleName, roles, grantableRoles, rolesAtHQ, grantableRolesAtHQ, rolesAtBase, grantableRolesAtBase, rolesAtOther, grantableRolesAtOther FROM crpTitlesTemplate",
             new Dictionary <string, object> {{"@corporationID", corporationID}}
         );
@@ -740,7 +740,7 @@ public class CorporationDB : DatabaseAccessor
 
     public bool IsCorporationNameTaken (string corporationName)
     {
-        DbDataReader reader = this.Database.Select (
+        DbDataReader reader = Database.Select (
             $"SELECT COUNT(*) FROM eveNames WHERE groupID = {(int) GroupID.Corporation} AND itemName LIKE @corporationName",
             new Dictionary <string, object> {{"@corporationName", corporationName}}
         );
@@ -755,7 +755,7 @@ public class CorporationDB : DatabaseAccessor
 
     public bool IsTickerNameTaken (string tickerName)
     {
-        DbDataReader reader = this.Database.Select (
+        DbDataReader reader = Database.Select (
             "SELECT COUNT(*) FROM corporation WHERE tickerName LIKE @tickerName",
             new Dictionary <string, object> {{"@tickerName", tickerName}}
         );
@@ -770,7 +770,7 @@ public class CorporationDB : DatabaseAccessor
 
     public bool IsAllianceNameTaken (string corporationName)
     {
-        DbDataReader reader = this.Database.Select (
+        DbDataReader reader = Database.Select (
             $"SELECT COUNT(*) FROM eveNames WHERE groupID = {(int) GroupID.Alliance} AND itemName LIKE @corporationName",
             new Dictionary <string, object> {{"@corporationName", corporationName}}
         );
@@ -785,7 +785,7 @@ public class CorporationDB : DatabaseAccessor
 
     public bool IsShortNameTaken (string shortName)
     {
-        DbDataReader reader = this.Database.Select (
+        DbDataReader reader = Database.Select (
             "SELECT COUNT(*) FROM crpAlliances WHERE shortName LIKE @shortName",
             new Dictionary <string, object> {{"@shortName", shortName}}
         );
@@ -805,7 +805,7 @@ public class CorporationDB : DatabaseAccessor
         string wallet3,       string wallet4,   string wallet5,   string wallet6,   string wallet7
     )
     {
-        this.Database.Prepare (
+        Database.Prepare (
             "UPDATE corporation SET division1 = @division1, division2 = @division2, division3 = @division3, division4 = @division4, division5 = @division5, division6 = @division6, division7 = @division7, walletDivision1 = @walletDivision1, walletDivision2 = @walletDivision2, walletDivision3 = @walletDivision3, walletDivision4 = @walletDivision4, walletDivision5 = @walletDivision5, walletDivision6 = @walletDivision6, walletDivision7 = @walletDivision7 WHERE corporationID = @corporationID",
             new Dictionary <string, object>
             {
@@ -830,7 +830,7 @@ public class CorporationDB : DatabaseAccessor
 
     public void UpdateCorporation (int corporationID, string description, string url, double tax)
     {
-        this.Database.Prepare (
+        Database.Prepare (
             "UPDATE corporation SET description = @description, taxRate = @taxRate, url = @url WHERE corporationID = @corporationID",
             new Dictionary <string, object>
             {
@@ -844,7 +844,7 @@ public class CorporationDB : DatabaseAccessor
 
     public IEnumerable <int> GetMembersForCorp (int corporationID)
     {
-        DbDataReader reader = this.Database.Select (
+        DbDataReader reader = Database.Select (
             "SELECT characterID FROM chrInformation WHERE corporationID = @corporationID",
             new Dictionary <string, object> {{"@corporationID", corporationID}}
         );
@@ -859,7 +859,7 @@ public class CorporationDB : DatabaseAccessor
     public CRowset GetItemsRented (int corporationID)
     {
         // TODO: WHEN SUPPORTING ANYTHING ELSE ENSURE THE TYPEID IS FETCHED FROM WHERE IT SHOULD BE
-        return this.Database.PrepareCRowset (
+        return Database.PrepareCRowset (
             "SELECT 26 AS typeID, stationID AS rentedFromID, invItems.typeID AS stationTypeID, startDate, rentPeriodInDays, periodCost, balanceDueDate FROM crpOffices LEFT JOIN invItems ON invItems.itemID = crpOffices.stationID WHERE corporationID = @corporationID AND impounded = 0",
             new Dictionary <string, object> {{"@corporationID", corporationID}}
         );
@@ -867,7 +867,7 @@ public class CorporationDB : DatabaseAccessor
 
     public ulong CreateRecruitmentAd (int stationID, int days, int corporationID, int typeMask, int raceMask, string description, int skillPoints)
     {
-        return this.Database.Insert (
+        return Database.Insert (
             "INSERT INTO crpRecruitmentAds(expiryDateTime, createDateTime, corporationID, typeMask, raceMask, description, minimumSkillPoints, stationID)VALUES(@expiryDateTime, @createDateTime, @corporationID, @typeMask, @raceMask, @description, @minimumSkillpoints, @stationID)",
             new Dictionary <string, object>
             {
@@ -885,7 +885,7 @@ public class CorporationDB : DatabaseAccessor
 
     public bool DeleteRecruitmentAd (int advertId, int corporationID)
     {
-        return this.Database.Prepare (
+        return Database.Prepare (
             "DELETE FROM crpRecruitmentAds WHERE adID = @adID AND corporationID = @corporationID",
             new Dictionary <string, object>
             {
@@ -897,7 +897,7 @@ public class CorporationDB : DatabaseAccessor
 
     public bool UpdateRecruitmentAd (int adID, int corporationID, int typeMask, int raceMask, string description, int skillPoints)
     {
-        return this.Database.Prepare (
+        return Database.Prepare (
             "UPDATE crpRecruitmentAds SET typeMask = @typeMask, raceMask = @raceMask, description = @description, minimumSkillPoints = @minimumSkillpoints WHERE adID = @adID AND corporationID = @corporationID",
             new Dictionary <string, object>
             {
@@ -913,7 +913,7 @@ public class CorporationDB : DatabaseAccessor
 
     public PyDataType GetCorporationRow (int corporationID)
     {
-        return this.Database.PrepareRow (
+        return Database.PrepareRow (
             "SELECT corporationID, corporationName, description, tickerName, url, taxRate, minimumJoinStanding, corporationType, hasPlayerPersonnelManager, sendCharTerminationMessage, creatorID, ceoID, stationID, raceID, allianceID, shares, memberCount, memberLimit, allowedMemberRaceIDs, graphicID, shape1, shape2, shape3, color1, color2, color3, typeface, division1, division2, division3, division4, division5, division6, division7, walletDivision1, walletDivision2, walletDivision3, walletDivision4, walletDivision5, walletDivision6, walletDivision7, deleted FROM corporation WHERE corporationID = @corporationID",
             new Dictionary <string, object> {{"@corporationID", corporationID}}
         );
@@ -926,7 +926,7 @@ public class CorporationDB : DatabaseAccessor
         long grantableRolesAtOther
     )
     {
-        this.Database.Prepare (
+        Database.Prepare (
             "REPLACE INTO crpTitles(corporationID, titleID, titleName, roles, grantableRoles, rolesAtHQ, grantableRolesAtHQ, rolesAtBase, grantableRolesAtBase, rolesAtOther, grantableRolesAtOther)VALUES(@corporationID, @titleID, @titleName, @roles, @grantableRoles, @rolesAtHQ, @grantableRolesAtHQ, @rolesAtBase, @grantableRolesAtBase, @rolesAtOther, @grantableRolesAtOther)",
             new Dictionary <string, object>
             {
@@ -965,7 +965,7 @@ public class CorporationDB : DatabaseAccessor
         out long grantableRolesAtHQ, out long grantableRolesAtBase, out long grantableRolesAtOther, out string titleName
     )
     {
-        DbDataReader reader = this.Database.Select (
+        DbDataReader reader = Database.Select (
             "SELECT roles, grantableRoles, rolesAtHQ, grantableRolesAtHQ, rolesAtBase, grantableRolesAtBase, rolesAtOther, grantableRolesAtOther, titleName FROM crpTitles WHERE corporationID = @corporationID AND titleID & @titleMask > 0",
             new Dictionary <string, object>
             {
@@ -1006,7 +1006,7 @@ public class CorporationDB : DatabaseAccessor
     {
         long expirationDate = DateTime.Now.AddDays (30).ToFileTimeUtc ();
 
-        DbDataReader reader = this.Database.Select (
+        DbDataReader reader = Database.Select (
             "SELECT corporationID, officeID, periodCost, stationID, balanceDueDate FROM crpOffices WHERE nextBillID IS NULL AND balanceDueDate < @expirationDate",
             new Dictionary <string, object> {{"@expirationDate", expirationDate}}
         );
@@ -1033,7 +1033,7 @@ public class CorporationDB : DatabaseAccessor
 
     public void SetNextBillID (int corporationID, int officeID, int newBillID)
     {
-        this.Database.Prepare (
+        Database.Prepare (
             "UPDATE crpOffices SET nextBillID = @nextBillID, balanceDueDate = balanceDueDate + @interval WHERE officeID = @officeID AND corporationID = @corporationID",
             new Dictionary <string, object>
             {
@@ -1047,7 +1047,7 @@ public class CorporationDB : DatabaseAccessor
 
     public void UpdateMemberLimits (int corporationID, int newMemberLimit, int newRaceMask)
     {
-        this.Database.Prepare (
+        Database.Prepare (
             "UPDATE corporation SET memberLimit = @memberLimit, allowedMemberRaceIDs = @allowedMemberRaceIDs WHERE corporationID = @corporationID",
             new Dictionary <string, object>
             {
@@ -1060,7 +1060,7 @@ public class CorporationDB : DatabaseAccessor
 
     public void CreateApplication (int characterID, int corporationID, string message)
     {
-        this.Database.Prepare (
+        Database.Prepare (
             "INSERT INTO chrApplications(characterID, corporationID, applicationText, applicationDateTime)VALUES(@characterID, @corporationID, @message, @datetime)",
             new Dictionary <string, object>
             {
@@ -1074,7 +1074,7 @@ public class CorporationDB : DatabaseAccessor
 
     public void DeleteApplication (int characterID, int corporationID)
     {
-        this.Database.Prepare (
+        Database.Prepare (
             "DELETE FROM chrApplications WHERE characterID = @characterID AND corporationID = @corporationID",
             new Dictionary <string, object>
             {
@@ -1086,7 +1086,7 @@ public class CorporationDB : DatabaseAccessor
 
     public ulong CreateMedal (int corporationID, int creatorID, string title, string description, PyList <PyList> parts)
     {
-        ulong medalID = this.Database.Insert (
+        ulong medalID = Database.Insert (
             "INSERT INTO crpMedals(corporationID, title, description, date, creatorID, noRecepients)VALUES(@corporationID, @title, @description, @date, @creatorID, @noRecepients)",
             new Dictionary <string, object>
             {
@@ -1103,7 +1103,7 @@ public class CorporationDB : DatabaseAccessor
 
         IDbConnection connection = Database.OpenConnection ();
 
-        MySqlCommand command = (MySqlCommand) this.Database.Prepare (
+        MySqlCommand command = (MySqlCommand) Database.Prepare (
             connection,
             "INSERT INTO crpMedalParts(medalID, `index`, part, graphic, color)VALUE(@medalID, @index, @part, @graphic, @color)"
         );
@@ -1130,7 +1130,7 @@ public class CorporationDB : DatabaseAccessor
 
     public void GrantMedal (int medalID, int ownerID, int issuerID, string reason, int status = 0)
     {
-        this.Database.Prepare (
+        Database.Prepare (
             "INSERT INTO chrMedals(medalID, ownerID, issuerID, date, reason, status)VALUE(@medalID, @ownerID, @issuerID, @date, @reason, @status)",
             new Dictionary <string, object>
             {
@@ -1146,7 +1146,7 @@ public class CorporationDB : DatabaseAccessor
 
     public PyDataType GetRecipientsOfMedal (int medalID)
     {
-        return this.Database.PreparePackedRowList (
+        return Database.PreparePackedRowList (
             "SELECT ownerID AS recepientID, issuerID, date, reason, status FROM chrMedals WHERE medalID = @medalID",
             new Dictionary <string, object> {{"@medalID", medalID}}
         );
@@ -1154,7 +1154,7 @@ public class CorporationDB : DatabaseAccessor
 
     public void RemoveMedalFromCharacter (int medalID, int characterID)
     {
-        this.Database.Prepare (
+        Database.Prepare (
             "DELETE FROM chrMedals WHERE ownerID = @characterID AND medalID = @medalID",
             new Dictionary <string, object>
             {
@@ -1166,7 +1166,7 @@ public class CorporationDB : DatabaseAccessor
 
     public void UpdateMedalForCharacter (int medalID, int characterID, int newStatus)
     {
-        this.Database.Prepare (
+        Database.Prepare (
             "UPDATE chrMedals SET status = @status WHERE ownerID = @characterID AND medalID = @medalID",
             new Dictionary <string, object>
             {
@@ -1179,7 +1179,7 @@ public class CorporationDB : DatabaseAccessor
 
     public PyDataType GetMedalDetails (int medalID)
     {
-        return this.Database.PrepareKeyVal (
+        return Database.PrepareKeyVal (
             "SELECT title, description, noRecepients AS numberOfRecipients, corporationID AS ownerID FROM crpMedals WHERE medalID = @medalID",
             new Dictionary <string, object> {{"@medalID", medalID}}
         );
@@ -1187,7 +1187,7 @@ public class CorporationDB : DatabaseAccessor
 
     public void IncreaseRecepientsForMedal (int medalID, int amount)
     {
-        this.Database.Prepare (
+        Database.Prepare (
             "UPDATE crpMedals SET noRecepients = noRecepients + @amount WHERE medalID = @medalID",
             new Dictionary <string, object>
             {
@@ -1199,7 +1199,7 @@ public class CorporationDB : DatabaseAccessor
 
     public PyDataType GetMemberIDsWithMoreThanAvgShares (int corporationID)
     {
-        return this.Database.PrepareList (
+        return Database.PrepareList (
             "SELECT ownerID FROM crpshares LEFT JOIN chrinformation ON ownerID = characterID WHERE shares > (SELECT AVG(shares) FROM crpshares LEFT JOIN chrinformation ON ownerID = characterID WHERE crpShares.corporationID = @corporationID AND chrInformation.corporationID = @corporationID) AND crpShares.corporationID = @corporationID AND chrInformation.corporationID = @corporationID",
             new Dictionary <string, object> {{"@corporationID", corporationID}}
         );
@@ -1207,7 +1207,7 @@ public class CorporationDB : DatabaseAccessor
 
     public ulong InsertVoteCase (int corporationID, int characterID, int type, long startDateTime, long endDateTime, long expires, string text, string description)
     {
-        return this.Database.Insert (
+        return Database.Insert (
             "INSERT INTO crpVotes(voteType, corporationID, characterID, startDateTime, endDateTime, expires, voteCaseText, description)VALUE(@type, @corporationID, @characterID, @startDateTime, @endDateTime, @expires, @text, @description)",
             new Dictionary <string, object>
             {
@@ -1225,7 +1225,7 @@ public class CorporationDB : DatabaseAccessor
 
     public void InsertVoteOption (int voteCaseID, string text, int parameter, int? parameter1, int? parameter2)
     {
-        this.Database.Prepare (
+        Database.Prepare (
             "INSERT INTO crpVoteOptions(voteCaseID, optionText, parameter, parameter1, parameter2)VALUE(@voteCaseID, @text, @parameter, @parameter1, @parameter2)",
             new Dictionary <string, object>
             {
@@ -1240,7 +1240,7 @@ public class CorporationDB : DatabaseAccessor
 
     public PyDataType GetOpenVoteCasesByCorporation (int corporationID)
     {
-        return this.Database.PrepareIndexRowset (
+        return Database.PrepareIndexRowset (
             0,
             "SELECT voteCaseID, voteType, corporationID, characterID, startDateTime, endDateTime, voteCaseText, description FROM crpVotes WHERE corporationID = @corporationID AND endDateTime > @currentTime",
             new Dictionary <string, object>
@@ -1253,7 +1253,7 @@ public class CorporationDB : DatabaseAccessor
 
     public PyDataType GetAllVoteCasesByCorporation (int corporationID)
     {
-        return this.Database.PrepareIndexRowset (
+        return Database.PrepareIndexRowset (
             0,
             "SELECT voteCaseID, voteType, corporationID, characterID, startDateTime, endDateTime, voteCaseText, description FROM crpVotes WHERE corporationID = @corporationID",
             new Dictionary <string, object> {{"@corporationID", corporationID}}
@@ -1262,7 +1262,7 @@ public class CorporationDB : DatabaseAccessor
 
     public PyDataType GetSanctionedActionsByCorporation (int corporationID, int status)
     {
-        return this.Database.PrepareRowset (
+        return Database.PrepareRowset (
             "SELECT voteCaseID, voteType, corporationID, chrVotes.characterID, startDateTime, endDateTime, voteCaseText, description, COUNT(*) AS votes, parameter, parameter1, parameter2, actedUpon, inEffect, expires, timeRescended, timeActedUpon FROM crpvotes RIGHT JOIN crpvoteoptions USING(voteCaseID) RIGHT JOIN chrVotes USING(optionID) WHERE corporationID = @corporationID AND status = @status GROUP BY optionID ORDER BY votes DESC",
             new Dictionary <string, object>
             {
@@ -1274,7 +1274,7 @@ public class CorporationDB : DatabaseAccessor
 
     public PyDataType GetClosedVoteCasesByCorporation (int corporationID)
     {
-        return this.Database.PrepareIndexRowset (
+        return Database.PrepareIndexRowset (
             0,
             "SELECT voteCaseID, voteType, corporationID, characterID, startDateTime, endDateTime, voteCaseText, description FROM crpVotes WHERE corporationID = @corporationID AND endDateTime < @currentTime",
             new Dictionary <string, object>
@@ -1287,7 +1287,7 @@ public class CorporationDB : DatabaseAccessor
 
     public PyDataType GetVoteCaseOptions (int corporationID, int voteCaseID)
     {
-        return this.Database.PrepareIndexRowset (
+        return Database.PrepareIndexRowset (
             0,
             "SELECT optionID, optionText, parameter, parameter1, parameter2, IF(crpVotes.endDateTime < @currentTime, (SELECT COUNT(*) FROM chrVotes WHERE optionID = crpVoteOptions.optionID), 0) AS votesFor FROM crpVoteOptions LEFT JOIN crpVotes USING(voteCaseID) WHERE voteCaseID = @voteCaseID AND corporationID = @corporationID",
             new Dictionary <string, object>
@@ -1301,7 +1301,7 @@ public class CorporationDB : DatabaseAccessor
 
     public PyDataType GetVotes (int corporationID, int voteCaseID, int characterID)
     {
-        return this.Database.PrepareIndexRowset (
+        return Database.PrepareIndexRowset (
             0,
             "SELECT chrVotes.characterID, optionID FROM chrVotes LEFT JOIN crpVoteOptions USING(optionID) LEFT JOIN crpVotes USING(voteCaseID) WHERE voteCaseID = @voteCaseID AND corporationID = @corporationID AND chrVotes.characterID = @characterID",
             new Dictionary <string, object>
@@ -1315,7 +1315,7 @@ public class CorporationDB : DatabaseAccessor
 
     public void InsertVote (int voteCaseID, int optionID, int characterID)
     {
-        this.Database.Prepare (
+        Database.Prepare (
             "INSERT IGNORE INTO chrVotes(optionID, characterID)VALUE(@optionID, @characterID)",
             new Dictionary <string, object>
             {
@@ -1332,7 +1332,7 @@ public class CorporationDB : DatabaseAccessor
 
     public void UpdateCorporationInformation (int corporationID, int? allianceID, long? startDate, int? executorCorpID)
     {
-        this.Database.Prepare (
+        Database.Prepare (
             "UPDATE corporation SET allianceID = @allianceID, startDate = @startDate, chosenExecutorID = @chosenExecutorID WHERE corporationID = @corporationID",
             new Dictionary <string, object>
             {
@@ -1346,7 +1346,7 @@ public class CorporationDB : DatabaseAccessor
 
     public int? GetAllianceIDForCorporation (int corporationID)
     {
-        DbDataReader reader = this.Database.Select (
+        DbDataReader reader = Database.Select (
             "SELECT allianceID FROM corporation WHERE corporationID = @corporationID",
             new Dictionary <string, object> {{"@corporationID", corporationID}}
         );
@@ -1362,7 +1362,7 @@ public class CorporationDB : DatabaseAccessor
 
     public int? GetCurrentAllianceApplication (int corporationID)
     {
-        DbDataReader reader = this.Database.Select (
+        DbDataReader reader = Database.Select (
             "SELECT allianceID FROM crpApplications WHERE corporationID = @corporationID",
             new Dictionary <string, object> {{"@corporationID", corporationID}}
         );
@@ -1378,7 +1378,7 @@ public class CorporationDB : DatabaseAccessor
 
     public void InsertAllianceApplication (int allianceID, int corporationID, string text)
     {
-        this.Database.Prepare (
+        Database.Prepare (
             "REPLACE INTO crpApplications(allianceID, corporationID, applicationText, applicationDateTime, applicationUpdateTime, state)VALUES(@allianceID, @corporationID, @applicationText, @applicationDateTime, @applicationDateTime, @state)",
             new Dictionary <string, object>
             {
@@ -1393,7 +1393,7 @@ public class CorporationDB : DatabaseAccessor
 
     public long GetAllianceJoinDate (int corporationID)
     {
-        DbDataReader reader = this.Database.Select (
+        DbDataReader reader = Database.Select (
             "SELECT startDate FROM corporation WHERE corporationID = @corporationID",
             new Dictionary <string, object> {{"@corporationID", corporationID}}
         );
@@ -1408,7 +1408,7 @@ public class CorporationDB : DatabaseAccessor
     }
 public bool IsNPCCorporation(int corporationID)
 {
-    using (DbDataReader reader = this.Database.Select(
+    using (DbDataReader reader = Database.Select(
         "SELECT corporationType FROM corporation WHERE corporationID = @corp",
         new Dictionary<string, object> { { "@corp", corporationID } }
     ))

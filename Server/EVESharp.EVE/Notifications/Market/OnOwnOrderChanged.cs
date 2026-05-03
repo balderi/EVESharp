@@ -15,18 +15,18 @@ public class OnOwnOrderChanged : ClientNotification
 
     public OnOwnOrderChanged (int typeID, string reason, bool isCorp = false) : base (NOTIFICATION_NAME)
     {
-        this.TypeID = typeID;
-        this.Reason = reason;
-        this.IsCorp = isCorp;
+        TypeID = typeID;
+        Reason = reason;
+        IsCorp = isCorp;
     }
 
     public override List <PyDataType> GetElements ()
     {
         return new List <PyDataType>
         {
-            new PyPackedRow (DESCRIPTOR, new Dictionary <string, PyDataType> {{"typeID", this.TypeID}}),
-            this.Reason,
-            this.IsCorp
+            new PyPackedRow (DESCRIPTOR, new Dictionary <string, PyDataType> {{"typeID", TypeID}}),
+            Reason,
+            IsCorp
         };
     }
 }

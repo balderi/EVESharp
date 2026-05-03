@@ -25,8 +25,8 @@ public class charmgr : Service
         Database     = database;
         DB           = db;
         MarketDB     = marketDB;
-        this.Items   = items;
-        this.Wallets = wallets;
+        Items   = items;
+        Wallets = wallets;
     }
 
     public PyDataType GetPublicInfo (ServiceCall call, PyInteger characterID)
@@ -50,7 +50,7 @@ public class charmgr : Service
     public PyDataType AddToBounty (ServiceCall call, PyInteger characterID, PyInteger bounty)
     {
         // access the wallet and do the required changes
-        using IWallet wallet = this.Wallets.AcquireWallet (call.Session.CharacterID, WalletKeys.MAIN);
+        using IWallet wallet = Wallets.AcquireWallet (call.Session.CharacterID, WalletKeys.MAIN);
         {
             // ensure the character has enough balance
             wallet.EnsureEnoughBalance (bounty);

@@ -16,15 +16,15 @@ public class OnSkillStartTraining : ClientNotification
 
     public OnSkillStartTraining (Skill skill) : base (NOTIFICATION_NAME)
     {
-        this.Skill = skill;
+        Skill = skill;
     }
 
     public override List <PyDataType> GetElements ()
     {
         return new List <PyDataType>
         {
-            this.Skill.ID,
-            this.Skill.ExpiryTime
+            Skill.ID,
+            Skill.ExpiryTime
         };
     }
 }
