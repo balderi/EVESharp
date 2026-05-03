@@ -708,12 +708,15 @@ public class DogmaNotifications : IDogmaNotifications
         lock (this.mPendingEvents)
         {
             foreach ((PyTuple type, PyList <PyTuple> notifs) in this.mPendingEvents)
+            {
+                Console.WriteLine ($"[DogmaNotifications] Sending OnMultiEvent: {notifs.Count} events to {type [0] as PyString}");
                 Notifications.SendNotification (
                     "OnMultiEvent",
                     type [0] as PyString,
                     type [1] as PyList,
                     new PyTuple (1) {[0] = notifs}
                 );
+            }
 
             this.mPendingEvents.Clear ();
         }

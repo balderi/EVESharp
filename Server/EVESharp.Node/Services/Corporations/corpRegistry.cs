@@ -323,7 +323,14 @@ public class corpRegistry : MultiClientBoundService
 
     public PyDataType GetMember (ServiceCall call, PyInteger memberID)
     {
-        return DB.GetMember (memberID, call.Session.CorporationID);
+        try
+        {
+            return DB.GetMember (memberID, call.Session.CorporationID);
+        }
+        catch (System.IO.InvalidDataException)
+        {
+            return null;
+        }
     }
 
     public PyDataType GetMembers (ServiceCall call)

@@ -27,6 +27,7 @@ public class Interpreter
         this.mOpcodes [EffectOperand.ADD]            = typeof (OpcodeADD);
         this.mOpcodes [EffectOperand.IF]             = typeof (OpcodeIF);
         this.mOpcodes [EffectOperand.ATT]            = typeof (OpcodeATT);
+        this.mOpcodes [EffectOperand.ATTACK]         = typeof (OpcodeATTACK);
         this.mOpcodes [EffectOperand.SET]            = typeof (OpcodeSET);
         this.mOpcodes [EffectOperand.DEFINT]         = typeof (OpcodeDEFINT);
         this.mOpcodes [EffectOperand.OR]             = typeof (OpcodeOR);
@@ -37,6 +38,7 @@ public class Interpreter
         this.mOpcodes [EffectOperand.DEFASSOCIATION] = typeof (OpcodeDEFASSOCIATION);
         this.mOpcodes [EffectOperand.UE]             = typeof (OpcodeUE);
         this.mOpcodes [EffectOperand.GT]             = typeof (OpcodeGT);
+        this.mOpcodes [EffectOperand.DEFBOOL]        = typeof (OpcodeDEFBOOL);
     }
 
     public Opcode Step (BinaryReader reader)

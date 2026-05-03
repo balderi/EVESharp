@@ -2,6 +2,7 @@
 using EVESharp.Database.Dogma;
 using EVESharp.Database.Inventory.Attributes;
 using EVESharp.EVE.Data.Inventory;
+using EVESharp.EVE.Data.Inventory.Items;
 using EVESharp.EVE.Data.Inventory.Items.Dogma;
 using EVESharp.EVE.Data.Inventory.Items.Types;
 using EVESharp.EVE.Dogma.Interpreter.Opcodes;
@@ -65,16 +66,21 @@ public class ItemEffects
 
     public void ApplyEffect (string effectName, Session session = null)
     {
+        this.ApplyEffect (effectName, session, null, null);
+    }
+
+    public void ApplyEffect (string effectName, Session session, ItemEntity target, ItemEntity charge)
+    {
         // check if the module has the given effect in it's list
         if (this.Module.Type.EffectsByName.TryGetValue (effectName, out Effect effect) == false)
             throw new EffectNotActivatible (this.Module.Type);
         if (this.Module.Effects.TryGetEffect (effect.EffectID, out GodmaShipEffect godmaEffect) == false)
             throw new CustomError ("Cannot apply the given effect, our type has it but we dont");
 
-        this.ApplyEffect (effect, godmaEffect, session);
+        this.ApplyEffect (effect, godmaEffect, session, target, charge);
     }
 
-    private void ApplyEffect (Effect effect, GodmaShipEffect godmaEffect, Session session = null)
+    private void ApplyEffect (Effect effect, GodmaShipEffect godmaEffect, Session session = null, ItemEntity target = null, ItemEntity charge = null)
     {
         if (godmaEffect.ShouldStart)
             return;
@@ -90,7 +96,8 @@ public class ItemEffects
                 Character          = character,
                 Self               = this.Module,
                 Ship               = ship,
-                Target             = null,
+                Target             = target,
+                Charge             = charge,
                 Session            = session,
                 ItemFactory        = this.ItemFactory,
                 DogmaNotifications = this.DogmaNotifications,
@@ -127,6 +134,8 @@ public class ItemEffects
         godmaEffect.ShouldStart = true;
         godmaEffect.Duration    = duration;
 
+        Console.WriteLine ($"[ItemEffects] Effect activated: effectID={effect.EffectID}, startTime={godmaEffect.StartTime}, duration={duration}, targetID={godmaEffect.TargetID}, queuing OnGodmaShipEffect for ownerID={this.Module.OwnerID}");
+
         // notify the client about it
         // TODO: THIS MIGHT NEED MORE NOTIFICATIONS
         // TODO: CHECK IF THIS MULTIEVENT IS RIGHT OR NOT
@@ -138,16 +147,21 @@ public class ItemEffects
 
     public void StopApplyingEffect (string effectName, Session session = null)
     {
+        this.StopApplyingEffect (effectName, session, null, null);
+    }
+
+    public void StopApplyingEffect (string effectName, Session session, ItemEntity target, ItemEntity charge)
+    {
         // check if the module has the given effect in it's list
         if (this.Module.Type.EffectsByName.TryGetValue (effectName, out Effect effect) == false)
             throw new EffectNotActivatible (this.Module.Type);
         if (this.Module.Effects.TryGetEffect (effect.EffectID, out GodmaShipEffect godmaEffect) == false)
             throw new CustomError ("Cannot apply the given effect, our type has it but we dont");
 
-        this.StopApplyingEffect (effect, godmaEffect, session);
+        this.StopApplyingEffect (effect, godmaEffect, session, target, charge);
     }
 
-    private void StopApplyingEffect (Effect effect, GodmaShipEffect godmaEffect, Session session = null)
+    private void StopApplyingEffect (Effect effect, GodmaShipEffect godmaEffect, Session session = null, ItemEntity target = null, ItemEntity charge = null)
     {
         // ensure the effect is being applied before doing anything
         if (godmaEffect.ShouldStart == false)
@@ -162,7 +176,8 @@ public class ItemEffects
             Character          = character,
             Self               = this.Module,
             Ship               = ship,
-            Target             = null,
+            Target             = target,
+            Charge             = charge,
             Session            = session,
             ItemFactory        = this.ItemFactory,
             DogmaNotifications = DogmaNotifications,
@@ -192,6 +207,33 @@ public class ItemEffects
         // online effect, this requires some special processing as all the passive effects should also be applied
         if (effect.EffectID == (int) EffectsEnum.Online)
             this.StopApplyingOnlineEffects (session);
+    }
+
+    public void SafeDeactivateEffect (string effectName, Session session = null)
+    {
+        if (this.Module.Type.EffectsByName.TryGetValue (effectName, out Effect effect) == false)
+            return;
+        if (this.Module.Effects.TryGetEffect (effect.EffectID, out GodmaShipEffect godmaEffect) == false)
+            return;
+        if (godmaEffect.ShouldStart == false)
+            return; // already inactive — idempotent
+
+        try
+        {
+            this.StopApplyingEffect (effect, godmaEffect, session);
+        }
+        catch (System.Exception)
+        {
+            // PostExpression VM threw — force the effect off so the client always
+            // sees the module deactivate, even if the VM code is broken
+            godmaEffect.ShouldStart = false;
+            godmaEffect.StartTime   = 0;
+            godmaEffect.Duration    = 0;
+
+            this.Module.Persist ();
+
+            this.DogmaNotifications.QueueMultiEvent (this.Module.OwnerID, new OnGodmaShipEffect (godmaEffect));
+        }
     }
 
     private void ApplyEffectsByCategory (EffectCategory category, Session session = null)

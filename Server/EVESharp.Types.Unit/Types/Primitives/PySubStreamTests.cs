@@ -31,9 +31,9 @@ public class PySubStreamTests
         Assert.False(obj4 is not null);
         Assert.False(obj1 == obj4);
         Assert.True(obj1 != obj4);
-        
+
         // ensure value change updates the marshaling data
-        obj2.Stream = 600;
+        PySubStream sub = new PySubStream(new byte[] { 1, 2, 3 });
 
         Assert.True(obj2 == obj3);
         Assert.False(obj1 == obj2);

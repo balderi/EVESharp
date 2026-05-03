@@ -20,7 +20,7 @@ public interface IClusterManager
     /// <summary>
     /// Sends a heartbeat to the orchestrator agent to signal our node being up and running healthily
     /// </summary>
-    void PerformHeartbeat ();
+    Task PerformHeartbeat ();
 
     /// <summary>
     /// Ensures the identification req is actually legitimate

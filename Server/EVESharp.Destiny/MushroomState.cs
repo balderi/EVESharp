@@ -1,12 +1,21 @@
-﻿using System.Runtime.InteropServices;
+using System.Runtime.InteropServices;
 
 namespace EVESharp.Destiny;
 
+/// <summary>
+/// Mushroom (smartbomb/gravity well) mode state (Apocrypha format).
+///
+/// Wire format (24 bytes total):
+///   FollowRange: 8 bytes (double)
+///   Unknown:     8 bytes (double)
+///   EffectStamp: 4 bytes (int)
+///   OwnerId:     4 bytes (int)
+/// </summary>
 [StructLayout (LayoutKind.Sequential, Pack = 1)]
 public struct MushroomState
 {
-    public float Unk01;
-    public long  Unk02;
-    public float Unk03;
-    public long  Unk04;
+    public double FollowRange;
+    public double Unknown;
+    public int    EffectStamp;
+    public int    OwnerId;
 }

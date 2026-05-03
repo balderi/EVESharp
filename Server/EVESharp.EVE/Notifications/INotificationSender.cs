@@ -65,4 +65,5 @@ public interface INotificationSender
     void SendNotification (string             notificationType, NotificationIdType idType,        PyList             idsOfInterest, ClientNotification data);
     void SendNotification (string             notificationType, NotificationIdType idType,        PyList             idsOfInterest, PyTuple            data);
     void SendNotification (string             notificationType, string             idType,        PyList             idsOfInterest, PyTuple            data);
+
 }

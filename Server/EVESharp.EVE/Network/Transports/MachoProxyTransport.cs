@@ -38,7 +38,7 @@ public class MachoProxyTransport : IMachoTransport
         Log.Fatal ("Lost connection to proxy {0}, is it down?", this.Session.NodeID);
 
         // clean up ourselves
-        this.Terminated (this);
+        this.Terminated?.Invoke (this);
     }
 
     private void HandleException (Exception ex)

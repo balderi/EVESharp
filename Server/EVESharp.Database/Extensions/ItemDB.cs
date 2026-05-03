@@ -52,7 +52,7 @@ public static class ItemDB
     public static IEnumerable <Item> InvGetStaticItems (this IDatabase Database, ITypes types, IAttributes attributes)
     {
         IDataReader reader = Database.Select (
-            $"SELECT itemID, eveNames.itemName, invItems.typeID, ownerID, locationID, flag, contraband, singleton, quantity, x, y, z, custominfo FROM invItems LEFT JOIN eveNames USING(itemID) LEFT JOIN invPositions USING (itemID) WHERE itemID < {ItemRanges.UserGenerated.MIN} AND (groupID = {(int) GroupID.Station} OR groupID = {(int) GroupID.Faction} OR groupID = {(int) GroupID.SolarSystem} OR groupID = {(int) GroupID.Corporation} OR groupID = {(int) GroupID.System})"
+            $"SELECT invItems.itemID, COALESCE(eveNames.itemName, md.itemName) AS itemName, invItems.typeID, ownerID, locationID, flag, contraband, singleton, quantity, ip.x, ip.y, ip.z, custominfo FROM invItems LEFT JOIN eveNames USING(itemID) LEFT JOIN invPositions ip USING (itemID) LEFT JOIN mapDenormalize md ON md.itemID = invItems.itemID WHERE invItems.itemID < {ItemRanges.UserGenerated.MIN} AND (eveNames.groupID = {(int) GroupID.Station} OR eveNames.groupID = {(int) GroupID.Faction} OR eveNames.groupID = {(int) GroupID.SolarSystem} OR eveNames.groupID = {(int) GroupID.Corporation} OR eveNames.groupID = {(int) GroupID.System})"
         );
 
         using (reader)
@@ -65,7 +65,7 @@ public static class ItemDB
     public static Item InvLoadItem (this IDatabase Database, int itemID, long nodeID, ITypes types, IAttributes attributes)
     {
         IDataReader reader = Database.Select (
-            "SELECT itemID, eveNames.itemName, invItems.typeID, ownerID, locationID, flag, contraband, singleton, quantity, x, y, z, customInfo, nodeID FROM invItems LEFT JOIN eveNames USING (itemID) LEFT JOIN invPositions USING (itemID) WHERE itemID = @itemID",
+            "SELECT invItems.itemID, COALESCE(eveNames.itemName, md.itemName) AS itemName, invItems.typeID, ownerID, locationID, flag, contraband, singleton, quantity, ip.x, ip.y, ip.z, customInfo, nodeID FROM invItems LEFT JOIN eveNames USING (itemID) LEFT JOIN invPositions ip USING (itemID) LEFT JOIN mapDenormalize md ON md.itemID = invItems.itemID WHERE invItems.itemID = @itemID",
             new Dictionary <string, object> {{"@itemID", itemID}}
         );
 

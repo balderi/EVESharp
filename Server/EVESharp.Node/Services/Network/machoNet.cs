@@ -85,6 +85,12 @@ public class machoNet : Service
         };
     }
 
+    public PyDataType GetClusterSessionStatistics (ServiceCall call)
+    {
+        // TODO: IMPLEMENT THIS - should return player count per solar system for starmap overlay
+        return new PyList (0);
+    }
+
     public PyInteger GetTime (ServiceCall call)
     {
         return DateTime.UtcNow.ToFileTimeUtc ();

@@ -41,12 +41,21 @@ public class OpcodeDEFENVIDX : Opcode
                 break;
 
             case Database.Dogma.Environment.Target:
+                item = this.Interpreter.Environment.Target;
+                break;
+
+            case Database.Dogma.Environment.Charge:
+                item = this.Interpreter.Environment.Charge;
+                break;
+
             case Database.Dogma.Environment.Area:
             case Database.Dogma.Environment.Other:
-            case Database.Dogma.Environment.Charge:
             default:
                 throw new CustomError ("Unsupported target");
         }
+
+        if (item is null)
+            throw new CustomError ($"Environment item is null for {this.Environment}");
 
         return item;
     }

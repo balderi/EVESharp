@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
@@ -36,7 +36,7 @@ public class UpdateReader
             case BallMode.Orbit:
                 ret.FollowState = str.ReadStruct <FollowState> ();
                 break;
-            
+
             case BallMode.Formation:
                 ret.FormationState = str.ReadStruct <FormationState> ();
                 break;
@@ -52,7 +52,7 @@ public class UpdateReader
             case BallMode.Goto:
                 ret.GotoState = str.ReadStruct <GotoState> ();
                 break;
-            
+
             case BallMode.Warp:
                 ret.WarpState = str.ReadStruct <WarpState> ();
                 break;
@@ -60,7 +60,7 @@ public class UpdateReader
             case BallMode.Mushroom:
                 ret.MushroomState = str.ReadStruct <MushroomState> ();
                 break;
-            
+
             case BallMode.Stop:
             case BallMode.Field:
             case BallMode.Rigid:
@@ -71,10 +71,9 @@ public class UpdateReader
         if (ret.Header.Flags.HasFlag (BallFlag.HasMiniBalls))
             ret.MiniBalls = ReadMiniBalls (reader);
 
-        // Crucible:
-        // no more names in destiny data
-        // most of them were invalid anyway, and slimitems have the name, so sensible change for CCP
-        //ret.Name = ReadString(reader);
+        // Apocrypha has name field (byte count + unicode data)
+        // Crucible removed this, but our client expects it.
+        ret.Name = ReadString(reader);
 
         return ret;
     }

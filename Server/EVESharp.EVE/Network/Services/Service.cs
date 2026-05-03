@@ -12,21 +12,10 @@ namespace EVESharp.EVE.Network.Services;
 
 public abstract class Service
 {
-    /// <summary>
-    /// Indicates what pre-requirements the service has to be called by the client
-    /// </summary>
     public abstract AccessLevel AccessLevel { get; }
 
-    /// <summary>
-    /// Returns the service name
-    /// </summary>
     public string Name => this.GetType().Name;
 
-    /// <summary>
-    /// Searches for all the methods available with the given name
-    /// </summary>
-    /// <param name="methodName"></param>
-    /// <returns>The list of methods found</returns>
     private bool FindSuitableMethod(string methodName, ServiceCall extra, out object[] parameters, out MethodInfo matchingMethod)
     {
         PyTuple      arguments      = extra.Payload;
@@ -40,81 +29,118 @@ public abstract class Service
         matchingMethod = null;
         parameters     = null;
             
-        foreach (MethodInfo method in methods)
-        {
-            ParameterInfo[] methodParameters = method.GetParameters();
-                
-            // ignore calls that have less parameters available that the ones provided
-            // remember that last parameter is the service call information that isn't
-            // provided by the call
-            if (methodParameters.Length <= arguments.Count)
-                continue;
+
+Console.WriteLine($"[DEBUG] ExecuteCall {this.GetType().FullName}::{methodName} payloadCount={arguments.Count}");
+for (int i = 0; i < arguments.Count; i++)
+{
+    string t = arguments[i]?.GetType().Name ?? "null";
+    Console.WriteLine($"[DEBUG]   arg[{i}] type={t}");
+}
+
             
-            // this one should hold the real parameter count here
-            parameters     = new object[methodParameters.Length];
-            parameters[0]  = extra;
+       foreach (MethodInfo method in methods)
+{
+    Console.WriteLine($"[DEBUG] Checking method {method.Name}({string.Join(", ", method.GetParameters().Select(p => p.ParameterType.Name))}) for call {methodName}");
 
-            bool match = true;
+    ParameterInfo[] methodParameters = method.GetParameters();
 
-            for (int parameterIndex = 1, argumentIndex = 0; parameterIndex < methodParameters.Length; parameterIndex ++, argumentIndex ++)
-            {
-                if (argumentIndex >= arguments.Count)
-                {
-                    // check if the parameter is in the named payload and set it, otherwise resort to the default value
-                    if (namedArguments.TryGetValue (methodParameters [parameterIndex].Name, out PyDataType value))
-                    {
-                        parameters [parameterIndex] = value;
-                        match = true;
-                        break;
-                    }
-                    if (methodParameters[parameterIndex].IsOptional == false)
-                    {
-                        match = false;
-                        break;
-                    }
+    // Skip if argument count doesn't match (accounting for ServiceCall)
+    int required = methodParameters.Length - 1; // exclude the implicit ServiceCall
+int actual   = arguments.Count;
 
-                    // set the default value for the call
-                    parameters[parameterIndex] = methodParameters[parameterIndex].DefaultValue;
-                }
-                else
-                {
-                    PyDataType element = arguments[argumentIndex];
-
-                    if (element is null || methodParameters[parameterIndex].IsOptional)
-                        parameters[parameterIndex] = null;
-                    else if (methodParameters[parameterIndex].ParameterType == element.GetType() ||
-                             methodParameters[parameterIndex].ParameterType == element.GetType().BaseType)
-                        parameters[parameterIndex] = element;
-                    else
-                    {
-                        match = false;
-                        break;
-                    }
-                }
-            }
-
-            if (match)
-            {
-                matchingMethod = method;
-                return true;
-            }
+// Allow extra trailing "dummy" args (null/PyNone) to be ignored for zero-arg methods.
+bool extraAreIgnorable = false;
+if (actual > required)
+{
+    // if all extra args are null or PyNone, we can safely ignore them
+    extraAreIgnorable = true;
+    for (int i = required; i < actual; i++)
+    {
+        PyDataType el = arguments[i];
+        if (el != null && el.GetType().Name != "PyNone")
+        {
+            extraAreIgnorable = false;
+            break;
         }
+    }
+}
 
-        return false;
+// original strict check becomes: must match exactly OR be a zero-arg method with ignorable extras
+if (actual != required && !(required == 0 && extraAreIgnorable))
+    continue;
+
+
+    // Special case: only ServiceCall
+    if (methodParameters.Length == 1)
+    {
+        matchingMethod = method;
+        parameters = new object[] { extra };
+        Console.WriteLine($"[DEBUG] Matched simple method {method.Name} with only ServiceCall param");
+        return true;
     }
 
-    /// <summary>
-    /// Searches for the given <see cref="method"/> in the service and performs a call if the user is allowed
-    /// </summary>
-    /// <param name="method">The method to call</param>
-    /// <param name="extraInformation">Extra information for the call</param>
-    /// <returns>The returned data by the call (if any)</returns>
+    parameters = new object[methodParameters.Length];
+    parameters[0] = extra;
+
+    bool match = true;
+
+    for (int parameterIndex = 1, argumentIndex = 0; parameterIndex < methodParameters.Length; parameterIndex++, argumentIndex++)
+    {
+        if (argumentIndex >= arguments.Count)
+        {
+            if (namedArguments.TryGetValue(methodParameters[parameterIndex].Name, out PyDataType value))
+            {
+                parameters[parameterIndex] = value;
+                match = true;
+                break;
+            }
+            if (methodParameters[parameterIndex].IsOptional == false)
+            {
+                match = false;
+                break;
+            }
+
+            parameters[parameterIndex] = methodParameters[parameterIndex].DefaultValue;
+        }
+        else
+        {
+            PyDataType element = arguments[argumentIndex];
+
+            if (element is null || methodParameters[parameterIndex].IsOptional)
+                parameters[parameterIndex] = null;
+            else if (methodParameters[parameterIndex].ParameterType == element.GetType() ||
+                     methodParameters[parameterIndex].ParameterType == element.GetType().BaseType)
+                parameters[parameterIndex] = element;
+            else
+            {
+                match = false;
+                break;
+            }
+        }
+    }
+
+    if (match)
+    {
+        matchingMethod = method;
+        return true;
+    }
+}
+
+return false;
+
+
+
+    }
+
     public PyDataType ExecuteCall(string method, ServiceCall extraInformation)
     {
         if (this.FindSuitableMethod(method, extraInformation, out object[] parameters, out MethodInfo methodInfo) == false)
+        {
+        
+            Console.WriteLine($"[Service.ExecuteCall] MISSING method '{method}' on service '{this.GetType().FullName}'");
             throw new MissingCallException(this.Name, method);
+        }
 
-        // ensure that the caller has the required roles
         List <CallValidator> requirements = this.GetType ().GetCustomAttributes <CallValidator> ().Concat (methodInfo.GetCustomAttributes <CallValidator> ()).ToList ();
 
         if (requirements.Any ())
@@ -124,7 +150,6 @@ public abstract class Service
                 if (validator.Validate (extraInformation.Session) == false)
                 {
                     if (validator.Exception is not null)
-                        // throw that exception
                         throw (Exception) Activator.CreateInstance (validator.Exception, validator.ExceptionParameters);
 
                     return null;
@@ -134,18 +159,12 @@ public abstract class Service
 
         try
         {
-            // all checks completed, the caller has permissions to perform this call
             return (PyDataType) methodInfo.Invoke(this, parameters);
         }
         catch (TargetInvocationException e)
         {
-            // throw the InnerException if possible
-            // ExceptionDispatchInfo is used to preserve the stacktrace of the inner exception
-            // so it gets rid of cryptic stacktraces that do not really point to the error
             if (e.InnerException is not null)
                 ExceptionDispatchInfo.Throw(e.InnerException);
-                
-            // fallback, re-throw the original exception so at least there's some error information
             throw;
         }
     }

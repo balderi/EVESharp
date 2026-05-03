@@ -120,6 +120,12 @@ public class map : EVE.Network.Services.Service
         );
     }
 
+    public PyDataType GetStationCount (ServiceCall call)
+    {
+        // TODO: IMPLEMENT THIS - should return station counts per solar system for starmap filter
+        return new PyDictionary ();
+    }
+
     public PyDictionary GetStuckSystems (ServiceCall call)
     {
         return new PyDictionary ();

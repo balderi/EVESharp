@@ -29,6 +29,21 @@ public static class BlueprintDB
         }
     }
 
+    public static void InvBpCreate (this IDatabase Database, Blueprint info)
+    {
+        Database.Prepare (
+            "INSERT INTO invBlueprints (itemID, copy, materialLevel, productivityLevel, licensedProductionRunsRemaining) VALUES (@itemID, @copy, @materialLevel, @productivityLevel, @licensedProductionRunsRemaining)",
+            new Dictionary <string, object>
+            {
+                {"@itemID", info.Information.ID},
+                {"@copy", info.IsCopy},
+                {"@materialLevel", info.MaterialLevel},
+                {"@productivityLevel", info.ProductivityLevel},
+                {"@licensedProductionRunsRemaining", info.LicensedProductionRunsRemaining}
+            }
+        );
+    }
+
     public static void InvBpPersist (this IDatabase Database, Blueprint info)
     {
         Database.Prepare (

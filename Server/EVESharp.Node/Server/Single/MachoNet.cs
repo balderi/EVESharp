@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using EVESharp.Common.Constants;
 using EVESharp.Database;
@@ -15,6 +16,8 @@ using EVESharp.Node.Configuration;
 using EVESharp.Types;
 using EVESharp.Types.Collections;
 using Serilog;
+using EVESharp.Node.Services.Network;
+
 
 namespace EVESharp.Node.Server.Single;
 
@@ -24,18 +27,20 @@ public class MachoNet : IMachoNet
     private IDatabase Database      { get; }
 
     public MachoNet
-    (
-        IDatabase database, ITransportManager transportManager, IQueueProcessor <LoginQueueEntry> loginProcessor,
-        General             configuration,      ILogger           logger
-    )
-    {
-        Database         = database;
-        LoginProcessor   = loginProcessor;
-        TransportManager = transportManager;
-        Configuration    = configuration;
-        Log              = logger;
+(
+    IDatabase database, ITransportManager transportManager, IQueueProcessor<LoginQueueEntry> loginProcessor,
+    General configuration, ILogger logger
+)
+{
+    Database         = database;
+    LoginProcessor   = loginProcessor;
+    TransportManager = transportManager;
+    Configuration    = configuration;
+    Log              = logger;
+
     }
 
+    
     public long                              NodeID           { get; set; } = Network.PROXY_NODE_ID;
     public string                            Address          { get; set; }
     public RunMode                           Mode             => RunMode.Single;
@@ -72,6 +77,9 @@ public class MachoNet : IMachoNet
 
     public void QueueOutputPacket (IMachoTransport origin, PyPacket packet)
     {
+
+        Console.WriteLine($"[QueueOutputPacket] DEST={packet.Destination} TYPE={packet.Type}");
+
         // origin not being null means the packet came from a specific connection
         // and is a direct answer to it, so we can short-circuit through it
         // this can only happen if the destination is a client
@@ -150,11 +158,17 @@ public class MachoNet : IMachoNet
         if (INotificationSender.NotificationComparison.TryGetValue (dest.IDType, out ComparisonType comparison) == false)
             comparison = ComparisonType.Equality;
 
+        IReadOnlyList <IMachoTransport> transportSnapshot = TransportManager.TransportList;
+        Log.Information("[BROADCAST] idType={IDType}, service={Service}, idsCount={Count}, transports={TransportCount}",
+            (string)dest.IDType, (string)dest.Service, dest.IDsOfInterest.Count, transportSnapshot.Count);
+
         foreach (PyInteger id in dest.IDsOfInterest.GetEnumerable <PyInteger> ())
         {
             // loop all transports, search for the idtype given and send it
-            foreach (IMachoTransport transport in TransportManager.TransportList)
+            foreach (IMachoTransport transport in transportSnapshot)
             {
+                PyDataType sessionVal = transport.Session [dest.IDType];
+
                 switch (comparison)
                 {
                     case ComparisonType.Bitmask:
@@ -166,8 +180,13 @@ public class MachoNet : IMachoNet
                             continue;
                         break;
                     case ComparisonType.Equality:
-                        if (!isOwnerID && transport.Session [dest.IDType] != id)
+                        if (!isOwnerID && sessionVal != id)
+                        {
+                            Log.Debug("[BROADCAST] SKIP user={UserID} char={CharID}: session[{IDType}]={SessionVal} (type={ValType}) != {BroadcastID}",
+                                transport.Session.UserID, transport.Session.CharacterID,
+                                (string)dest.IDType, sessionVal, sessionVal?.GetType().Name ?? "null", id.Value);
                             continue;
+                        }
 
                         if (isOwnerID && transport.Session.AllianceID != id &&
                             transport.Session.CharacterID != id &&
@@ -176,6 +195,8 @@ public class MachoNet : IMachoNet
                         break;
                 }
 
+                Log.Information("[BROADCAST] SEND to user={UserID} char={CharID} (idType={IDType}, id={BroadcastID})",
+                    transport.Session.UserID, transport.Session.CharacterID, (string)dest.IDType, id.Value);
                 transport.Socket.Send (packet);
             }
         }

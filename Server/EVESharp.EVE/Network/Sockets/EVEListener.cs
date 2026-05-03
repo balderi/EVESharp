@@ -50,18 +50,24 @@ public class EVEListener : IEVEListener
             // begin accepting again
             this.Socket.BeginAccept (this.AcceptCallback, this);
 
-            this.ConnectionAccepted (clientSocket);
+            this.ConnectionAccepted?.Invoke (clientSocket);
         }
         catch (Exception e)
         {
-            this.Exception (e);
+            this.Exception?.Invoke (e);
         }
     }
 
     public void Close ()
     {
-        this.Socket.Shutdown (SocketShutdown.Both);
-        this.Socket.Close ();
+        try
+        {
+            this.Socket.Close ();
+        }
+        catch (SocketException)
+        {
+            // listener socket may not be connected, safe to ignore
+        }
     }
     
     public void Dispose ()

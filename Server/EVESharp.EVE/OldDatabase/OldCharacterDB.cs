@@ -926,21 +926,42 @@ public class OldCharacterDB : DatabaseAccessor
         }
     }
 
+
+
     /// <summary>
     /// Updates character's corporationID and the corporation join date time for that character
     /// </summary>
     /// <param name="characterID"></param>
     /// <param name="corporationID"></param>
-    public void UpdateCorporationID (int characterID, int corporationID)
-    {
-        this.Database.Prepare (
-            "UPDATE chrInformation SET corporationID = @corporationID, corporationDateTime = @corporationDateTime WHERE characterID = @characterID",
-            new Dictionary <string, object>
-            {
-                {"@corporationID", corporationID},
-                {"@corporationDateTime", DateTime.UtcNow.ToFileTimeUtc ()},
-                {"@characterID", characterID}
-            }
-        );
-    }
+public void UpdateCorporationID(int characterID, int corporationID)
+{
+    this.Database.Prepare(
+        "UPDATE chrInformation SET corporationID = @corporationID, corporationDateTime = @corporationDateTime WHERE characterID = @characterID",
+        new Dictionary<string, object>
+        {
+            {"@corporationID", corporationID},
+            {"@corporationDateTime", DateTime.UtcNow.ToFileTimeUtc()},
+            {"@characterID", characterID}
+        }
+    );
+}
+
+//
+public void UpdateStationAndLocation(int characterID, int stationID, int solarSystemID, int constellationID, int regionID)
+{
+    this.Database.Prepare(
+        "UPDATE chrInformation " +
+        "SET stationID = @stationID, solarSystemID = @solarSystemID, constellationID = @constellationID, regionID = @regionID " +
+        "WHERE characterID = @characterID",
+        new Dictionary<string, object>
+        {
+            {"@characterID", characterID},
+            {"@stationID", stationID},
+            {"@solarSystemID", solarSystemID},
+            {"@constellationID", constellationID},
+            {"@regionID", regionID}
+        }
+    );
+}
+
 }

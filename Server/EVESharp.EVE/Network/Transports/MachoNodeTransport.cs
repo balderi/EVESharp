@@ -39,7 +39,7 @@ public class MachoNodeTransport : IMachoTransport
         Log.Fatal ("Lost connection to node {0}, is it down?", this.Session.NodeID);
 
         // clean up ourselves
-        this.Terminated (this);
+        this.Terminated?.Invoke (this);
     }
 
     private void HandleException (Exception ex)

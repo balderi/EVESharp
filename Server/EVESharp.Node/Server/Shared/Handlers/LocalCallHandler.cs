@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text.RegularExpressions;
+using System.Threading;
 using EVESharp.Database.Account;
 using EVESharp.EVE.Exceptions;
 using EVESharp.EVE.Network;
@@ -20,7 +21,7 @@ namespace EVESharp.Node.Server.Shared.Handlers;
 
 public class LocalCallHandler
 {
-    private int                   ErrorID              { get; set; }
+    private int                   _errorId;
     public  IMachoNet             MachoNet             { get; }
     public  ServiceManager        ServiceManager       { get; }
     public  IBoundServiceManager  BoundServiceManager  { get; }
@@ -167,7 +168,7 @@ public class LocalCallHandler
         }
         catch (Exception ex)
         {
-            int errorID = ++ErrorID;
+            int errorID = Interlocked.Increment (ref _errorId);
 
             Log.Fatal (
                 "Detected non-client exception on call to {service}::{call}, registered as error {errorID}. Extra information: \n{3}\n{4}",

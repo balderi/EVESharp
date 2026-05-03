@@ -59,8 +59,10 @@ public class ConfigDB : DatabaseAccessor
     /// <returns></returns>
     public PyDataType GetMultiLocationsEx (PyList <PyInteger> ids)
     {
+        string idList = PyString.Join (',', ids);
+
         DbDataReader reader = this.Database.Select (
-            $"SELECT itemID as locationID, itemName as locationName, x, y, z FROM invItems LEFT JOIN eveNames USING(itemID) LEFT JOIN invPositions USING (itemID) WHERE itemID IN ({PyString.Join (',', ids)})"
+            $"SELECT t.itemID as locationID, COALESCE(en.itemName, md.itemName) as locationName, COALESCE(ip.x, md.x) as x, COALESCE(ip.y, md.y) as y, COALESCE(ip.z, md.z) as z FROM (SELECT itemID FROM invItems WHERE itemID IN ({idList}) UNION SELECT itemID FROM mapDenormalize WHERE itemID IN ({idList})) t LEFT JOIN eveNames en ON en.itemID = t.itemID LEFT JOIN invPositions ip ON ip.itemID = t.itemID LEFT JOIN mapDenormalize md ON md.itemID = t.itemID"
         );
 
         using (reader)
@@ -111,7 +113,7 @@ public class ConfigDB : DatabaseAccessor
     public Rowset GetMap (int solarSystemID)
     {
         Rowset result = this.Database.PrepareRowset (
-            "SELECT IF(groupID = 10, (SELECT GROUP_CONCAT(celestialID SEPARATOR ',') FROM mapJumps WHERE stargateID = itemID), NULL) AS destinations, itemID, itemName, typeID, mapDenormalize.x, mapDenormalize.y, mapDenormalize.z, xMin, yMin, zMin, xMax, yMax, zMax, orbitID, luminosity, mapDenormalize.solarSystemID AS locationID FROM mapDenormalize LEFT JOIN mapSolarSystems ON mapSolarSystems.solarSystemID = mapDenormalize.itemID WHERE mapDenormalize.solarSystemID = @solarSystemID",
+            "SELECT IF(mapDenormalize.groupID = 10, (SELECT GROUP_CONCAT(celestialID SEPARATOR ',') FROM mapJumps WHERE stargateID = mapDenormalize.itemID), NULL) AS destinations, mapDenormalize.itemID, COALESCE(eveNames.itemName, mapDenormalize.itemName) AS itemName, mapDenormalize.typeID, mapDenormalize.x, mapDenormalize.y, mapDenormalize.z, xMin, yMin, zMin, xMax, yMax, zMax, orbitID, luminosity, mapDenormalize.solarSystemID AS locationID FROM mapDenormalize LEFT JOIN mapSolarSystems ON mapSolarSystems.solarSystemID = mapDenormalize.itemID LEFT JOIN eveNames ON eveNames.itemID = mapDenormalize.itemID WHERE mapDenormalize.solarSystemID = @solarSystemID",
             new Dictionary <string, object> {{"@solarSystemID", solarSystemID}}
         );
 
@@ -155,11 +157,11 @@ public class ConfigDB : DatabaseAccessor
     {
         if (itemID == this.Constants.LocationUniverse)
             return this.Database.PrepareCRowset (
-                $"SELECT groupID, typeID, itemID, itemName, {itemID} as locationID, orbitID, 0 AS connection, x, y, z FROM mapDenormalize WHERE typeID = 3"
+                $"SELECT mapDenormalize.groupID, mapDenormalize.typeID, mapDenormalize.itemID, COALESCE(eveNames.itemName, mapDenormalize.itemName) AS itemName, {itemID} as locationID, orbitID, 0 AS connection, mapDenormalize.x, mapDenormalize.y, mapDenormalize.z FROM mapDenormalize LEFT JOIN eveNames ON eveNames.itemID = mapDenormalize.itemID WHERE mapDenormalize.typeID = 3"
             );
 
         return this.Database.PrepareCRowset (
-            "SELECT groupID, typeID, itemID, itemName, solarSystemID AS locationID, orbitID, 0 AS connection, x, y, z FROM mapDenormalize WHERE solarSystemID = @solarSystemID",
+            "SELECT mapDenormalize.groupID, mapDenormalize.typeID, mapDenormalize.itemID, COALESCE(eveNames.itemName, mapDenormalize.itemName) AS itemName, solarSystemID AS locationID, orbitID, 0 AS connection, mapDenormalize.x, mapDenormalize.y, mapDenormalize.z FROM mapDenormalize LEFT JOIN eveNames ON eveNames.itemID = mapDenormalize.itemID WHERE mapDenormalize.solarSystemID = @solarSystemID",
             new Dictionary <string, object> {{"@solarSystemID", itemID}}
         );
     }

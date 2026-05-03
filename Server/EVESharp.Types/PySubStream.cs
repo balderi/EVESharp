@@ -1,3 +1,4 @@
+using System; 
 using EVESharp.Common.Checksum;
 using EVESharp.Types.Serialization;
 
@@ -14,34 +15,29 @@ public class PySubStream : PyDataType
     {
         get
         {
-            if (this.mIsUnmarshaled == false)
-                this.mOriginalStream = this.mCurrentStream = Unmarshal.ReadFromByteArray (this.mByteStream);
+            if (!this.mIsUnmarshaled)
+            {
+                this.mOriginalStream = this.mCurrentStream =
+                    Unmarshal.ReadFromByteArray(this.mByteStream);
+            }
 
             return this.mCurrentStream;
         }
-
-        set
-        {
-            this.mIsUnmarshaled = true;
-            this.mCurrentStream = value;
-        }
     }
 
-    public byte [] ByteStream
+    public byte[] ByteStream
     {
         get
         {
-            // check hash codes and types to ensure they're equal
-            if (this.mByteStream is not null && (this.mIsUnmarshaled == false || this.mCurrentStream == this.mOriginalStream))
+            if (this.mByteStream != null &&
+                (this.mIsUnmarshaled == false || this.mCurrentStream == this.mOriginalStream))
                 return this.mByteStream;
 
-            // make sure the old and new value are the same so checks work fine
             this.mOriginalStream = this.mCurrentStream;
-
-            // update the byte stream with the new value
-            return this.mByteStream = Marshal.ToByteArray (this.mCurrentStream);
+            return this.mByteStream = Marshal.ToByteArray(this.mCurrentStream);
         }
     }
+
 
     public PySubStream (byte [] from)
     {

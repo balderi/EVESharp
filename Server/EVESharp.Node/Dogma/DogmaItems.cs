@@ -11,6 +11,7 @@ using EVESharp.EVE.Exceptions.inventory;
 using EVESharp.EVE.Notifications;
 using EVESharp.EVE.Notifications.Inventory;
 using EVESharp.EVE.Sessions;
+using Serilog;
 
 namespace EVESharp.Node.Dogma;
 
@@ -24,12 +25,15 @@ public class DogmaItems : IDogmaItems
     
     private EffectsManager EffectsManager { get; }
 
-    public DogmaItems (IDogmaNotifications dogmaNotifications, IItems items, EffectsManager effectsManager, IMetaInventories metaInventories)
+    private ILogger Log { get; }
+
+    public DogmaItems (IDogmaNotifications dogmaNotifications, IItems items, EffectsManager effectsManager, IMetaInventories metaInventories, ILogger logger)
     {
         MetaInventories    = metaInventories;
         DogmaNotifications = dogmaNotifications;
         Items              = items;
         EffectsManager     = effectsManager;
+        Log                = logger;
     }
     
     public T CreateItem <T> (Type type, ItemEntity owner, ItemInventory location, Flags flag, int quantity = 1, bool singleton = false, bool contraband = false) where T : ItemEntity
@@ -378,15 +382,18 @@ public class DogmaItems : IDogmaItems
 
     public void FitInto (ItemEntity item, int locationID, Flags slot, Session session)
     {
+        Log.Information ("[DogmaItems] FitInto(1): itemID={ItemID}, typeID={TypeID}, slot={Slot}, locationID={LocationID}",
+            item.ID, item.Type.ID, slot, locationID);
+
         ItemEntity original = null;
         bool wasSingleton = true;
         int originalLocationID = item.LocationID;
         Flags originalFlag = item.Flag;
-            
+
         // cannot be fitted if it's not a module
         if (item is not ShipModule shipModule)
-            return;
-        
+            throw new CustomError ("This item cannot be fitted to a ship");
+
         if (item.Quantity != 1)
         {
             // keep a reference to the old item to undo the changes if required
@@ -399,43 +406,50 @@ public class DogmaItems : IDogmaItems
             // move the item to the requested slot
             MoveItem (item, locationID, slot);
         }
-        
+
+        Log.Information ("[DogmaItems] FitInto(1): MoveItem complete for itemID={ItemID}", item.ID);
+
         // set the singleton if not done already
         if (item.Singleton == false)
         {
             wasSingleton = false;
             item.Singleton = true;
-                
+
             DogmaNotifications.QueueMultiEvent (
                 item.OwnerID, OnItemChange.BuildSingletonChange (item, false)
             );
+
+            Log.Information ("[DogmaItems] FitInto(1): Singleton set for itemID={ItemID}", item.ID);
         }
 
-        ItemEffects effects = EffectsManager.GetForItem (shipModule, session);
-        
-        // throw the effects in and hope they stick
+        // persist the item (including singleton change) to the database
+        item.Persist ();
+
+        // GetForItem creates ItemEffects whose constructor applies passive effects,
+        // so it must be inside the try-catch to properly roll back on failure
+        ItemEffects effects = null;
+
         try
         {
-            // apply all passive effects (this also blocks the item fitting if the initialization fails)
-            effects?.ApplyPassiveEffects (session);
-            // TODO: extra check, ensure that the character has the required skills?
+            effects = EffectsManager.GetForItem (shipModule, session);
 
-            if (shipModule?.IsRigSlot () == false)
-                effects?.ApplyEffect ("online", session);
+            Log.Information ("[DogmaItems] FitInto(1): Passive effects applied for itemID={ItemID}", item.ID);
         }
-        catch (UserError)
+        catch (UserError e)
         {
+            Log.Warning ("[DogmaItems] FitInto(1): UserError during passive effects for itemID={ItemID}: {Error}", item.ID, e.Message);
+
             effects?.StopApplyingPassiveEffects (session);
-            
+
             // restore the old item again
             if (original is not null)
             {
                 original.Quantity++;
-                
+
                 DogmaNotifications.QueueMultiEvent (
                     original.OwnerID, OnItemChange.BuildQuantityChange (original, original.Quantity - 1)
                 );
-                
+
                 // destroy the new item too
                 DestroyItem (item);
             }
@@ -447,29 +461,48 @@ public class DogmaItems : IDogmaItems
                 if (wasSingleton == false)
                 {
                     item.Singleton = false;
-                
+
                     DogmaNotifications.QueueMultiEvent (
                         item.OwnerID, OnItemChange.BuildSingletonChange (item, true)
                     );
                 }
             }
-            
+
             throw;
         }
+
+        // online effect is separate — if it fails, the module stays fitted but offline
+        if (shipModule?.IsRigSlot () == false)
+        {
+            try
+            {
+                Log.Information ("[DogmaItems] FitInto(1): Applying online effect for itemID={ItemID}", item.ID);
+                effects?.ApplyEffect ("online", session);
+            }
+            catch (System.Exception e)
+            {
+                Log.Warning ("[DogmaItems] FitInto(1): Online effect failed for itemID={ItemID}: {Error} — module stays offline", item.ID, e.Message);
+            }
+        }
+
+        Log.Information ("[DogmaItems] FitInto(1): Complete for itemID={ItemID}", item.ID);
     }
     
     public void FitInto (ItemEntity item, int locationID, int ownerID, Flags slot, Session session)
     {
+        Log.Information ("[DogmaItems] FitInto(2): itemID={ItemID}, typeID={TypeID}, slot={Slot}, locationID={LocationID}, ownerID={OwnerID}",
+            item.ID, item.Type.ID, slot, locationID, ownerID);
+
         ItemEntity original = null;
         bool wasSingleton = true;
         int originalLocationID = item.LocationID;
         int originalOwnerID = item.OwnerID;
         Flags originalFlag = item.Flag;
-            
+
         // cannot be fitted if it's not a module
         if (item is not ShipModule shipModule)
-            return;
-        
+            throw new CustomError ("This item cannot be fitted to a ship");
+
         if (item.Quantity != 1)
         {
             // keep a reference to the old item to undo the changes if required
@@ -477,43 +510,53 @@ public class DogmaItems : IDogmaItems
             // item has to be split first and then moved
             item = SplitStack (item, 1, item.LocationID);
         }
-        
+
         // set the singleton if not done already
         if (item.Singleton == false)
         {
             wasSingleton = false;
             item.Singleton = true;
-                
+
             DogmaNotifications.QueueMultiEvent (
                 item.OwnerID, OnItemChange.BuildSingletonChange (item, false)
             );
+
+            Log.Information ("[DogmaItems] FitInto(2): Singleton set for itemID={ItemID}", item.ID);
         }
-        
+
         // move the item to the requested slot
         MoveItem (item, locationID, ownerID, slot);
 
-        ItemEffects effects = EffectsManager.GetForItem (shipModule, session);
-        
-        // throw the effects in and hope they stick
+        Log.Information ("[DogmaItems] FitInto(2): MoveItem complete for itemID={ItemID}", item.ID);
+
+        // persist the item (including singleton change) to the database
+        item.Persist ();
+
+        // GetForItem creates ItemEffects whose constructor applies passive effects,
+        // so it must be inside the try-catch to properly roll back on failure
+        ItemEffects effects = null;
+
         try
         {
-            // apply all passive effects (this also blocks the item fitting if the initialization fails)
-            effects?.ApplyPassiveEffects (session);
-            // TODO: extra check, ensure that the character has the required skills?
+            effects = EffectsManager.GetForItem (shipModule, session);
+
+            Log.Information ("[DogmaItems] FitInto(2): Passive effects applied for itemID={ItemID}", item.ID);
         }
-        catch (UserError)
+        catch (UserError e)
         {
+            Log.Warning ("[DogmaItems] FitInto(2): UserError during passive effects for itemID={ItemID}: {Error}", item.ID, e.Message);
+
             effects?.StopApplyingPassiveEffects (session);
-            
+
             // restore the old item again
             if (original is not null)
             {
                 original.Quantity++;
-                
+
                 DogmaNotifications.QueueMultiEvent (
                     original.OwnerID, OnItemChange.BuildQuantityChange (original, original.Quantity - 1)
                 );
-                
+
                 // destroy the new item too
                 DestroyItem (item);
             }
@@ -525,18 +568,31 @@ public class DogmaItems : IDogmaItems
                 if (wasSingleton == false)
                 {
                     item.Singleton = false;
-                
+
                     DogmaNotifications.QueueMultiEvent (
                         item.OwnerID, OnItemChange.BuildSingletonChange (item, true)
                     );
                 }
             }
-            
+
             throw;
         }
 
+        // online effect is separate — if it fails, the module stays fitted but offline
         if (shipModule?.IsRigSlot () == false)
-            effects?.ApplyEffect ("online", session);
+        {
+            try
+            {
+                Log.Information ("[DogmaItems] FitInto(2): Applying online effect for itemID={ItemID}", item.ID);
+                effects?.ApplyEffect ("online", session);
+            }
+            catch (System.Exception e)
+            {
+                Log.Warning ("[DogmaItems] FitInto(2): Online effect failed for itemID={ItemID}: {Error} — module stays offline", item.ID, e.Message);
+            }
+        }
+
+        Log.Information ("[DogmaItems] FitInto(2): Complete for itemID={ItemID}", item.ID);
     }
     
     public void SetSingleton (ItemEntity item, bool newSingleton)

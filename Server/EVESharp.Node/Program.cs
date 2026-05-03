@@ -1,4 +1,4 @@
-﻿/*
+/*
     ------------------------------------------------------------------------------------
     LICENSE:
     ------------------------------------------------------------------------------------
@@ -81,6 +81,7 @@ using EVESharp.Node.Services.Corporations;
 using EVESharp.Node.Services.Data;
 using EVESharp.Node.Services.Dogma;
 using EVESharp.Node.Services.Inventory;
+using EVESharp.Node.Services.Insurance;
 using EVESharp.Node.Services.Market;
 using EVESharp.Node.Services.Navigation;
 using EVESharp.Node.Services.Network;
@@ -88,6 +89,7 @@ using EVESharp.Node.Services.Stations;
 using EVESharp.Node.Services.Tutorial;
 using EVESharp.Node.Services.War;
 using EVESharp.Node.SimpleInject;
+using EVESharp.Node.Services.Space;
 using Serilog;
 using Serilog.Core;
 using Serilog.Events;
@@ -104,304 +106,346 @@ namespace EVESharp.Node;
 
 internal class Program
 {
-    private static async Task InitializeItemFactory (ILogger logChannel, Container dependencies)
+    private static async Task InitializeItemFactory(ILogger logChannel, Container dependencies)
     {
-        await Task.Run (
+        await Task.Run(
             () =>
             {
-                logChannel.Information ("Initializing item factory");
-                dependencies.GetInstance <IItems> ().Init ();
-                logChannel.Debug ("Item Factory Initialized");
+                logChannel.Information("Initializing item factory");
+                dependencies.GetInstance<IItems>().Init();
+                logChannel.Debug("Item Factory Initialized");
             }
         );
     }
 
-    private static async Task InitializeCache (ILogger logChannel, Container dependencies)
+    private static async Task InitializeCache(ILogger logChannel, Container dependencies)
     {
-        await Task.Run (
+        await Task.Run(
             () =>
             {
-                logChannel.Information ("Initializing cache");
-                ICacheStorage cacheStorage = dependencies.GetInstance <ICacheStorage> ();
+                logChannel.Information("Initializing cache");
+                ICacheStorage cacheStorage = dependencies.GetInstance<ICacheStorage>();
 
                 // prime bulk data
-                cacheStorage.Load (
+                cacheStorage.Load(
                     EVE.Data.Cache.LoginCacheTable,
                     EVE.Data.Cache.LoginCacheQueries,
                     EVE.Data.Cache.LoginCacheTypes
                 );
 
                 // prime character creation cache
-                cacheStorage.Load (
+                cacheStorage.Load(
                     EVE.Data.Cache.CreateCharacterCacheTable,
                     EVE.Data.Cache.CreateCharacterCacheQueries,
                     EVE.Data.Cache.CreateCharacterCacheTypes
                 );
 
                 // prime character appearance cache
-                cacheStorage.Load (
+                cacheStorage.Load(
                     EVE.Data.Cache.CharacterAppearanceCacheTable,
                     EVE.Data.Cache.CharacterAppearanceCacheQueries,
                     EVE.Data.Cache.CharacterAppearanceCacheTypes
                 );
 
-                logChannel.Information ("Cache Initialized");
+                logChannel.Information("Cache Initialized");
             }
         );
     }
 
-    private static Logger SetupLogger (General configuration)
+    private static Logger SetupLogger(General configuration)
     {
-        LoggerConfiguration loggerConfiguration = new LoggerConfiguration ().MinimumLevel.Verbose ();
+        LoggerConfiguration loggerConfiguration = new LoggerConfiguration().MinimumLevel.Verbose();
 
         // create a default expression template to ensure the text has the correct format
-        ExpressionTemplate template = new ExpressionTemplate (
+        ExpressionTemplate template = new ExpressionTemplate(
             "{UtcDateTime(@t):yyyy-MM-dd HH:mm:ss} {@l:u1} {Coalesce(Coalesce(Name, Substring(SourceContext, LastIndexOf(SourceContext, '.') + 1)), 'Program')}: {@m:lj}\n{@x}"
         );
 
         // setup channels to be ignored based on the logging configuration
-        loggerConfiguration.Filter.ByExcluding (
+        loggerConfiguration.Filter.ByExcluding(
             logEvent =>
             {
                 // check if it should be hidden by default
-                if (logEvent.Properties.TryGetValue (LoggingExtensions.HIDDEN_PROPERTY_NAME, out LogEventPropertyValue _) == false)
+                if (logEvent.Properties.TryGetValue(LoggingExtensions.HIDDEN_PROPERTY_NAME, out LogEventPropertyValue _) == false)
                     return false;
 
                 // now check if the name is in the allowed list
                 string name = "";
 
-                if (logEvent.Properties.TryGetValue ("Name", out LogEventPropertyValue nameProp))
-                    name = nameProp.ToString ();
-                else if (logEvent.Properties.TryGetValue ("SourceContext", out LogEventPropertyValue sourceContext))
-                    name = sourceContext.ToString ();
+                if (logEvent.Properties.TryGetValue("Name", out LogEventPropertyValue nameProp))
+                    name = nameProp.ToString();
+                else if (logEvent.Properties.TryGetValue("SourceContext", out LogEventPropertyValue sourceContext))
+                    name = sourceContext.ToString();
 
-                return !configuration.Logging.EnableChannels.Contains (name);
+                return !configuration.Logging.EnableChannels.Contains(name);
             }
         );
 
         // setup all the required logging sinks
-        loggerConfiguration.WriteTo.Console (template);
-            
-        if (configuration.FileLog.Enabled)
-            loggerConfiguration.WriteTo.File (template, $"{configuration.FileLog.Directory}/{configuration.FileLog.LogFile}");
-        if (configuration.LogLite.Enabled)
-            loggerConfiguration.WriteTo.LogLite (configuration.LogLite);
+        loggerConfiguration.WriteTo.Console(template);
 
-        return loggerConfiguration.CreateLogger ();
+        if (configuration.FileLog.Enabled)
+            loggerConfiguration.WriteTo.File(template, $"{configuration.FileLog.Directory}/{configuration.FileLog.LogFile}");
+
+        if (configuration.LogLite.Enabled)
+            loggerConfiguration.WriteTo.LogLite(configuration.LogLite);
+
+        return loggerConfiguration.CreateLogger();
     }
 
-    private static Container SetupDependencyInjection (General configuration, ILogger baseLogger)
+    private static Container SetupDependencyInjection(General configuration, ILogger baseLogger)
     {
-        Container container = new Container ();
+        Container container = new Container();
 
         // change how dependencies are resolved to ensure serilog instances are properly provided
         container.Options.DependencyInjectionBehavior =
-            new SerilogContextualLoggerInjectionBehavior (container.Options, baseLogger);
+            new SerilogContextualLoggerInjectionBehavior(container.Options, baseLogger);
 
-        
         // register configuration instances
-        container.RegisterInstance (configuration);
-        container.RegisterInstance (configuration.Database);
-        container.RegisterInstance (configuration.MachoNet);
-        container.RegisterInstance (configuration.Authentication);
-        container.RegisterInstance (configuration.LogLite);
-        container.RegisterInstance (configuration.FileLog);
-        container.RegisterInstance (configuration.Logging);
-        container.RegisterInstance (configuration.Character);
-        
+        container.RegisterInstance(configuration);
+        container.RegisterInstance(configuration.Database);
+        container.RegisterInstance(configuration.MachoNet);
+        container.RegisterInstance(configuration.Authentication);
+        container.RegisterInstance(configuration.LogLite);
+        container.RegisterInstance(configuration.FileLog);
+        container.RegisterInstance(configuration.Logging);
+        container.RegisterInstance(configuration.Character);
+        container.Register<beyonce>(Lifestyle.Singleton);
+        container.Register<DestinyBroadcaster>(Lifestyle.Singleton);
+        container.Register<SolarSystemDestinyManager>(Lifestyle.Singleton);
+        container.Register<Services.Dogma.TargetManager>(Lifestyle.Singleton);
+        container.Register<Services.Combat.PlayerDeathHandler>(Lifestyle.Singleton);
+        container.Register<Services.Combat.CombatService>(Lifestyle.Singleton);
+        container.Register<Services.Combat.WeaponCycler>(Lifestyle.Singleton);
+        container.Register<Services.Combat.MissileManager>(Lifestyle.Singleton);
+
         // register logging system
-        container.RegisterInstance (baseLogger);
-        
+        container.RegisterInstance(baseLogger);
+
         // register all the dependencies we have available
-        container.RegisterInstance (new HttpClient ());
-        container.Register <IDatabase, Database.Database> (Lifestyle.Singleton);
-        container.Register <ISessionManager, SessionManager> (Lifestyle.Singleton);
-        container.Register <ICacheStorage, CacheStorage> (Lifestyle.Singleton);
-        container.Register <IMetaInventories, MetaInventories> (Lifestyle.Singleton);
-        container.Register <IDefaultAttributes, DefaultAttributes> (Lifestyle.Singleton);
-        container.Register <IAttributes, Attributes> (Lifestyle.Singleton);
-        container.Register <IFactions, Factions> (Lifestyle.Singleton);
-        container.Register <ITypes, Data.Inventory.Types> (Lifestyle.Singleton);
-        container.Register <ICategories, Categories> (Lifestyle.Singleton);
-        container.Register <IGroups, Groups> (Lifestyle.Singleton);
-        container.Register <IStations, Stations> (Lifestyle.Singleton);
-        container.Register <IItems, Items> (Lifestyle.Singleton);
-        container.Register <IStandings, Standings>(Lifestyle.Singleton);
-        container.Register <ITimers, Timers> (Lifestyle.Singleton);
-        container.Register <ISolarSystems, SolarSystems> (Lifestyle.Singleton);
-        container.Register <ServiceManager> (Lifestyle.Singleton);
-        container.Register <IBoundServiceManager, BoundServiceManager> (Lifestyle.Singleton);
-        container.Register <IRemoteServiceManager, RemoteServiceManager> (Lifestyle.Singleton);
-        container.Register <PacketCallHelper> (Lifestyle.Singleton);
-        container.Register <INotificationSender, NotificationSender> (Lifestyle.Singleton);
-        container.Register <IExpressions, Expressions> (Lifestyle.Singleton);
-        container.Register <IWallets, Wallets> (Lifestyle.Singleton);
-        container.Register <MailManager> (Lifestyle.Singleton);
-        container.Register <AgentManager> (Lifestyle.Singleton);
-        container.Register <IAncestries, Ancestries> (Lifestyle.Singleton);
-        container.Register <IBloodlines, Bloodlines> (Lifestyle.Singleton);
-        container.Register <IConstants, Constants> (Lifestyle.Singleton);
-        container.Register <IDogmaNotifications, DogmaNotifications> (Lifestyle.Singleton);
-        container.Register <IAudit, Audit> (Lifestyle.Singleton);
-        container.Register <IShares, Shares> (Lifestyle.Singleton);
-        container.Register <IContracts, Contracts> (Lifestyle.Singleton);
-        container.Register <IDogmaItems, DogmaItems> (Lifestyle.Singleton);
+        container.RegisterInstance(new HttpClient());
+        container.Register<IDatabase, Database.Database>(Lifestyle.Singleton);
+        container.Register<ISessionManager, SessionManager>(Lifestyle.Singleton);
+        container.Register<ICacheStorage, CacheStorage>(Lifestyle.Singleton);
+        container.Register<IMetaInventories, MetaInventories>(Lifestyle.Singleton);
+        container.Register<IDefaultAttributes, DefaultAttributes>(Lifestyle.Singleton);
+        container.Register<IAttributes, Attributes>(Lifestyle.Singleton);
+        container.Register<IFactions, Factions>(Lifestyle.Singleton);
+        container.Register<ITypes, Data.Inventory.Types>(Lifestyle.Singleton);
+        container.Register<ICategories, Categories>(Lifestyle.Singleton);
+        container.Register<IGroups, Groups>(Lifestyle.Singleton);
+        container.Register<IStations, Stations>(Lifestyle.Singleton);
+        container.Register<IItems, Items>(Lifestyle.Singleton);
+        container.Register<IStandings, Standings>(Lifestyle.Singleton);
+        container.Register<ITimers, Timers>(Lifestyle.Singleton);
+        container.Register<ISolarSystems, SolarSystems>(Lifestyle.Singleton);
+        container.Register<ServiceManager>(Lifestyle.Singleton);
+        container.Register<IBoundServiceManager, BoundServiceManager>(Lifestyle.Singleton);
+        container.Register<IRemoteServiceManager, RemoteServiceManager>(Lifestyle.Singleton);
+        container.Register<PacketCallHelper>(Lifestyle.Singleton);
+        container.Register<INotificationSender, NotificationSender>(Lifestyle.Singleton);
+        container.Register<IExpressions, Expressions>(Lifestyle.Singleton);
+        container.Register<IWallets, Wallets>(Lifestyle.Singleton);
+        container.Register<MailManager>(Lifestyle.Singleton);
+        container.Register<AgentManager>(Lifestyle.Singleton);
+        container.Register<IAncestries, Ancestries>(Lifestyle.Singleton);
+        container.Register<IBloodlines, Bloodlines>(Lifestyle.Singleton);
+        container.Register<IConstants, Constants>(Lifestyle.Singleton);
+        container.Register<IDogmaNotifications, DogmaNotifications>(Lifestyle.Singleton);
+        container.Register<IAudit, Audit>(Lifestyle.Singleton);
+        container.Register<IShares, Shares>(Lifestyle.Singleton);
+        container.Register<IContracts, Contracts>(Lifestyle.Singleton);
+        container.Register<IDogmaItems, DogmaItems>(Lifestyle.Singleton);
 
         // register the database accessors dependencies
-        container.Register <OldCharacterDB> (Lifestyle.Singleton);
-        container.Register <ChatDB> (Lifestyle.Singleton);
-        container.Register <ConfigDB> (Lifestyle.Singleton);
-        container.Register <ContractDB> (Lifestyle.Singleton);
-        container.Register <CorporationDB> (Lifestyle.Singleton);
-        container.Register <ItemDB> (Lifestyle.Singleton);
-        container.Register <MarketDB> (Lifestyle.Singleton);
-        container.Register <SkillDB> (Lifestyle.Singleton);
-        container.Register <StandingDB> (Lifestyle.Singleton);
-        container.Register <StationDB> (Lifestyle.Singleton);
-        container.Register <LookupDB> (Lifestyle.Singleton);
-        container.Register <InsuranceDB> (Lifestyle.Singleton);
-        container.Register <RepairDB> (Lifestyle.Singleton);
-        container.Register <ReprocessingDB> (Lifestyle.Singleton);
-        container.Register <RAMDB> (Lifestyle.Singleton);
-        container.Register <FactoryDB> (Lifestyle.Singleton);
-        container.Register <TutorialsDB> (Lifestyle.Singleton);
+        container.Register<OldCharacterDB>(Lifestyle.Singleton);
+        container.Register<ChatDB>(Lifestyle.Singleton);
+        container.Register<ConfigDB>(Lifestyle.Singleton);
+        container.Register<ContractDB>(Lifestyle.Singleton);
+        container.Register<CorporationDB>(Lifestyle.Singleton);
+        container.Register<ItemDB>(Lifestyle.Singleton);
+        container.Register<MarketDB>(Lifestyle.Singleton);
+        container.Register<SkillDB>(Lifestyle.Singleton);
+        container.Register<StandingDB>(Lifestyle.Singleton);
+        container.Register<StationDB>(Lifestyle.Singleton);
+        container.Register<LookupDB>(Lifestyle.Singleton);
+        container.Register<InsuranceDB>(Lifestyle.Singleton);
+        container.Register<RepairDB>(Lifestyle.Singleton);
+        container.Register<ReprocessingDB>(Lifestyle.Singleton);
+        container.Register<RAMDB>(Lifestyle.Singleton);
+        container.Register<FactoryDB>(Lifestyle.Singleton);
+        container.Register<TutorialsDB>(Lifestyle.Singleton);
 
         // register all the services
-        container.Register <account> (Lifestyle.Singleton);
-        container.Register <machoNet> (Lifestyle.Singleton);
-        container.Register <objectCaching> (Lifestyle.Singleton);
-        container.Register <alert> (Lifestyle.Singleton);
-        container.Register <authentication> (Lifestyle.Singleton);
-        container.Register <character> (Lifestyle.Singleton);
-        container.Register <userSvc> (Lifestyle.Singleton);
-        container.Register <charmgr> (Lifestyle.Singleton);
-        container.Register <config> (Lifestyle.Singleton);
-        container.Register <dogmaIM> (Lifestyle.Singleton);
-        container.Register <invbroker> (Lifestyle.Singleton);
-        container.Register <warRegistry> (Lifestyle.Singleton);
-        container.Register <station> (Lifestyle.Singleton);
-        container.Register <map> (Lifestyle.Singleton);
-        container.Register <skillMgr> (Lifestyle.Singleton);
-        container.Register <contractMgr> (Lifestyle.Singleton);
-        container.Register <corpStationMgr> (Lifestyle.Singleton);
-        container.Register <bookmark> (Lifestyle.Singleton);
-        container.Register <LSC> (Lifestyle.Singleton);
-        container.Register <onlineStatus> (Lifestyle.Singleton);
-        container.Register <billMgr> (Lifestyle.Singleton);
-        container.Register <facWarMgr> (Lifestyle.Singleton);
-        container.Register <corporationSvc> (Lifestyle.Singleton);
-        container.Register <clientStatsMgr> (Lifestyle.Singleton);
-        container.Register <voiceMgr> (Lifestyle.Singleton);
-        container.Register <standing2> (Lifestyle.Singleton);
-        container.Register <tutorialSvc> (Lifestyle.Singleton);
-        container.Register <agentMgr> (Lifestyle.Singleton);
-        container.Register <corpRegistry> (Lifestyle.Singleton);
-        container.Register <marketProxy> (Lifestyle.Singleton);
-        container.Register <stationSvc> (Lifestyle.Singleton);
-        container.Register <certificateMgr> (Lifestyle.Singleton);
-        container.Register <jumpCloneSvc> (Lifestyle.Singleton);
-        container.Register <LPSvc> (Lifestyle.Singleton);
-        container.Register <lookupSvc> (Lifestyle.Singleton);
-        container.Register <insuranceSvc> (Lifestyle.Singleton);
-        container.Register <slash> (Lifestyle.Singleton);
-        container.Register <ship> (Lifestyle.Singleton);
-        container.Register <corpmgr> (Lifestyle.Singleton);
-        container.Register <repairSvc> (Lifestyle.Singleton);
-        container.Register <reprocessingSvc> (Lifestyle.Singleton);
-        container.Register <ramProxy> (Lifestyle.Singleton);
-        container.Register <factory> (Lifestyle.Singleton);
-        container.Register <petitioner> (Lifestyle.Singleton);
-        container.Register <allianceRegistry> (Lifestyle.Singleton);
-        container.Register <IMessageQueue <LoginQueueEntry>, LoginQueue> (Lifestyle.Singleton);
-        container.Register <IQueueProcessor <LoginQueueEntry>, ThreadedProcessor <LoginQueueEntry>> (Lifestyle.Singleton);
-        container.Register <IClusterManager, ClusterManager> (Lifestyle.Singleton);
-        container.Register <ITransportManager, TransportManager> (Lifestyle.Singleton);
-        container.Register <EffectsManager> (Lifestyle.Singleton);
-        
+        container.Register<account>(Lifestyle.Singleton);
+        container.Register<machoNet>(Lifestyle.Singleton);
+        container.Register<objectCaching>(Lifestyle.Singleton);
+        container.Register<alert>(Lifestyle.Singleton);
+        container.Register<authentication>(Lifestyle.Singleton);
+        container.Register<character>(Lifestyle.Singleton);
+        container.Register<userSvc>(Lifestyle.Singleton);
+        container.Register<charmgr>(Lifestyle.Singleton);
+        container.Register<config>(Lifestyle.Singleton);
+        container.Register<dogmaIM>(Lifestyle.Singleton);
+        container.Register<invbroker>(Lifestyle.Singleton);
+        container.Register<warRegistry>(Lifestyle.Singleton);
+        container.Register<station>(Lifestyle.Singleton);
+        container.Register<map>(Lifestyle.Singleton);
+        container.Register<skillMgr>(Lifestyle.Singleton);
+        container.Register<contractMgr>(Lifestyle.Singleton);
+        container.Register<corpStationMgr>(Lifestyle.Singleton);
+        container.Register<bookmark>(Lifestyle.Singleton);
+        container.Register<LSC>(Lifestyle.Singleton);
+        container.Register<onlineStatus>(Lifestyle.Singleton);
+        container.Register<billMgr>(Lifestyle.Singleton);
+        container.Register<facWarMgr>(Lifestyle.Singleton);
+        container.Register<corporationSvc>(Lifestyle.Singleton);
+        container.Register<clientStatsMgr>(Lifestyle.Singleton);
+        container.Register<voiceMgr>(Lifestyle.Singleton);
+        container.Register<standing2>(Lifestyle.Singleton);
+        container.Register<tutorialSvc>(Lifestyle.Singleton);
+        container.Register<agentMgr>(Lifestyle.Singleton);
+        container.Register<corpRegistry>(Lifestyle.Singleton);
+        container.Register<marketProxy>(Lifestyle.Singleton);
+        container.Register<stationSvc>(Lifestyle.Singleton);
+        container.Register<certificateMgr>(Lifestyle.Singleton);
+        container.Register<jumpCloneSvc>(Lifestyle.Singleton);
+        container.Register<LPSvc>(Lifestyle.Singleton);
+        container.Register<lookupSvc>(Lifestyle.Singleton);
+        container.Register<insuranceSvc>(Lifestyle.Singleton);
+        container.Register<slash>(Lifestyle.Singleton);
+        container.Register<ship>(Lifestyle.Singleton);
+        container.Register<corpmgr>(Lifestyle.Singleton);
+        container.Register<repairSvc>(Lifestyle.Singleton);
+        container.Register<reprocessingSvc>(Lifestyle.Singleton);
+        container.Register<ramProxy>(Lifestyle.Singleton);
+        container.Register<factory>(Lifestyle.Singleton);
+        container.Register<petitioner>(Lifestyle.Singleton);
+        container.Register<allianceRegistry>(Lifestyle.Singleton);
+        container.Register<IMessageQueue<LoginQueueEntry>, LoginQueue>(Lifestyle.Singleton);
+        container.Register<IQueueProcessor<LoginQueueEntry>, ThreadedProcessor<LoginQueueEntry>>(Lifestyle.Singleton);
+        container.Register<IClusterManager, ClusterManager>(Lifestyle.Singleton);
+        container.Register<ITransportManager, TransportManager>(Lifestyle.Singleton);
+        container.Register<EffectsManager>(Lifestyle.Singleton);
+        container.Register<inventoryInsurancesSvc>(Lifestyle.Singleton);
+        container.Register<SpaceServiceRegistrar>(Lifestyle.Singleton);
+        // ballparkSvc removed — beyonce is the single consolidated ballpark service
+        container.Register<michelle>(Lifestyle.Singleton);
+        container.Register<DungeonData>(Lifestyle.Singleton);
+        container.Register<dungeon>(Lifestyle.Singleton);
+        container.Register<keeper>(Lifestyle.Singleton);
+        container.Register<dungeonExplorationMgr>(Lifestyle.Singleton);
+        container.Register<scanMgr>(Lifestyle.Singleton);
+        container.Register<fittingSvc>(Lifestyle.Singleton);
+
         // depending on the server mode initialize a different macho instance
         switch (configuration.MachoNet.Mode)
         {
             case MachoNetMode.Single:
-                container.Register <IMachoNet, MachoNet> (Lifestyle.Singleton);
-                container.Register <IMessageQueue <MachoMessage>, MessageQueue> (Lifestyle.Singleton);
+                container.Register<IMachoNet, MachoNet>(Lifestyle.Singleton);
+                container.Register<IMessageQueue<MachoMessage>, MessageQueue>(Lifestyle.Singleton);
                 break;
 
             case MachoNetMode.Proxy:
-                container.Register <IMachoNet, Server.Proxy.MachoNet> (Lifestyle.Singleton);
-                container.Register <IMessageQueue <MachoMessage>, Server.Proxy.Messages.MessageQueue> (Lifestyle.Singleton);
+                container.Register<IMachoNet, Server.Proxy.MachoNet>(Lifestyle.Singleton);
+                container.Register<IMessageQueue<MachoMessage>, Server.Proxy.Messages.MessageQueue>(Lifestyle.Singleton);
                 break;
 
             case MachoNetMode.Server:
-                container.Register <IMachoNet, Server.Node.MachoNet> (Lifestyle.Singleton);
-                container.Register <IMessageQueue <MachoMessage>, Server.Node.Messages.MessageQueue> (Lifestyle.Singleton);
+                container.Register<IMachoNet, Server.Node.MachoNet>(Lifestyle.Singleton);
+                container.Register<IMessageQueue<MachoMessage>, Server.Node.Messages.MessageQueue>(Lifestyle.Singleton);
                 break;
         }
 
-        container.Register <IQueueProcessor <MachoMessage>, MachoMessageProcessor>(Lifestyle.Singleton);
+        container.Register<IQueueProcessor<MachoMessage>, MachoMessageProcessor>(Lifestyle.Singleton);
 
         return container;
     }
 
-    private static void Main (string [] argv)
+    private static void Main(string[] argv)
     {
         // load configuration first
-        General configuration = Loader.Load <General> ("configuration.conf");
+        General configuration = Loader.Load<General>("configuration.conf");
         // initialize the logging system
-        Logger log = SetupLogger (configuration);
+        Logger log = SetupLogger(configuration);
         // finally initialize the dependency injection
-        Container dependencies = SetupDependencyInjection (configuration, log);
+        Container dependencies = SetupDependencyInjection(configuration, log);
 
         using (log)
         {
             try
             {
-                log.Information ("Initializing EVESharp Node");
-                log.Fatal ("Initializing EVESharp Node");
-                log.Error ("Initializing EVESharp Node");
-                log.Warning ("Initializing EVESharp Node");
-                log.Debug ("Initializing EVESharp Node");
-                log.Verbose ("Initializing EVESharp Node");
+                log.Information("Initializing EVESharp Node");
+                log.Fatal("Initializing EVESharp Node");
+                log.Error("Initializing EVESharp Node");
+                log.Warning("Initializing EVESharp Node");
+                log.Debug("Initializing EVESharp Node");
+                log.Verbose("Initializing EVESharp Node");
 
                 // do some parallel initialization, cache priming and static item loading can be performed in parallel
                 // this makes the changes quicker
-                Task cacheStorage = InitializeCache (log, dependencies);
-                Task itemFactory  = InitializeItemFactory (log, dependencies);
+                Task cacheStorage = InitializeCache(log, dependencies);
+                Task itemFactory  = InitializeItemFactory(log, dependencies);
 
                 // wait for all the tasks to be done
-                Task.WaitAll (itemFactory, cacheStorage);
+                Task.WaitAll(itemFactory, cacheStorage);
 
                 // register the current machoNet handler
-                IMachoNet machoNet = dependencies.GetInstance <IMachoNet> ();
+                IMachoNet machoNet = dependencies.GetInstance<IMachoNet>();
 
                 // initialize the machoNet protocol
-                machoNet.Initialize ();
+                machoNet.Initialize();
 
                 // based on the mode do some things with the cluster manager
-                IClusterManager cluster = dependencies.GetInstance <IClusterManager> ();
+                IClusterManager cluster = dependencies.GetInstance<IClusterManager>();
 
                 // register with the server
                 if (machoNet.Mode != RunMode.Single)
-                    cluster.RegisterNode ();
+                    cluster.RegisterNode();
 
                 if (machoNet.Mode == RunMode.Server)
                 {
                     // wait for 5 seconds and connect to proxies
-                    Thread.Sleep (5000);
+                    Thread.Sleep(5000);
                     // connect to proxies
-                    cluster.EstablishConnectionWithProxies ();
+                    cluster.EstablishConnectionWithProxies();
                 }
 
-                log.Verbose ("Node startup done");
+                log.Verbose("Node startup done");
 
-                // idle for infinity
-                // yes, i know this is not ideal, but there's actual work that needs to happen
-                // before this can be properly rewritten
-                Thread.Sleep (Timeout.Infinite);
+                // wait for shutdown signal (Ctrl+C or process termination)
+                using ManualResetEventSlim shutdownEvent = new ManualResetEventSlim (false);
+
+                Console.CancelKeyPress += (_, e) =>
+                {
+                    e.Cancel = true;
+                    log.Information ("Shutdown signal received (Ctrl+C), shutting down...");
+                    shutdownEvent.Set ();
+                };
+
+                AppDomain.CurrentDomain.ProcessExit += (_, _) =>
+                {
+                    log.Information ("Process exit signal received, shutting down...");
+                    shutdownEvent.Set ();
+                };
+
+                shutdownEvent.Wait ();
+
+                // graceful cleanup
+                log.Information ("Closing server transport...");
+                machoNet.TransportManager.ServerTransport?.Close ();
+
+                log.Information ("Closing client connections...");
+
+                foreach (IMachoTransport transport in machoNet.TransportManager.TransportList)
+                    transport.Close ();
+
+                log.Information ("Server shutdown complete.");
             }
             catch (Exception e)
             {
-                log.Fatal ("Node stopped...");
-                log.Fatal (e.ToString ());
+                log.Fatal("Node stopped...");
+                log.Fatal(e.ToString());
             }
         }
     }

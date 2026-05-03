@@ -133,6 +133,21 @@ public interface IItems
     SolarSystem GetStaticSolarSystem (int solarSystemID);
 
     /// <summary>
+    /// Loads all items located at the given location entity
+    /// </summary>
+    /// <param name="location">The location entity to load items for</param>
+    /// <param name="ignoreFlag">Optional flag to ignore</param>
+    /// <returns>Dictionary of loaded items keyed by item ID</returns>
+    ConcurrentDictionary <int, ItemEntity> LoadItemsLocatedAt (ItemEntity location, Flags ignoreFlag = Flags.None);
+
+    /// <summary>
+    /// Loads all items located at the given location entity without any flag filtering
+    /// </summary>
+    /// <param name="location">The location entity to load items for</param>
+    /// <returns>Dictionary of loaded items keyed by item ID</returns>
+    ConcurrentDictionary <int, ItemEntity> LoadAllItemsLocatedAt (ItemEntity location);
+
+    /// <summary>
     /// Checks if the given item is already loaded
     /// </summary>
     /// <param name="itemID"></param>

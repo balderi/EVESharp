@@ -1406,4 +1406,20 @@ public class CorporationDB : DatabaseAccessor
             return reader.GetInt64 (0);
         }
     }
+public bool IsNPCCorporation(int corporationID)
+{
+    using (DbDataReader reader = this.Database.Select(
+        "SELECT corporationType FROM corporation WHERE corporationID = @corp",
+        new Dictionary<string, object> { { "@corp", corporationID } }
+    ))
+    {
+        if (reader.Read() == false)
+            return false;
+
+        int corpType = reader.GetInt32(0);
+        return corpType != 0; // 0 = player corp, everything else = NPC corp
+    }
+}
+
+
 }

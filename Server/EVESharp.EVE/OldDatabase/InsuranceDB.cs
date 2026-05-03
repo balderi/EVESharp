@@ -68,17 +68,33 @@ public class InsuranceDB : DatabaseAccessor
         );
     }
 
-    public PyPackedRow GetContractForShip (int characterID, int shipID)
-    {
-        return this.Database.PreparePackedRow (
-            "SELECT ownerID, shipID, fraction, startDate, endDate FROM chrShipInsurances WHERE ownerID = @characterID AND shipID = @shipID",
-            new Dictionary <string, object>
-            {
-                {"@characterID", characterID},
-                {"@shipID", shipID}
-            }
-        );
-    }
+    public PyPackedRow GetContractForShip(int characterID, int shipID)
+{
+    // try to fetch a real insurance row
+    PyPackedRow row = this.Database.PreparePackedRow(
+        "SELECT ownerID, shipID, fraction, startDate, endDate FROM chrShipInsurances WHERE ownerID = @characterID AND shipID = @shipID",
+        new Dictionary<string, object>
+        {
+            {"@characterID", characterID},
+            {"@shipID", shipID}
+        }
+    );
+
+    // If the query returned a real row → return it
+    if (row != null)
+        return row;
+
+    // Otherwise return a dummy "uninsured" row the same way the DB layer expects it
+    return this.Database.PreparePackedRow(
+        "SELECT @ownerID AS ownerID, @shipID AS shipID, 0.0 AS fraction, 0 AS startDate, 0 AS endDate",
+        new Dictionary<string, object>
+        {
+            {"@ownerID", characterID},
+            {"@shipID", shipID}
+        }
+    );
+}
+
 
     public bool IsShipInsured (int shipID, out int ownerID, out int numberOfInsurances)
     {

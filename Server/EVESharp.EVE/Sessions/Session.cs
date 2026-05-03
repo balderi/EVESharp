@@ -9,7 +9,7 @@ public class Session : PyDictionary <PyString, PyDataType>
 {
     /// <summary>
     /// List of nodes that are "interested" in this session
-    /// (nodes where a bound instance is for this client, etc)
+    /// (nodes where a bound instance is for this client, etc.)
     /// </summary>
     public PyList <PyInteger> NodesOfInterest { get; } = new PyList <PyInteger> ();
 
@@ -77,6 +77,7 @@ public class Session : PyDictionary <PyString, PyDataType>
     public const string ROLES_AT_HQ      = "rolesAtHQ";
     public const string ROLES_AT_OTHER   = "rolesAtOther";
     public const string SHIP_ID          = "shipid";
+    public const string SHIP_TYPE_ID     = "shipTypeID";
     public const string STATION_ID       = "stationid";
     public const string SOLAR_SYSTEM_ID  = "solarsystemid";
     public const string LOCATION_ID      = "locationid";
@@ -85,6 +86,9 @@ public class Session : PyDictionary <PyString, PyDataType>
     public const string RACE_ID          = "raceID";
     public const string NODE_ID          = "nodeid";
     public const string LOAD_METRIC      = "loadMetric";
+    public const string BALLPARK_ID      = "ballparkid";
+    public const string BALLPARK_BROKER  = "ballparkBroker";
+    public const string LOCATION_ID2     = "locationid2";
 
     public long NodeID
     {
@@ -186,27 +190,62 @@ public class Session : PyDictionary <PyString, PyDataType>
         get => this [SHIP_ID] as PyInteger;
         set => this [SHIP_ID] = value;
     }
+    public int? ShipTypeID
+    {
+        get => this [SHIP_TYPE_ID] as PyInteger;
+        set => this [SHIP_TYPE_ID] = value;
+    }
 
     public int StationID
     {
-        get => this [STATION_ID] as PyInteger ?? 0;
+        get => this[STATION_ID] as PyInteger ?? 0;
         set
         {
-            this [STATION_ID]      = value;
-            this [SOLAR_SYSTEM_ID] = null;
-            this [LOCATION_ID]     = value;
+            // In station: stationid set, solarsystemid cleared
+            this[STATION_ID]      = value;
+            this[SOLAR_SYSTEM_ID] = null;
+
+            // Also clear solarsystemid2 when explicitly in a station
+            this[SOLAR_SYSTEM_ID2] = null;  // <<< NEW LINE
+            
+            // DO NOT overwrite locationid on space transitions — ship.cs handles this
+            // this[LOCATION_ID] = value;
         }
     }
 
     public int? SolarSystemID
     {
-        get => this [SOLAR_SYSTEM_ID] as PyInteger;
+        get => this[SOLAR_SYSTEM_ID] as PyInteger;
         set
         {
-            this [SOLAR_SYSTEM_ID] = value;
-            this [STATION_ID]      = null;
-            this [LOCATION_ID]     = value;
+            // In space: solarsystemid set, stationid cleared
+            this[SOLAR_SYSTEM_ID] = value;
+            this[STATION_ID]      = null;
+        
+
+            // Keep solarsystemid2 in sync when moving into space
+            if (value != null)                          // <<< NEW BLOCK
+                this[SOLAR_SYSTEM_ID2] = value;         // keep 2 aligned
+            // if value == null, leave solarsystemid2 alone (we just cleared station)
         }
+    }
+
+    public int? BallparkID
+    {
+        get => this[BALLPARK_ID] as PyInteger;
+        set => this[BALLPARK_ID] = value;
+    }
+
+    public string BallparkBroker
+    {
+        get => this[BALLPARK_BROKER] as PyString;
+        set => this[BALLPARK_BROKER] = value;
+    }
+
+    public int? LocationID2
+    {
+        get => this[LOCATION_ID2] as PyInteger;
+        set => this[LOCATION_ID2] = value;
     }
 
     public int LocationID

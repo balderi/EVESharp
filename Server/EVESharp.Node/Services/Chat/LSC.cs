@@ -33,7 +33,7 @@ public class LSC : Service
     /// </summary>
     private const string NOTIFICATION_TYPE = "OnLSC";
     private         ILogger     Log         { get; }
-    public override AccessLevel AccessLevel => AccessLevel.Location;
+    public override AccessLevel AccessLevel => AccessLevel.None;
 
     private ChatDB                DB                   { get; }
     private OldCharacterDB        CharacterDB          { get; }

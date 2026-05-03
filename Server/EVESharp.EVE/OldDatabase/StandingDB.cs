@@ -160,4 +160,52 @@ public class StandingDB : DatabaseAccessor
             return reader.GetDouble (0);
         }
     }
+
+    /// <summary>
+    /// Get the standing that an NPC faction has toward a specific character.
+    /// Queries chrNPCStandings where fromID = the NPC faction and characterID = the player.
+    /// Returns 0.0 (neutral) if no standing exists.
+    /// </summary>
+    public double GetNpcStandingToCharacter (int npcFactionID, int characterID)
+    {
+        DbDataReader reader = this.Database.Select (
+            "SELECT standing FROM chrNPCStandings WHERE characterID = @characterID AND fromID = @fromID",
+            new Dictionary <string, object>
+            {
+                {"@characterID", characterID},
+                {"@fromID", npcFactionID}
+            }
+        );
+
+        using (reader)
+        {
+            if (reader.Read () == false)
+                return 0.0;
+
+            return reader.GetDouble (0);
+        }
+    }
+
+    /// <summary>
+    /// Look up the faction that owns an NPC corporation.
+    /// Returns 0 if not found.
+    /// </summary>
+    public int GetFactionForCorporation (int corporationID)
+    {
+        DbDataReader reader = this.Database.Select (
+            "SELECT factionID FROM crpNPCCorporations WHERE corporationID = @corpID",
+            new Dictionary <string, object>
+            {
+                {"@corpID", corporationID}
+            }
+        );
+
+        using (reader)
+        {
+            if (reader.Read () == false)
+                return 0;
+
+            return reader.GetInt32 (0);
+        }
+    }
 }

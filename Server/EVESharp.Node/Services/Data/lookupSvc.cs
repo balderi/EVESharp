@@ -160,4 +160,9 @@ public class lookupSvc : Service
     {
         return DB.LookupKnownLocationsByGroup (searchStr, groupID);
     }
+
+    public PyDataType LookupLocationsByGroup (ServiceCall call, PyInteger groupID, PyString searchStr)
+    {
+        return DB.LookupKnownLocationsByGroup (searchStr, groupID);
+    }
 }

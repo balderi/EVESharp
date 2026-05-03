@@ -12,6 +12,7 @@ public class Environment
     public Character           Character          { get; init; }
     public Ship                Ship               { get; init; }
     public ItemEntity          Target             { get; init; }
+    public ItemEntity          Charge             { get; init; }
     public Session             Session            { get; init; }
     public IItems              ItemFactory        { get; init; }
     public IDogmaNotifications DogmaNotifications { get; init; }

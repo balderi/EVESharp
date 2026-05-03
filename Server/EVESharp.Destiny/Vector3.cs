@@ -20,6 +20,26 @@ public struct Vector3
         return Math.Sqrt (this.DistanceSquare (b));
     }
 
+    public double Length => Math.Sqrt(X * X + Y * Y + Z * Z);
+
+    public Vector3 Normalize()
+    {
+        double len = Length;
+        if (len < 1e-12) return default (Vector3);
+        return new Vector3 { X = X / len, Y = Y / len, Z = Z / len };
+    }
+
+    public static Vector3 operator +(Vector3 a, Vector3 b)
+        => new Vector3 { X = a.X + b.X, Y = a.Y + b.Y, Z = a.Z + b.Z };
+
+    public static Vector3 operator -(Vector3 a, Vector3 b)
+        => new Vector3 { X = a.X - b.X, Y = a.Y - b.Y, Z = a.Z - b.Z };
+
+    public static Vector3 operator *(Vector3 v, double s)
+        => new Vector3 { X = v.X * s, Y = v.Y * s, Z = v.Z * s };
+
+    public static Vector3 operator *(double s, Vector3 v) => v * s;
+
     public override string ToString ()
     {
         return "(" + Math.Round (this.X) + ", " + Math.Round (this.Y) + ", " + Math.Round (this.Z) + ")";

@@ -9,7 +9,8 @@ public interface IBoundServiceManager : IServiceManager <int>
 {
     public IMachoNet                      MachoNet      { get; }
     public Dictionary <int, BoundService> BoundServices { get; }
-    
+   
+
     /// <summary>
     /// Registers the given bound service into this service manager
     /// </summary>

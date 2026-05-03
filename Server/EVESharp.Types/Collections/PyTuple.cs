@@ -31,6 +31,10 @@ public class PyTuple : PyDataType, IPyEnumerable<PyDataType>
         this.mList = new PyDataType[size];
     }
 
+    public PyTuple()
+    {
+    }
+
     public IEnumerator <PyDataType> GetEnumerator ()
     {
         return ((IEnumerable <PyDataType>) this.mList).GetEnumerator ();

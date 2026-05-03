@@ -287,101 +287,93 @@ public class marketProxy : Service
         if (quantity > 0)
             throw new MktOrderDidNotMatch ();
     }
+private void PlaceImmediateSellOrderChar(
+    DbLock dbLock, IWallet wallet, Character character, int itemID, int typeID, int stationID, int quantity,
+    double price, Session session)
+{
+    int solarSystemID = this.Items.GetStaticStation(stationID).SolarSystemID;
 
-    private void PlaceImmediateSellOrderChar
-    (
-        DbLock dbLock, IWallet wallet, Character character, int itemID, int typeID, int stationID, int quantity,
-        double        price,      Session session
-    )
+    List <(int ownerID, int accountID, bool isCorp, double amount)> pendingRefunds = new List<(int ownerID, int accountID, bool isCorp, double amount)>();
+
+    // 1) Match BUY orders using the SAME lock we were given
+    MarketOrder[] orders = DB.FindMatchingOrders(
+        dbLock, price, typeID, character.ID, solarSystemID, TransactionType.Buy
+    );
+
+    // 2) Ensure enough quantity
+    this.CheckMatchingBuyOrders(orders, quantity, stationID);
+
+    // 3) Consume orders
+    foreach (MarketOrder order in orders)
     {
-        int solarSystemID = this.Items.GetStaticStation (stationID).SolarSystemID;
+        if (order.Range == -1 && order.LocationID != stationID) continue;
+        if (order.Range != -1 && order.Range < order.Jumps)     continue;
+        if (quantity <= 0) break;
 
-        // look for matching buy orders
-        MarketOrder [] orders = DB.FindMatchingOrders (dbLock, price, typeID, character.ID, solarSystemID, TransactionType.Buy);
+        int orderOwnerID = order.IsCorp ? order.CorporationID : order.CharacterID;
 
-        // ensure there's at least some that match
-        this.CheckMatchingBuyOrders (orders, quantity, stationID);
+        int quantityToSell =
+            (order.UnitsLeft <= quantity) ? order.UnitsLeft :
+            (order.MinimumUnits <= quantity ? quantity : 0);
+        if (quantityToSell <= 0) continue;
 
-        // there's at least SOME orders that can be satisfied, let's start satisfying them one by one whenever possible
-        foreach (MarketOrder order in orders)
+        double escrowUsed = quantityToSell * order.Price;
+
+        if (quantityToSell == order.UnitsLeft)
         {
-            int quantityToSell = 0;
-
-            // ensure the order is in the range
-            if (order.Range == -1 && order.LocationID != stationID)
-                continue;
-
-            if (order.Range != -1 && order.Range < order.Jumps)
-                continue;
-
-            int orderOwnerID = order.IsCorp ? order.CorporationID : order.CharacterID;
-
-            if (order.UnitsLeft <= quantity)
-            {
-                // if there's any kind of escrow left ensure that the character receives it back
-                double escrowLeft = order.Escrow - order.UnitsLeft * price;
-
-                if (escrowLeft > 0.0)
-                {
-                    // give back the escrow for the character
-                    // TODO: THERE IS A POTENTIAL DEADLOCK HERE IF WE BUY FROM OURSELVES
-                    using IWallet escrowWallet = this.Wallets.AcquireWallet (orderOwnerID, order.AccountID, order.IsCorp);
-
-                    {
-                        escrowWallet.CreateJournalRecord (MarketReference.MarketEscrow, null, null, escrowLeft);
-                    }
-                }
-
-                // this order is fully satisfiable, so do that
-                // remove the order off the database if it's fully satisfied
-                DB.RemoveOrder (dbLock, order.OrderID);
-
-                quantityToSell =  order.UnitsLeft;
-                quantity       -= order.UnitsLeft;
-            }
-            else if (order.MinimumUnits <= quantity)
-            {
-                // we can satisfy SOME of the order
-                DB.UpdateOrderRemainingQuantity (dbLock, order.OrderID, order.UnitsLeft - quantity, quantity * price);
-                // the quantity we're selling is already depleted if the code got here
-                quantityToSell = quantity;
-                quantity       = 0;
-            }
-
-            if (quantityToSell > 0)
-            {
-                // calculate sales tax
-                double profit, tax;
-
-                this.CalculateSalesTax (character.GetSkillLevel (TypeID.Accounting), quantity, price, out tax, out profit);
-
-                // create the required records for the wallet
-                wallet.CreateJournalRecord (MarketReference.MarketTransaction, orderOwnerID, character.ID, null, profit);
-
-                if (tax > 0)
-                    wallet.CreateJournalRecord (MarketReference.TransactionTax, null, null, -tax);
-
-                wallet.CreateTransactionRecord (TransactionType.Sell, character.ID, orderOwnerID, typeID, quantityToSell, price, stationID);
-
-                this.Wallets.CreateTransactionRecord (
-                    orderOwnerID, TransactionType.Buy, order.CharacterID, character.ID, typeID, quantityToSell, price, stationID,
-                    order.AccountID
-                );
-
-                ItemEntity item = DogmaItems.CreateItem <ItemEntity> (
-                    Types [typeID], orderOwnerID, stationID, order.IsCorp ? Flags.CorpMarket : Flags.Hangar, quantityToSell
-                );
-
-                // no inventory holding this reference, can safely be unloaded
-                if (item.Parent is null)
-                    this.Items.UnloadItem (item);
-            }
-
-            // ensure we do not sell more than we have
-            if (quantity == 0)
-                break;
+            DB.UpdateOrderRemainingQuantity(dbLock, order.OrderID, 0, escrowUsed);
+            double leftoverEscrow = order.Escrow - escrowUsed;
+            if (leftoverEscrow > 0)
+                pendingRefunds.Add((orderOwnerID, order.AccountID, order.IsCorp, leftoverEscrow));
+            DB.RemoveOrder(dbLock, order.OrderID);
         }
+        else
+        {
+            int newUnits = order.UnitsLeft - quantityToSell;
+            DB.UpdateOrderRemainingQuantity(dbLock, order.OrderID, newUnits, escrowUsed);
+        }
+
+        // Seller tax & proceeds
+        double tax, profit;
+        this.CalculateSalesTax(
+            character.GetSkillLevel(TypeID.Accounting),
+            quantityToSell, price, out tax, out profit
+        );
+
+        // credit seller and tax SCC
+        wallet.CreateJournalRecord(MarketReference.MarketTransaction, character.ID, null,  profit);
+        if (tax > 0)
+            wallet.CreateJournalRecord(MarketReference.TransactionTax, this.Items.OwnerSCC.ID, null, -tax);
+
+        // Transaction log (seller)
+        wallet.CreateTransactionRecord(
+            TransactionType.Sell, character.ID, orderOwnerID, typeID, quantityToSell, price, stationID
+        );
+
+        // Transaction log (buyer) — **no wallet lock needed**
+        this.Wallets.CreateTransactionRecord(
+            orderOwnerID, TransactionType.Buy, order.CharacterID, wallet.OwnerID,
+            typeID, quantityToSell, price, stationID, order.AccountID
+        ); // writes mktTransactions only (no balance change). :contentReference[oaicite:3]{index=3}
+
+        // Deliver items to buyer
+        ItemEntity item = DogmaItems.CreateItem<ItemEntity>(
+            Types[typeID], orderOwnerID, stationID, order.IsCorp ? Flags.CorpMarket : Flags.Hangar, quantityToSell
+        );
+        if (item.Parent is null) this.Items.UnloadItem(item);
+
+        quantity -= quantityToSell;
     }
+
+    // 4) Refund leftover escrow to buyers (if any) — this DOES touch balances, so use wallet locks here only
+    foreach ((int ownerID, int accountID, bool isCorp, double amount) in pendingRefunds)
+    {
+        using IWallet w = this.Wallets.AcquireWallet(ownerID, accountID, isCorp);
+        w.CreateJournalRecord(MarketReference.MarketEscrow, null, null, amount);
+    }
+}
+
+
 
     private void PlaceSellOrderCharUpdateItems (DbLock dbLock, Session session, int stationID, int typeID, int quantity)
     {
@@ -402,13 +394,20 @@ public class marketProxy : Service
         // load the items here and send proper notifications
         foreach ((int _, MarketDB.ItemQuantityEntry entry) in items)
         {
-            ItemEntity item  = this.Items.LoadItem (entry.ItemID);
-            ItemEntity split = DogmaItems.SplitStack (item, entry.OriginalQuantity - entry.Quantity);
+           ItemEntity item = this.Items.LoadItem(entry.ItemID);
+if (item is null)
+    throw new NotEnoughQuantity(this.Types[typeID]);  // item disappeared or wrong station
 
-            DogmaItems.DestroyItem (split);
+int splitQty = entry.OriginalQuantity - entry.Quantity;
+if (splitQty > 0)
+{
+    ItemEntity split = DogmaItems.SplitStack(item, splitQty);
+    DogmaItems.DestroyItem(split);
 
-            if (item.Parent is null && split != item)
-                Items.UnloadItem (item);
+    if (item.Parent is null)
+        Items.UnloadItem(item);
+}
+
         }
     }
 
@@ -425,8 +424,9 @@ public class marketProxy : Service
 
         // obtain wallet lock too
         // everything is checked already, perform table locking and do all the job here
-        using IWallet wallet = this.Wallets.AcquireWallet (ownerID, accountKey, ownerID == call.Session.CorporationID);
-        using DbLock  dbLock = DB.AcquireMarketLock ();
+        using DbLock dbLock = DB.AcquireMarketLock();
+        using IWallet wallet = Wallets.AcquireWallet(ownerID, accountKey, ownerID == call.Session.CorporationID);
+
 
         // check if the item is singleton and throw a exception about it
         {
@@ -490,130 +490,151 @@ public class marketProxy : Service
     }
 
     private void PlaceImmediateBuyOrderChar
-    (
-        ServiceCall call, DbLock dbLock, IWallet wallet, int typeID, Character character, int stationID, int quantity,
-        double          price,
-        int             range
-    )
+(
+    ServiceCall call, DbLock dbLock, IWallet wallet, int typeID, Character character, int stationID, int quantity,
+    double price, int range
+)
+{
+    int solarSystemID = this.Items.GetStaticStation(stationID).SolarSystemID;
+
+    // look for matching sell orders
+    MarketOrder[] orders = DB.FindMatchingOrders(dbLock, price, typeID, character.ID, solarSystemID, TransactionType.Sell);
+
+    // ensure there's at least some that match
+    this.CheckMatchingSellOrders(orders, quantity, stationID);
+
+    foreach (MarketOrder order in orders)
     {
-        int solarSystemID = this.Items.GetStaticStation (stationID).SolarSystemID;
+        int quantityToBuy = 0;
 
-        // look for matching sell orders
-        MarketOrder [] orders = DB.FindMatchingOrders (dbLock, price, typeID, character.ID, solarSystemID, TransactionType.Sell);
+        if (order.Range == -1 && order.LocationID != stationID)
+            continue;
 
-        // ensure there's at least some that match
-        this.CheckMatchingSellOrders (orders, quantity, solarSystemID);
+        if (order.Range != -1 && order.Range < order.Jumps)
+            continue;
 
-        foreach (MarketOrder order in orders)
+        int orderOwnerID = order.IsCorp ? order.CorporationID : order.CharacterID;
+
+        if (order.UnitsLeft <= quantity)
         {
-            int quantityToBuy = 0;
-
-            if (order.Range == -1 && order.LocationID != stationID)
-                continue;
-
-            if (order.Range != -1 && order.Range < order.Jumps)
-                continue;
-
-            int orderOwnerID = order.IsCorp ? order.CorporationID : order.CharacterID;
-
-            if (order.UnitsLeft <= quantity)
-            {
-                // the order was completed, remove it from the database
-                DB.RemoveOrder (dbLock, order.OrderID);
-
-                // increase the amount of bought items
-                quantityToBuy =  order.UnitsLeft;
-                quantity      -= order.UnitsLeft;
-            }
-            else
-            {
-                // part of the sell order was satisfied
-                DB.UpdateOrderRemainingQuantity (dbLock, order.OrderID, order.UnitsLeft - quantity, 0);
-
-                quantityToBuy = quantity;
-                quantity      = 0;
-            }
-
-            if (quantityToBuy > 0)
-            {
-                // calculate sales tax
-                double tax;
-
-                this.CalculateSalesTax (CharacterDB.GetSkillLevelForCharacter (TypeID.Accounting, order.CharacterID), quantity, price, out tax, out _);
-
-                // acquire wallet journal for seller so we can update their balance to add the funds that he got
-                using IWallet sellerWallet = this.Wallets.AcquireWallet (orderOwnerID, order.AccountID, order.IsCorp);
-
-                {
-                    sellerWallet.CreateJournalRecord (MarketReference.MarketTransaction, orderOwnerID, null, price * quantityToBuy);
-
-                    // calculate sales tax for the seller
-                    if (tax > 0)
-                        sellerWallet.CreateJournalRecord (MarketReference.TransactionTax, this.Items.OwnerSCC.ID, null, -tax);
-
-                    sellerWallet.CreateTransactionRecord (TransactionType.Sell, order.CharacterID, wallet.OwnerID, typeID, quantityToBuy, price, stationID);
-                }
-
-                // create the transaction records for both characters
-                wallet.CreateTransactionRecord (TransactionType.Buy, character.ID, orderOwnerID, typeID, quantityToBuy, price, stationID);
-
-                // create the new item that will be used by the player
-                ItemEntity item = this.Items.CreateSimpleItem (
-                    this.Types [typeID], wallet.OwnerID, stationID, wallet.OwnerID == character.CorporationID ? Flags.CorpMarket : Flags.Hangar, quantityToBuy
-                );
-
-                if (item.Parent is null)
-                    this.Items.UnloadItem (item);
-                
-                Notifications.NotifyCharacter (character.ID, OnItemChange.BuildLocationChange (item, this.Items.LocationMarket.ID));
-            }
-
-            // ensure we do not buy more than we need
-            if (quantity == 0)
-                break;
-        }
-    }
-
-    private void PlaceBuyOrder
-    (
-        ServiceCall call, int typeID, Character character, int stationID, int quantity, double price, int duration,
-        int             minVolume,
-        int             range, double brokerCost, int ownerID, int accountKey
-    )
-    {
-        // ensure the character can place the order where he's trying to
-        this.CheckBuyOrderDistancePermissions (character, stationID, duration);
-
-        using IWallet wallet = this.Wallets.AcquireWallet (ownerID, accountKey, ownerID == call.Session.CorporationID);
-        using DbLock  dbLock = DB.AcquireMarketLock ();
-
-        // make sure the character can pay the escrow and the broker
-        wallet.EnsureEnoughBalance (quantity * price + brokerCost);
-        // do the escrow after
-        wallet.CreateJournalRecord (MarketReference.MarketEscrow, null, null, -quantity * price);
-
-        if (duration == 0)
-        {
-            this.PlaceImmediateBuyOrderChar (
-                call, dbLock, wallet, typeID, character, stationID, quantity, price,
-                range
-            );
+            DB.RemoveOrder(dbLock, order.OrderID);
+            quantityToBuy = order.UnitsLeft;
+            quantity     -= order.UnitsLeft;
         }
         else
         {
-            // do broker fee first
-            wallet.CreateJournalRecord (MarketReference.Brokerfee, null, null, -brokerCost);
-
-            // place the buy order
-            DB.PlaceBuyOrder (
-                dbLock, typeID, character.ID, call.Session.CorporationID, stationID, range, price, quantity,
-                minVolume, accountKey, duration, ownerID == character.CorporationID
-            );
+            DB.UpdateOrderRemainingQuantity(dbLock, order.OrderID, order.UnitsLeft - quantity, 0);
+            quantityToBuy = quantity;
+            quantity = 0;
         }
 
-        // send a OnOwnOrderChange notification
-        this.DogmaNotifications.QueueMultiEvent (character.ID, new OnOwnOrderChanged (typeID, "Add"));
+        if (quantityToBuy > 0)
+        {
+            // 1) Buyer pays now (no escrow on immediate)
+            double cost = price * quantityToBuy;
+            wallet.CreateJournalRecord(MarketReference.MarketTransaction, orderOwnerID, null, -cost);
+
+            // 2) Seller receives funds (+ tax to SCC)
+            double tax;
+            this.CalculateSalesTax(
+                CharacterDB.GetSkillLevelForCharacter(TypeID.Accounting, order.CharacterID),
+                quantityToBuy, price, out tax, out _
+            );
+
+            bool selfTrade =
+             (orderOwnerID == wallet.OwnerID) &&
+             (order.IsCorp == (wallet.OwnerID == character.CorporationID));
+
+
+            if (selfTrade)
+            {
+                // credit same wallet
+                wallet.CreateJournalRecord(MarketReference.MarketTransaction, orderOwnerID, null, cost);
+                if (tax > 0)
+                    wallet.CreateJournalRecord(MarketReference.TransactionTax, this.Items.OwnerSCC.ID, null, -tax);
+            }
+            else
+            {
+                using IWallet sellerWallet = this.Wallets.AcquireWallet(orderOwnerID, order.AccountID, order.IsCorp);
+                sellerWallet.CreateJournalRecord(MarketReference.MarketTransaction, orderOwnerID, null, cost);
+                if (tax > 0)
+                    sellerWallet.CreateJournalRecord(MarketReference.TransactionTax, this.Items.OwnerSCC.ID, null, -tax);
+            }
+
+            // 3) Transactions
+            wallet.CreateTransactionRecord(TransactionType.Buy, character.ID, orderOwnerID, typeID, quantityToBuy, price, stationID);
+
+            // Seller’s side transaction record
+            this.Wallets.CreateTransactionRecord(
+                orderOwnerID, TransactionType.Sell, order.CharacterID, wallet.OwnerID, typeID, quantityToBuy, price, stationID,
+                order.AccountID
+            );
+
+            // 4) Deliver item to buyer
+            ItemEntity item = DogmaItems.CreateItem<ItemEntity>(
+    Types[typeID],
+    wallet.OwnerID,
+    stationID,
+    wallet.OwnerID == character.CorporationID ? Flags.CorpMarket : Flags.Hangar,
+    quantityToBuy
+);
+
+if (item.Parent is null)
+    this.Items.UnloadItem(item);
+
+
+            Notifications.NotifyCharacter(character.ID, OnItemChange.BuildLocationChange(item, this.Items.LocationMarket.ID));
+        }
+
+        if (quantity == 0)
+            break;
     }
+}
+
+
+private void PlaceBuyOrder
+(
+    ServiceCall call, int typeID, Character character, int stationID, int quantity, double price, int duration,
+    int             minVolume,
+    int             range, double brokerCost, int ownerID, int accountKey
+)
+{
+    // ensure the character can place the order where he's trying to
+    this.CheckBuyOrderDistancePermissions (character, stationID, duration);
+
+    using IWallet wallet = this.Wallets.AcquireWallet(ownerID, accountKey, ownerID == call.Session.CorporationID);
+    using DbLock  dbLock = DB.AcquireMarketLock();
+
+    if (duration == 0)
+    {
+        // IMMEDIATE BUY: no broker fee, no escrow. Just ensure balance for the max spend.
+        wallet.EnsureEnoughBalance(quantity * price);
+
+        this.PlaceImmediateBuyOrderChar(
+            call, dbLock, wallet, typeID, character, stationID, quantity, price, range
+        );
+    }
+    else
+    {
+        // DURATIONAL BUY (standing buy order): escrow + broker fee
+        wallet.EnsureEnoughBalance(quantity * price + brokerCost);
+
+        // put ISK into escrow for the full order value
+        wallet.CreateJournalRecord(MarketReference.MarketEscrow, null, null, -quantity * price);
+
+        // broker fee taken now
+        wallet.CreateJournalRecord(MarketReference.Brokerfee, null, null, -brokerCost);
+
+        // place the buy order
+        DB.PlaceBuyOrder(
+            dbLock, typeID, character.ID, call.Session.CorporationID, stationID, range, price, quantity,
+            minVolume, accountKey, duration, ownerID == character.CorporationID
+        );
+    }
+
+    // send a OnOwnOrderChange notification
+    this.DogmaNotifications.QueueMultiEvent(character.ID, new OnOwnOrderChanged(typeID, "Add"));
+}
 
     public PyDataType PlaceCharOrder
     (

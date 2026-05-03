@@ -473,6 +473,37 @@ public class character : Service
         // update the session data for this client
         updates.CharacterID   = character.ID;
         updates.CorporationID = character.CorporationID;
+       
+         // -----------------------------------------------------
+        // REQUIRED SESSION INITIALIZATION FOR LSC + MICHELLE + BALLPARK
+        // -----------------------------------------------------
+
+        updates.CharacterID   = character.ID;
+        updates.CorporationID = character.CorporationID;
+
+        // Player is inside a station
+        updates.LocationID  = character.StationID;
+        updates.LocationID2 = character.StationID;
+
+        // Solar system fields (Apoc requires BOTH)
+        updates.SolarSystemID  = character.SolarSystemID;
+        updates.SolarSystemID2 = character.SolarSystemID;
+
+        // Constellation + Region (ONLY ONE field each in EVESharp Apoc)
+        updates.ConstellationID = character.ConstellationID;
+        updates.RegionID        = character.RegionID;
+
+        // Required for everything else
+        updates.StationID = character.StationID;
+
+        Log.Information(
+            $"[character] Session restored: station={character.StationID}, system={character.SolarSystemID}, constellation={character.ConstellationID}, region={character.RegionID}"
+        );
+        
+
+        // Log for sanity
+        Log.Information($"[character] Session location set: station={character.StationID}, system={character.SolarSystemID}");
+
 
         if (character.StationID == 0)
             updates.SolarSystemID = character.SolarSystemID;
@@ -504,6 +535,22 @@ public class character : Service
         updates.HQID            = 0; // TODO: ADD SUPPORT FOR HQID
         updates.ShipID          = character.LocationID;
         updates.RaceID          = Ancestries [character.AncestryID].Bloodline.RaceID;
+
+        // Load the ship item to set shipTypeID in the session
+        Console.WriteLine ($"[character] SelectCharacterID: charID={characterID} LocationID={character.LocationID} (ShipID) StationID={character.StationID} SolarSystemID={character.SolarSystemID}");
+        Console.WriteLine ($"[character]   CharTypeID={character.Type.ID} ({character.Type.Name})");
+        try
+        {
+            ItemEntity shipItem = this.Items.GetItem (character.LocationID);
+            Console.WriteLine ($"[character]   ShipItem: exists={shipItem != null} typeID={shipItem?.Type?.ID} typeName={shipItem?.Type?.Name} locationID={shipItem?.LocationID}");
+
+            if (shipItem?.Type != null)
+                updates.ShipTypeID = shipItem.Type.ID;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine ($"[character]   ShipItem: FAILED to load itemID={character.LocationID}: {ex.Message}");
+        }
 
         // check if the character has any accounting roles and set the correct accountKey based on the data
         if (this.Wallets.IsAccessAllowed (updates, character.CorpAccountKey, updates.CorporationID))

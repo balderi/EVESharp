@@ -1,4 +1,4 @@
-﻿using System.Text;
+using System.Text;
 
 namespace EVESharp.Destiny;
 
@@ -43,11 +43,11 @@ public static class PrettyPrinter
             case BallMode.Warp:
                 PrintWarpState (sb, indention + Indention, ball.WarpState);
                 break;
-            
+
             case BallMode.Missile:
                 PrintMissileState (sb, indention + Indention, ball.MissileState);
                 break;
-            
+
             case BallMode.Formation:
                 PrintFormationState (sb, indention + Indention, ball.FormationState);
                 break;
@@ -80,61 +80,61 @@ public static class PrettyPrinter
     private static void PrintTrollState (StringBuilder sb, string indention, TrollState trollState)
     {
         sb.AppendLine (indention + "[TrollState]");
-        sb.AppendLine (indention + Indention + "[Unk01: " + trollState.Unk01 + "]");
+        sb.AppendLine (indention + Indention + "[EffectStamp: " + trollState.EffectStamp + "]");
     }
 
     private static void PrintMushroomState (StringBuilder sb, string indention, MushroomState mushroomState)
     {
         sb.AppendLine (indention + "[MushroomState]");
-        sb.AppendLine (indention + Indention + "[Unk01: " + mushroomState.Unk01 + "]");
-        sb.AppendLine (indention + Indention + "[Unk02: " + mushroomState.Unk02 + "]");
-        sb.AppendLine (indention + Indention + "[Unk03: " + mushroomState.Unk03 + "]");
-        sb.AppendLine (indention + Indention + "[Unk04: " + mushroomState.Unk04 + "]");
+        sb.AppendLine (indention + Indention + "[FollowRange: " + mushroomState.FollowRange + "]");
+        sb.AppendLine (indention + Indention + "[Unknown: " + mushroomState.Unknown + "]");
+        sb.AppendLine (indention + Indention + "[EffectStamp: " + mushroomState.EffectStamp + "]");
+        sb.AppendLine (indention + Indention + "[OwnerId: " + mushroomState.OwnerId + "]");
     }
 
     private static void PrintFollowState (StringBuilder sb, string indention, FollowState followState)
     {
         sb.AppendLine (indention + "[FollowState]");
-        sb.AppendLine (indention + Indention + "[UnkFollowId: " + followState.UnkFollowId + "]");
-        sb.AppendLine (indention + Indention + "[UnkRange: " + followState.UnkRange + "]");
+        sb.AppendLine (indention + Indention + "[FollowId: " + followState.FollowId + "]");
+        sb.AppendLine (indention + Indention + "[FollowRange: " + followState.FollowRange + "]");
     }
 
     private static void PrintFormationState (StringBuilder sb, string indention, FormationState formationState)
     {
         sb.AppendLine (indention + "[FormationState]");
-        sb.AppendLine (indention + Indention + "[Unk01: " + formationState.Unk01 + "]");
-        sb.AppendLine (indention + Indention + "[Unk02: " + formationState.Unk02 + "]");
-        sb.AppendLine (indention + Indention + "[Unk03: " + formationState.Unk03 + "]");
+        sb.AppendLine (indention + Indention + "[FollowId: " + formationState.FollowId + "]");
+        sb.AppendLine (indention + Indention + "[FollowRange: " + formationState.FollowRange + "]");
+        sb.AppendLine (indention + Indention + "[EffectStamp: " + formationState.EffectStamp + "]");
     }
 
     private static void PrintBallExtraHeader (StringBuilder sb, string indention, ExtraBallHeader extraHeader)
     {
         sb.AppendLine (indention + "[ExtraHeader]");
-        sb.AppendLine (indention + Indention + "[AllianceId: " + extraHeader.AllianceId + "]");
-        sb.AppendLine (indention + Indention + "[CorporationId: " + extraHeader.CorporationId + "]");
+        sb.AppendLine (indention + Indention + "[Mass: " + extraHeader.Mass + "]");
         sb.AppendLine (indention + Indention + "[CloakMode: " + extraHeader.CloakMode + "]");
         sb.AppendLine (indention + Indention + "[Harmonic: " + extraHeader.Harmonic + "]");
-        sb.AppendLine (indention + Indention + "[Mass: " + extraHeader.Mass + "]");
+        sb.AppendLine (indention + Indention + "[CorporationId: " + extraHeader.CorporationId + "]");
+        sb.AppendLine (indention + Indention + "[AllianceId: " + extraHeader.AllianceId + "]");
     }
 
     private static void PrintMissileState (StringBuilder sb, string indention, MissileState missileState)
     {
         sb.AppendLine (indention + "[MissileState]");
-        sb.AppendLine (indention + Indention + "[UnkFollowId: " + missileState.UnkFollowId + "]");
-        sb.AppendLine (indention + Indention + "[UnkSourceId: " + missileState.UnkSourceId + "]");
-        sb.AppendLine (indention + Indention + "[Unk01: " + missileState.Unk01 + "]");
-        sb.AppendLine (indention + Indention + "[Unk02: " + missileState.Unk02 + "]");
-        sb.AppendLine (indention + Indention + "[Unk03: " + missileState.Unk03 + "]");
+        sb.AppendLine (indention + Indention + "[FollowId: " + missileState.FollowId + "]");
+        sb.AppendLine (indention + Indention + "[FollowRange: " + missileState.FollowRange + "]");
+        sb.AppendLine (indention + Indention + "[OwnerId: " + missileState.OwnerId + "]");
+        sb.AppendLine (indention + Indention + "[EffectStamp: " + missileState.EffectStamp + "]");
+        sb.AppendLine (indention + Indention + "[Location: " + missileState.Location + "]");
     }
 
     private static void PrintWarpState (StringBuilder sb, string indention, WarpState warpState)
     {
         sb.AppendLine (indention + "[WarpState]");
         sb.AppendLine (indention + Indention + "[Location: " + warpState.Location + "]");
-        sb.AppendLine (indention + Indention + "[OwnerId: " + warpState.OwnerId + "]");
-        sb.AppendLine (indention + Indention + "[FollowId: " + warpState.FollowId + "]");
         sb.AppendLine (indention + Indention + "[EffectStamp: " + warpState.EffectStamp + "]");
-        sb.AppendLine (indention + Indention + "[Unk01: " + warpState.Unk01 + "]");
+        sb.AppendLine (indention + Indention + "[FollowRange: " + warpState.FollowRange + "]");
+        sb.AppendLine (indention + Indention + "[FollowId: " + warpState.FollowId + "]");
+        sb.AppendLine (indention + Indention + "[OwnerId: " + warpState.OwnerId + "]");
     }
 
     private static void PrintGotoState (StringBuilder sb, string indention, GotoState gotoState)
@@ -146,10 +146,11 @@ public static class PrettyPrinter
     private static void PrintBallData (StringBuilder sb, string indention, BallData data)
     {
         sb.AppendLine (indention + "[Data]");
-        sb.AppendLine (indention + Indention + "[Velocity: " + data.Velocity + "]");
         sb.AppendLine (indention + Indention + "[MaxVelocity: " + data.MaxVelocity + "]");
+        sb.AppendLine (indention + Indention + "[Velocity: " + data.Velocity + "]");
+        sb.AppendLine (indention + Indention + "[UnknownVec: " + data.UnknownVec + "]");
+        sb.AppendLine (indention + Indention + "[Agility: " + data.Agility + "]");
         sb.AppendLine (indention + Indention + "[SpeedFraction: " + data.SpeedFraction + "]");
-        sb.AppendLine (indention + Indention + "[Unk03: " + data.Unk03 + "]");
     }
 
     private static void PrintBallHeader (StringBuilder sb, string indention, BallHeader header)
@@ -157,9 +158,9 @@ public static class PrettyPrinter
         sb.AppendLine (indention + "[Header]");
         sb.AppendLine (indention + Indention + "[ItemId: " + header.ItemId + "]");
         sb.AppendLine (indention + Indention + "[Mode: " + header.Mode + " (" + (int) header.Mode + ")]");
-        sb.AppendLine (indention + Indention + "[Flags: " + header.Flags + " (" + (int) header.Flags + ")]");
         sb.AppendLine (indention + Indention + "[Radius: " + header.Radius + "]");
         sb.AppendLine (indention + Indention + "[Location: " + header.Location + "]");
+        sb.AppendLine (indention + Indention + "[Flags: " + header.Flags + " (" + (int) header.Flags + ")]");
     }
 
     private static void PrintHeader (StringBuilder sb, string indention, Header header)

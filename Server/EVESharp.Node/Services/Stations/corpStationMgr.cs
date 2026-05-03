@@ -460,6 +460,12 @@ public class corpStationMgr : ClientBoundService
         return null;
     }
 
+    public PyDataType GetStationServiceStates (ServiceCall call)
+    {
+        // TODO: IMPLEMENT THIS - should return service states (online/offline) for the station
+        return new PyDictionary ();
+    }
+
     [MustBeInStation]
     public PyDataType MoveCorpHQHere (ServiceCall call)
     {

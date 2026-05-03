@@ -349,6 +349,23 @@ public class ItemDB : DatabaseAccessor
         }
     }
 
+    public IEnumerable <int> LoadAllItemsLocatedAt (int locationID)
+    {
+        DbDataReader reader = this.Database.Select (
+            "SELECT itemID FROM invItems WHERE locationID = @locationID",
+            new Dictionary <string, object>
+            {
+                {"@locationID", locationID}
+            }
+        );
+
+        using (reader)
+        {
+            while (reader.Read ())
+                yield return reader.GetInt32 (0);
+        }
+    }
+
     public SolarSystem LoadSolarSystem (Item item)
     {
         DbDataReader reader = this.Database.Select (

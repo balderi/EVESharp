@@ -65,7 +65,7 @@ public class MachoUnauthenticatedTransport : IMachoTransport
         Log.Error ("Unauthenticated transport lost connection to the server");
 
         // clean up ourselves
-        this.Terminated (this);
+        this.Terminated?.Invoke (this);
     }
 
     public void Connect (string ip, ushort port)

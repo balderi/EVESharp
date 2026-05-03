@@ -100,20 +100,27 @@ public class ClusterManager : IClusterManager
     /// <summary>
     /// Sends a heartbeat to the orchestrator agent to signal our node being up and running healthily
     /// </summary>
-    public async void PerformHeartbeat ()
+    public async Task PerformHeartbeat ()
     {
-        MachoNet.Log.Debug ("Sending heartbeat to orchestration agent");
+        try
+        {
+            MachoNet.Log.Debug ("Sending heartbeat to orchestration agent");
 
-        // register ourselves with the orchestrator and get our node id AND address
-        HttpContent content = new FormUrlEncodedContent (
-            new Dictionary <string, string>
-            {
-                {"address", MachoNet.Address},
-                {"load", "0.0"}
-            }
-        );
+            // register ourselves with the orchestrator and get our node id AND address
+            HttpContent content = new FormUrlEncodedContent (
+                new Dictionary <string, string>
+                {
+                    {"address", MachoNet.Address},
+                    {"load", "0.0"}
+                }
+            );
 
-        await HttpClient.PostAsync ($"{MachoNet.OrchestratorURL}/Nodes/heartbeat", content);
+            await HttpClient.PostAsync ($"{MachoNet.OrchestratorURL}/Nodes/heartbeat", content);
+        }
+        catch (Exception ex)
+        {
+            MachoNet.Log.Error ("Failed to send heartbeat: {message}", ex.Message);
+        }
     }
 
     /// <summary>
@@ -229,6 +236,6 @@ public class ClusterManager : IClusterManager
 
     private void OnClusterHeartbeatTimer (object? source)
     {
-        this.PerformHeartbeat ();
+        _ = this.PerformHeartbeat ();
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Data;
+using System.IO;
 using EVESharp.Database;
 using EVESharp.Database.Corporations;
 using EVESharp.Database.Extensions;
@@ -33,8 +34,17 @@ public class Wallet : IWallet
 
         // obtain exclusive control over the wallet
         this.Lock = Database.GetLock (this.GenerateLockName ());
-        // also fetch the balance
-        this.Balance = this.OriginalBalance = Lock.MktWalletGetBalance (WalletKey, OwnerID);
+
+        // fetch the balance, creating the wallet if it doesn't exist yet
+        try
+        {
+            this.Balance = this.OriginalBalance = Lock.MktWalletGetBalance (WalletKey, OwnerID);
+        }
+        catch (InvalidDataException)
+        {
+            Database.MktWalletCreate (0.0, OwnerID, WalletKey);
+            this.Balance = this.OriginalBalance = 0.0;
+        }
     }
 
     /// <summary>

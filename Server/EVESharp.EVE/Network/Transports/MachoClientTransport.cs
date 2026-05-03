@@ -35,7 +35,7 @@ public class MachoClientTransport : IMachoTransport
         this.Log.Error ("Client {0} lost connection to the server", this.Session.UserID);
 
         // clean up ourselves
-        this.Terminated (this);
+        this.Terminated?.Invoke (this);
     }
 
     private void HandleException (Exception ex)
